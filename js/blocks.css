@@ -13,6 +13,7 @@
     position:absolute;
     z-index:-1;
     border:1px solid red;
+    background-color:white;
 }
 
 .blocks_js_editor .blocks {

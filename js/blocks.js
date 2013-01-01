@@ -97,6 +97,10 @@ Blocks = function()
             $('html').mouseup(function() {
                 self.release();
             });
+
+            self.div.click(function() {
+                self.canvasClicked();
+            });
             
             self.context.clearRect(0, 0, self.div.width(), self.div.height());
             self.context.strokeStyle = 'rgb(0, 0, 0)';
@@ -147,7 +151,7 @@ Blocks = function()
             var position = this.linking[0].linkPositionFor(this.linking[1]);
             self.redraw();
             self.context.lineWidth = 3;
-            self.context.strokeStyle = 'rgb(0, 0, 0)';
+            self.context.strokeStyle = 'rgba(0, 0, 0, 0.4)';
             self.context.beginPath();
             self.context.moveTo(position.x, position.y);
             self.context.lineTo(self.mouseX, self.mouseY);
@@ -155,9 +159,28 @@ Blocks = function()
         }
     };
 
+    /**
+     * Clicks the canvas
+     */
+    this.canvasClicked = function()
+    {
+        for (k in this.edges) {
+            if (this.edges[k].collide(this.mouseX, this.mouseY)) {
+                alert('Collide with '+k+'!');
+            }
+        }
+    };
+
+    /**
+     *  Draw the edges
+     */
     this.redraw = function()
     {
         self.context.clearRect(0, 0, self.div.width(), self.div.height());
+
+        for (k in self.edges) {
+            self.edges[k].draw(self.context);
+        }
     };
 
     /**
@@ -175,6 +198,8 @@ Blocks = function()
     this.endLink = function(block, io)
     {
         if (this.linking) {
+            var edge = new Edge(this.linking[0], this.linking[1], block, io);
+            this.edges.push(edge);
             this.linking = null;
         }
     };

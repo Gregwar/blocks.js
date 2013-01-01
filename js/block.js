@@ -67,6 +67,7 @@ Block = function(blocks, blockType, id)
                 self.y = (blocks.mouseY-self.drag[1]);
                 self.div.css('margin-left', self.x+'px');
                 self.div.css('margin-top', self.y+'px');
+                blocks.redraw();
             }
         });
 
