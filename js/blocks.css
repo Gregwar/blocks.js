@@ -1,0 +1,98 @@
+* {
+    padding:0;
+    margin:0;
+}
+
+.blocks_js_editor {
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+.blocks_js_editor canvas {
+    position:absolute;
+    z-index:-1;
+    border:1px solid red;
+}
+
+.blocks_js_editor .blocks {
+    width:100%;
+    height:100%;
+    z-index:10;
+}
+
+/**
+ * Menu bar
+ */
+
+.blocks_js_editor .menubar {
+    width:100%;
+    height:30px;
+    z-index:1;
+}
+
+.blocks_js_editor .menubar .add {
+    width:120px;
+    float:right; 
+    margin:5px;
+}
+
+.blocks_js_editor .menubar .add span {
+    color:green;
+}
+
+.blocks_js_editor .types {
+    position:absolute;
+    background-color:white;
+    margin-top:-1px;
+    z-index:99;
+}
+
+.blocks_js_editor .menubar .type {
+    cursor:pointer;
+}
+
+/**
+ * Blocks
+ */
+
+.blocks_js_editor .block {
+    width:150px;
+    position:absolute;
+    border:1px solid #aaa;
+    padding:4px;
+    margin-left:0px;
+    margin-top:0px;
+    background-color:#fafafa;
+}
+
+.blocks_js_editor .block h3 {
+    font-size:14px;
+    background-color:#eee;
+    padding:4px;
+    margin:-4px;
+    margin-bottom:5px;
+    cursor:move;
+}
+
+.blocks_js_editor .input,
+.blocks_js_editor .output {
+    background-color:#fff;
+    font-size:11px;
+    background-image:url('gfx/circle.png');
+    background-repeat:no-repeat;
+    cursor:pointer;
+}
+
+.blocks_js_editor .input {
+    float:left;
+    background-position:left;
+    padding-left:20px;
+}
+
+.blocks_js_editor .output {
+    float:right;
+    text-align:right;
+    background-position:right;
+    padding-right:20px;
+}

@@ -1,0 +1,12 @@
+body {
+    width:950px;
+    margin:auto;
+    font-family:Sans-serif;
+}
+
+#blocks {
+    width:950px;
+    height:500px;
+    margin:5px;
+    border:1px solid #aaa;
+}
