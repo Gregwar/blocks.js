@@ -22,13 +22,8 @@ function Segment(x, y, dx, dy)
         normal.x = point.x;
         normal.y = point.y;
         var intersection = this.intersection(normal);
-        print(intersection);
 
-        if (intersection[1] < 0 || intersection[1] > 1) {
-            return false;
-        }
-
-        return this.distance(normal.alpha(intersection[1]), point);
+        return [intersection[0], this.distance(normal.alpha(intersection[1]), point)];
     };
 
     /**

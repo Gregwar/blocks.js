@@ -5,15 +5,30 @@ function Edge(block1, io1, block2, io2)
 {
     var position1 = block1.linkPositionFor(io1);
     var position2 = block2.linkPositionFor(io2);
-    this.segment = new Segment(position1.x, position1.y, position2.x-position1.x, position2.y-position1.y);
+    var segment = new Segment(
+            position1.x, position1.y, 
+            position2.x-position1.x, position2.y-position1.y
+            );
 
     /**
      * Draws the edge
      */
-    this.draw = function(context)
+    this.draw = function(context, selected)
     {
+        position1 = block1.linkPositionFor(io1);
+        position2 = block2.linkPositionFor(io2);
+        
+        segment = new Segment(
+                position1.x, position1.y, 
+                position2.x-position1.x, position2.y-position1.y
+                );
+
         context.lineWidth = 3;
-        context.strokeStyle = 'rgba(0, 0, 0, 1)';
+        if (selected) {
+            context.strokeStyle = 'rgba(200, 200, 0, 1)';
+        } else {
+            context.strokeStyle = 'rgba(0, 0, 0, 1)';
+        }
         context.beginPath();
         context.moveTo(position1.x, position1.y);
         context.lineTo(position2.x, position2.y);
@@ -26,20 +41,11 @@ function Edge(block1, io1, block2, io2)
     this.collide = function(x, y)
     {
         var size = 5;
+        var dp = segment.distanceP({x: x, y: y});
 
-        if (x < Math.min(position1.x, position2.x)-5) {
-            return false;
+        if (dp[0] >= 0 && dp[0] <= 1) {
+            return dp[1] < size;
         }
-        if (x > Math.max(position1.x, position2.x)-5) {
-            return false;
-        }
-        if (y < Math.min(position1.y, position2.y)-5) {
-            return false;
-        }
-        if (y > Math.max(position1.y, position2.y)-5) {
-            return false;
-        }
-
 
         return false;
     };

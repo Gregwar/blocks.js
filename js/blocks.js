@@ -12,6 +12,11 @@ Blocks = function()
     // Linking ?
     this.linking = null;
 
+    /**
+     * Selected link
+     */
+    this.selectedLink = null;
+
     // BLocks division
     this.div = null;
 
@@ -106,6 +111,14 @@ Blocks = function()
             self.context.strokeStyle = 'rgb(0, 0, 0)';
             self.context.beginPath();
             self.context.stroke();
+
+            $(document).keydown(function(e){
+                if ($('input').is(':focus')) {
+                    return;
+                }   
+
+                self.deleteLink();
+            });
         });
     };
 
@@ -164,10 +177,27 @@ Blocks = function()
      */
     this.canvasClicked = function()
     {
+        this.selectedLink = null;
+
         for (k in this.edges) {
             if (this.edges[k].collide(this.mouseX, this.mouseY)) {
-                alert('Collide with '+k+'!');
+                this.selectedLink = k;
+                break;
             }
+        }
+                
+        this.redraw();
+    };
+
+    /**
+     * Delete the current link
+     */
+    this.deleteLink = function()
+    {
+        if (this.selectedLink != null) {
+            delete this.edges[this.selectedLink];
+            this.selectedLink = null;
+            this.redraw();
         }
     };
 
@@ -179,7 +209,7 @@ Blocks = function()
         self.context.clearRect(0, 0, self.div.width(), self.div.height());
 
         for (k in self.edges) {
-            self.edges[k].draw(self.context);
+            self.edges[k].draw(self.context, self.selectedLink == k);
         }
     };
 

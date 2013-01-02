@@ -4,7 +4,12 @@ blocks.register({
     parameters: [
         {
             name: "Gains",
-            type: "numbers",
+            type: [
+                {
+                    name: "Gain",
+                    type: "number"
+                }
+            ],
             default: [1]
         },
     ],
