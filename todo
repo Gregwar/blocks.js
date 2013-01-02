@@ -1,6 +1,5 @@
 
 Links:
-* Check integrity and cardinalities
 * Avoid same edge
 * Add a disconnect & reconnect system
 
@@ -10,6 +9,8 @@ Blocks:
 * Put colors in the used i/o
 * Add a "low opacity" block setup
 * Make the text unselectable for cleaner handling
+* Add a way to delete a block
+* Supports variadic I/Os
 
 Viewer:
 * Use the mouse wheel to zoom/unzoom

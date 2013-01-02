@@ -7,11 +7,24 @@ Block = function(blocks, blockType, id)
     var defaultWidth = 170;
     var self = this;
 
+    // Id
     this.id = id;
+
+    // Division (object)
     this.div = null;
+
+    // Is the user dragging ?
     this.drag = null;
+
+    // Position
     this.x = 0;
     this.y = 0;
+
+    // I/Os cardinality
+    this.ios = {};
+
+    // Edges
+    this.edges = {};
 
     /**
      * Returns the render of the block
@@ -20,21 +33,31 @@ Block = function(blocks, blockType, id)
     {
         html = '<h3>' + blockType.name + '</h3>';
 
-        // Adding inputs
-        html += '<div class="inputs">';
-        for (k in blockType.inputs) {
-            var input = blockType.inputs[k];
-            html += '<div class="input input_' + k + '" rel="input_' + k + '">' + input.name + '</div>';
-        }
-        html += '</div>';
-        
-        // Adding outputs
-        html += '<div class="outputs">';
-        for (k in blockType.outputs) {
-            var output = blockType.outputs[k];
-            html += '<div class="output output_'+ k +'" rel="output_' + k + '">' + output.name + '</div>';
-        }
-        html += '</div>';
+        // Handling inputs & outputs
+        handle = function(key) {
+            html += '<div class="inputs">';
+
+            for (k in blockType[key+'s']) {
+                var io = blockType[key+'s'][k];
+                var ion = key + '_' + k;
+                html += '<div class="'+key+' ' + ion + '" rel="' + ion + '">' + io.name + '</div>';
+
+                var card = [0, '*'];
+                if (io.card != undefined) {
+                    tab = io.card.split('-');
+                    if (tab.length == 1) {
+                        card = [0, tab[0]];
+                    } else {
+                        card = tab;
+                    }
+                }
+                self.ios[ion] = card;
+            }
+            html += '</div>';
+        };
+
+        handle('input');
+        handle('output');
 
         return html;
     };
@@ -94,13 +117,13 @@ Block = function(blocks, blockType, id)
         self.div.find('.input').mousedown(function(event) {
             if (event.which == 1) {
                 blocks.beginLink(self, $(this).attr('rel'));
-                evt.preventDefault();
+                event.preventDefault();
             }
         });
         self.div.find('.output').mousedown(function(event) {
             if (event.which == 1) {
                 blocks.beginLink(self, $(this).attr('rel'));
-                evt.preventDefault();
+                event.preventDefault();
             }
         });
         self.div.find('.input').mouseup(function(event) {
@@ -131,5 +154,53 @@ Block = function(blocks, blockType, id)
         }
 
         return {x: x, y: y};
+    };
+
+    /**
+     * Can the io be linked ?
+     */
+    this.canLink = function(ion)
+    {
+        var tab = [];
+        if (this.edges[ion] != undefined) {
+            tab = this.edges[ion];
+        }
+
+        var card = this.ios[ion];
+
+        if (card[1] != '*') {
+            return (tab.length < card[1]);
+        }
+
+        return true;
+    };
+
+    /**
+     * Add an edge
+     */
+    this.addEdge = function(ion, edge)
+    {
+        var tab = [];
+        if (this.edges[ion] != undefined) {
+            tab = this.edges[ion];
+        }
+
+        tab.push(edge);
+        this.edges[ion] = tab;
+    };
+
+    /**
+     * Erase an edge
+     */
+    this.eraseEdge = function(ion, edge)
+    {
+        if (this.edges[ion] != undefined) {
+            for (k in this.edges[ion]) {
+                if (this.edges[ion][k] == edge) {
+                    arrayRemove(this.edges[ion], k);
+                    break;
+                }
+            }
+        }
     };
 };

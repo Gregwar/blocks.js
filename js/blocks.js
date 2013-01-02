@@ -243,7 +243,8 @@ Blocks = function()
     this.deleteLink = function()
     {
         if (this.selectedLink != null) {
-            delete this.edges[this.selectedLink];
+            this.edges[this.selectedLink].erase();
+            arrayRemove(this.edges, this.selectedLink);
             this.selectedLink = null;
             this.redraw();
         }
@@ -282,9 +283,15 @@ Blocks = function()
     this.endLink = function(block, io)
     {
         if (this.linking) {
-            var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
-            this.edges.push(edge);
+            try {
+                var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
+                edge.create();
+                this.edges.push(edge);
+            } catch (error) {
+                alert('Unable to create this edge :' + "\n" + error);
+            }
             this.linking = null;
+            this.redraw();
         }
     };
 };

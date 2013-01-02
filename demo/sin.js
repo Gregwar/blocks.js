@@ -28,7 +28,6 @@ blocks.register({
     ],
     outputs: [
         {
-            card: "0-*",
             name: "Wave"
         }
     ]

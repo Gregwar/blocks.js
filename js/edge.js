@@ -9,7 +9,7 @@ function Edge(block1, io1, block2, io2, blocks)
     var segment = new Segment(
             position1.x, position1.y, 
             position2.x-position1.x, position2.y-position1.y
-            );
+    );
 
     /**
      * Draws the edge
@@ -49,5 +49,38 @@ function Edge(block1, io1, block2, io2, blocks)
         }
 
         return false;
+    };
+
+    /**
+     * Initializes the edge and do some tests
+     */ 
+    this.create = function()
+    {
+        // You can't link a block to itself
+        if (block1 == block2) {
+            throw 'You can\'t link a block to itself';
+        }
+
+        // You have to link an input with an output
+        if (io1[0] == io2[0]) {
+            throw 'You have to link an input with an output';
+        }
+
+        // The cards have to be okay
+        if ((!block1.canLink(io1)) || (!block2.canLink(io2))) {
+            throw 'Can\'t create such an edge because of the cardinalities';
+        }
+
+        block1.addEdge(io1, this);
+        block2.addEdge(io2, this);
+    };
+
+    /**
+     * Erase an edge
+     */
+    this.erase = function()
+    {
+        block1.eraseEdge(io1, this);
+        block2.eraseEdge(io2, this);
     };
 };
