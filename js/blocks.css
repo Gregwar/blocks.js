@@ -65,6 +65,10 @@
     margin-top:0px;
     background-color:#fafafa;
     font-size:14px;
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    -webkit-user-select:none;
+    -o-user-select:none;
 }
 
 .blocks_js_editor .block h3 {
