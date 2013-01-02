@@ -88,6 +88,9 @@ function Edge(block1, io1, block2, io2, blocks)
         block2.eraseEdge(io2, this);
     };
 
+    /**
+     * Test if this edge is the same than another
+     */
     this.same = function(other)
     {
         if (block1 == other.block1 && block2 == other.block2 

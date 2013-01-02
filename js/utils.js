@@ -3,7 +3,9 @@
  */
 function arrayRemove(array, index)
 {
-    var rest = array.slice(index +1);
-    array.length = index;
-    return array.push.apply(array, rest);
+    index = parseInt(index);
+    var last = array[array.length-1];
+    array[array.length-1] = array[index];
+    array[index] = last;
+    array.pop();
 };
