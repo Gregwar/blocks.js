@@ -1,8 +1,9 @@
 /**
  * An edge linking two blocks
  */
-function Edge(block1, io1, block2, io2)
+function Edge(block1, io1, block2, io2, blocks)
 {
+    var defaultSize = 3;
     var position1 = block1.linkPositionFor(io1);
     var position2 = block2.linkPositionFor(io2);
     var segment = new Segment(
@@ -23,7 +24,8 @@ function Edge(block1, io1, block2, io2)
                 position2.x-position1.x, position2.y-position1.y
                 );
 
-        context.lineWidth = 3;
+        context.lineWidth = defaultSize*blocks.scale;
+
         if (selected) {
             context.strokeStyle = 'rgba(200, 200, 0, 1)';
         } else {
@@ -40,11 +42,10 @@ function Edge(block1, io1, block2, io2)
      */
     this.collide = function(x, y)
     {
-        var size = 5;
         var dp = segment.distanceP({x: x, y: y});
 
         if (dp[0] >= 0 && dp[0] <= 1) {
-            return dp[1] < size;
+            return dp[1] < (defaultSize*blocks.scale)*1.3;
         }
 
         return false;

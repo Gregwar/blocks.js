@@ -1,0 +1,24 @@
+
+Links:
+* Check integrity and cardinalities
+* Avoid same edge
+* Add a disconnect & reconnect system
+
+Blocks:
+* Add a way to add style to blocks (comments etc.)
+* Check the constraints
+* Put colors in the used i/o
+* Add a "low opacity" block setup
+* Make the text unselectable for cleaner handling
+
+Viewer:
+* Use the mouse wheel to zoom/unzoom
+* Fix the overflow hidden
+
+Parameters:
+* Create form to edit parameters
+* Draw parameters in the blocks
+* Add a system to hook in the parameters edition
+
+Export:
+* Setup an export system

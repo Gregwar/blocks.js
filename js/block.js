@@ -3,6 +3,8 @@
  */
 Block = function(blocks, blockType, id)
 {
+    var defaultFont = 13;
+    var defaultWidth = 170;
     var self = this;
 
     this.id = id;
@@ -49,7 +51,20 @@ Block = function(blocks, blockType, id)
         div.append(html);
         this.div = div.find('#block' + this.id);
         this.initListeners();
+        this.redraw();
     };
+
+    /**
+     * Sets the position of the block
+     */
+    this.redraw = function()
+    {
+        self.div.css('margin-left', blocks.center.x+self.x*blocks.scale+'px');
+        self.div.css('margin-top', blocks.center.y+self.y*blocks.scale+'px');
+
+        self.div.css('font-size', Math.round(blocks.scale*defaultFont)+'px');
+        self.div.css('width', Math.round(blocks.scale*defaultWidth)+'px');
+    }
 
     /**
      * Init the function listeners
@@ -57,16 +72,16 @@ Block = function(blocks, blockType, id)
     this.initListeners = function()
     {
         // Drag & drop the block
-        self.div.find('h3').mousedown(function() {
-            self.drag = [blocks.mouseX-self.x, blocks.mouseY-self.y];
+        self.div.find('h3').mousedown(function(event) {
+            if (event.which == 1) {
+                self.drag = [blocks.mouseX/blocks.scale-self.x, blocks.mouseY/blocks.scale-self.y];
+            }
         });
             
         $('html').mousemove(function(evt) {
             if (self.drag) {
-                self.x = (blocks.mouseX-self.drag[0]);
-                self.y = (blocks.mouseY-self.drag[1]);
-                self.div.css('margin-left', self.x+'px');
-                self.div.css('margin-top', self.y+'px');
+                self.x = (blocks.mouseX/blocks.scale-self.drag[0]);
+                self.y = (blocks.mouseY/blocks.scale-self.drag[1]);
                 blocks.redraw();
             }
         });
@@ -76,19 +91,27 @@ Block = function(blocks, blockType, id)
         });
 
         // Draw a link
-        self.div.find('.input').mousedown(function(evt) {
-            blocks.beginLink(self, $(this).attr('rel'));
-            evt.preventDefault();
+        self.div.find('.input').mousedown(function(event) {
+            if (event.which == 1) {
+                blocks.beginLink(self, $(this).attr('rel'));
+                evt.preventDefault();
+            }
         });
-        self.div.find('.output').mousedown(function(evt) {
-            blocks.beginLink(self, $(this).attr('rel'));
-            evt.preventDefault();
+        self.div.find('.output').mousedown(function(event) {
+            if (event.which == 1) {
+                blocks.beginLink(self, $(this).attr('rel'));
+                evt.preventDefault();
+            }
         });
-        self.div.find('.input').mouseup(function() {
-            blocks.endLink(self, $(this).attr('rel'));
+        self.div.find('.input').mouseup(function(event) {
+            if (event.which == 1) {
+                blocks.endLink(self, $(this).attr('rel'));
+            }
         });
-        self.div.find('.output').mouseup(function() {
-            blocks.endLink(self, $(this).attr('rel'));
+        self.div.find('.output').mouseup(function(event) {
+            if (event.which == 1) {
+                blocks.endLink(self, $(this).attr('rel'));
+            }
         });
     };
 

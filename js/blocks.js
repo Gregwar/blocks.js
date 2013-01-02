@@ -5,6 +5,13 @@ Blocks = function()
 {
     var self = this;
 
+    // View center & scale
+    this.center = {};
+    this.scale = 1.0;
+
+    // Is the user dragging the view ?
+    this.moving = null;
+
     // Mouse
     this.mouseX = 0;
     this.mouseY = 0;
@@ -75,6 +82,10 @@ Blocks = function()
             self.div.find('canvas').attr('height',(self.div.height()));
             self.context = self.div.find('canvas')[0].getContext('2d');
 
+            // Setting up default viewer center
+            self.center.x = self.div.width()/2;
+            self.center.y = self.div.height()/2;
+
             // Add a block
             self.div.find('.add').hover(function() {
                 html = '';
@@ -99,25 +110,55 @@ Blocks = function()
                 self.move(evt);
             });
 
-            $('html').mouseup(function() {
-                self.release();
+            $('html').mouseup(function(event) {
+                if (event.which == 1) {
+                    self.release();
+                }
             });
 
+            // Detect clicks on the canvas
             self.div.click(function() {
                 self.canvasClicked();
             });
+
+            self.div.mousedown(function(event) {
+                if (event.which == 2) {
+                    self.moving = [self.mouseX, self.mouseY];
+                }
+            });
             
+            self.div.mouseup(function(event) {
+                if (event.which == 2) {
+                    self.moving = null;
+                }
+            });
+            
+            // Initializing canvas
             self.context.clearRect(0, 0, self.div.width(), self.div.height());
             self.context.strokeStyle = 'rgb(0, 0, 0)';
             self.context.beginPath();
             self.context.stroke();
 
+            // Detecting key press
             $(document).keydown(function(e){
                 if ($('input').is(':focus')) {
                     return;
                 }   
 
-                self.deleteLink();
+                // "del" will delete a selected link
+                if (e.keyCode == 46) {
+                    self.deleteLink();
+                }
+
+                // Temp: using "p" and "m" for the zoom
+                if (e.keyCode == 80) {
+                    self.scale *= 1.1;
+                    self.redraw();
+                }
+                if (e.keyCode == 77) {
+                    self.scale /= 1.1;
+                    self.redraw();
+                }
             });
         });
     };
@@ -170,6 +211,13 @@ Blocks = function()
             self.context.lineTo(self.mouseX, self.mouseY);
             self.context.stroke();
         }
+
+        if (self.moving) {
+            self.center.x += (self.mouseX-self.moving[0]);
+            self.center.y += (self.mouseY-self.moving[1]);
+            self.moving = [self.mouseX, self.mouseY];
+            self.redraw();
+        }
     };
 
     /**
@@ -206,6 +254,12 @@ Blocks = function()
      */
     this.redraw = function()
     {
+        // Set the position for blocks
+        for (k in self.blocks) {
+            self.blocks[k].redraw();
+        }
+
+        // Redraw edges
         self.context.clearRect(0, 0, self.div.width(), self.div.height());
 
         for (k in self.edges) {
@@ -228,7 +282,7 @@ Blocks = function()
     this.endLink = function(block, io)
     {
         if (this.linking) {
-            var edge = new Edge(this.linking[0], this.linking[1], block, io);
+            var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
             this.edges.push(edge);
             this.linking = null;
         }
