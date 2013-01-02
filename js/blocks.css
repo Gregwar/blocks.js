@@ -12,7 +12,6 @@
 .blocks_js_editor canvas {
     position:absolute;
     z-index:-1;
-    border:1px solid red;
     background-color:white;
 }
 

@@ -1,20 +1,28 @@
 function Segment(x, y, dx, dy)
 {
+    this.x = x;
+    this.y = y;
+    this.dx = dx;
+    this.dy = dy;
+
     /**
      * Distance
      */
     this.distance = function(point1, point2)
     {
-        return Math.sqrt(Math.pow(point2.x-point1.x,2) + Math.pow(point2.y-point1-y,2));
+        return Math.sqrt(Math.pow(point2.x-point1.x,2) + Math.pow(point2.y-point1.y,2));
     }
 
     /**
      * Distance with a point
      */
-    this.distance = function(point)
+    this.distanceP = function(point)
     {
         var normal = this.normal();
+        normal.x = point.x;
+        normal.y = point.y;
         var intersection = this.intersection(normal);
+        print(intersection);
 
         if (intersection[1] < 0 || intersection[1] > 1) {
             return false;
@@ -28,7 +36,7 @@ function Segment(x, y, dx, dy)
      */
     this.normal = function()
     {
-        var segment = new Segment(this.x, this.y, this.dy, -this.dx);
+        return new Segment(this.x, this.y, this.dy, -this.dx);
     };
 
     /**
@@ -60,8 +68,8 @@ function Segment(x, y, dx, dy)
     this.alpha = function(a)
     {
         var point = {};
-        point.x = x+dx*a;
-        point.y = y+dy*a;
+        point.x = this.x+this.dx*a;
+        point.y = this.y+this.dy*a;
 
         return point;
     };
