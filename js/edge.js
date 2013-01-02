@@ -27,9 +27,9 @@ function Edge(block1, io1, block2, io2, blocks)
         context.lineWidth = defaultSize*blocks.scale;
 
         if (selected) {
-            context.strokeStyle = 'rgba(200, 200, 0, 1)';
+            context.strokeStyle = 'rgba(0, 200, 0, 1)';
         } else {
-            context.strokeStyle = 'rgba(0, 0, 0, 1)';
+            context.strokeStyle = 'rgba(200, 200, 0, 1)';
         }
         context.beginPath();
         context.moveTo(position1.x, position1.y);

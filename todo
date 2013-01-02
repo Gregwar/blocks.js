@@ -6,7 +6,6 @@ Links:
 Blocks:
 * Add a way to add style to blocks (comments etc.)
 * Check the constraints
-* Put colors in the used i/o
 * Add a "low opacity" block setup
 * Make the text unselectable for cleaner handling
 * Add a way to delete a block

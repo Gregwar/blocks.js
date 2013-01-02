@@ -98,3 +98,7 @@
     background-position:right;
     padding-right:20px;
 }
+
+.blocks_js_editor .io_active {
+    background-image:url('gfx/circle_full.png');
+}

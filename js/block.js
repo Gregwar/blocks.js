@@ -87,6 +87,13 @@ Block = function(blocks, blockType, id)
 
         self.div.css('font-size', Math.round(blocks.scale*defaultFont)+'px');
         self.div.css('width', Math.round(blocks.scale*defaultWidth)+'px');
+
+        for (k in self.ios) {
+            self.div.find('.' + k).removeClass('io_active');
+            if (self.edges[k] != undefined && self.edges[k].length) {
+                self.div.find('.' + k).addClass('io_active');
+            }
+        }
     }
 
     /**
