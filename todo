@@ -4,6 +4,7 @@ Links:
 
 Menu:
 * Externalize the menu logic in a separate file
+* Groups block by family
 
 Blocks:
 * Add a way to delete a block
@@ -16,6 +17,7 @@ Viewer:
 * Use the mouse wheel to zoom/unzoom
 * Add a "perfect scale" button to init the view so that everything is in the screen
 * Fix the overflow hidden
+* Makes the circle better managed with different scales
 
 Parameters:
 * Create form to edit parameters
