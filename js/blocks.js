@@ -20,10 +20,9 @@ Blocks = function()
     // Linking ?
     this.linking = null;
 
-    /**
-     * Selected link
-     */
+    // Selected items
     this.selectedLink = null;
+    this.selectedBlock = null;
 
     // BLocks division
     this.div = null;
@@ -118,7 +117,7 @@ Blocks = function()
             });
 
             // Detect clicks on the canvas
-            self.div.click(function() {
+            self.div.mousedown(function() {
                 self.canvasClicked();
             });
 
@@ -148,7 +147,7 @@ Blocks = function()
 
                 // "del" will delete a selected link
                 if (e.keyCode == 46) {
-                    self.deleteLink();
+                    self.deleteEvent();
                 }
 
                 // Temp: using "p" and "m" for the zoom
@@ -226,7 +225,15 @@ Blocks = function()
      */
     this.canvasClicked = function()
     {
+        this.selectedBlock = null;
         this.selectedLink = null;
+
+        for (k in this.blocks) {
+            var block = this.blocks[k];
+            if (block.hasFocus) {
+                this.selectedBlock = k;
+            }
+        }
 
         for (k in this.edges) {
             if (this.edges[k].collide(this.mouseX, this.mouseY)) {
@@ -239,13 +246,44 @@ Blocks = function()
     };
 
     /**
+     * Edge to remove
+     */
+    this.removeEdge = function(edge)
+    {
+        this.edges[edge].erase();
+        arrayRemove(this.edges, edge);
+    };
+
+    /**
      * Delete the current link
      */
-    this.deleteLink = function()
+    this.deleteEvent = function()
     {
+        // Remove a block and its edges
+        if (this.selectedBlock != null) {
+            var block = this.blocks[this.selectedBlock];
+
+            var newEdges = [];
+            for (k in self.edges) {
+                var edge = self.edges[k];
+                if (edge.block1 == block || edge.block2 == block) {
+                    edge.erase();
+                } else {
+                    newEdges.push(edge);
+                }
+            }
+            this.edges = newEdges;
+
+            block.erase();
+            arrayRemove(this.blocks, this.selectedBlock);
+
+            this.selectedBlock = null;
+            this.redraw();
+        }
+
+        // Remove an edge
         if (this.selectedLink != null) {
-            this.edges[this.selectedLink].erase();
-            arrayRemove(this.edges, this.selectedLink);
+            this.removeEdge(this.selectedLink);
             this.selectedLink = null;
             this.redraw();
         }
@@ -258,7 +296,7 @@ Blocks = function()
     {
         // Set the position for blocks
         for (k in self.blocks) {
-            self.blocks[k].redraw();
+            self.blocks[k].redraw(self.selectedBlock == k);
         }
 
         // Redraw edges
@@ -311,6 +349,7 @@ Blocks = function()
                 alert('Unable to create this edge :' + "\n" + error);
             }
             this.linking = null;
+            this.selectedBlock = null;
             this.redraw();
         }
     };

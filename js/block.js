@@ -10,6 +10,9 @@ Block = function(blocks, blockType, id)
     // Id
     this.id = id;
 
+    // Do I have focus ?
+    this.hasFocus = false;
+
     // Division (object)
     this.div = null;
 
@@ -80,7 +83,7 @@ Block = function(blocks, blockType, id)
     /**
      * Sets the position of the block
      */
-    this.redraw = function()
+    this.redraw = function(selected)
     {
         self.div.css('margin-left', blocks.center.x+self.x*blocks.scale+'px');
         self.div.css('margin-top', blocks.center.y+self.y*blocks.scale+'px');
@@ -94,6 +97,11 @@ Block = function(blocks, blockType, id)
                 self.div.find('.' + k).addClass('io_active');
             }
         }
+
+        self.div.removeClass('block_selected');
+        if (selected) {
+            self.div.addClass('block_selected');
+        }
     }
 
     /**
@@ -106,6 +114,12 @@ Block = function(blocks, blockType, id)
             if (event.which == 1) {
                 self.drag = [blocks.mouseX/blocks.scale-self.x, blocks.mouseY/blocks.scale-self.y];
             }
+        });
+
+        self.div.hover(function() {
+            self.hasFocus = true;
+        }, function() {
+            self.hasFocus = false;
         });
             
         $('html').mousemove(function(evt) {
@@ -209,5 +223,13 @@ Block = function(blocks, blockType, id)
                 }
             }
         }
+    };
+
+    /**
+     * Erase the block
+     */
+    this.erase = function()
+    {
+        self.div.remove();
     };
 };

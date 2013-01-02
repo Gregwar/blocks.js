@@ -7,7 +7,6 @@ Menu:
 * Groups block by family
 
 Blocks:
-* Add a way to delete a block
 * Add a way to add style to blocks (comments etc.)
 * Check the constraints
 * Add a "low opacity" block setup

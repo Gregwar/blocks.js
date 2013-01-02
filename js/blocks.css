@@ -59,7 +59,7 @@
 .blocks_js_editor .block {
     width:180px;
     position:absolute;
-    border:1px solid #aaa;
+    border:2px solid #aaa;
     padding:2px;
     margin-left:0px;
     margin-top:0px;
@@ -69,6 +69,10 @@
     -khtml-user-select:none;
     -webkit-user-select:none;
     -o-user-select:none;
+}
+
+.blocks_js_editor .block_selected {
+    border:2px solid #0a0;
 }
 
 .blocks_js_editor .block h3 {
