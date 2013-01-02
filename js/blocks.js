@@ -8,6 +8,7 @@ Blocks = function()
     // View center & scale
     this.center = {};
     this.scale = 1.0;
+    this.redrawTimeout = null;
 
     // Is the user dragging the view ?
     this.moving = null;
@@ -203,7 +204,7 @@ Blocks = function()
     {
         if (self.linking) {
             var position = this.linking[0].linkPositionFor(this.linking[1]);
-            self.redraw();
+            self.doRedraw();
             self.context.lineWidth = 3;
             self.context.strokeStyle = 'rgba(0, 0, 0, 0.4)';
             self.context.beginPath();
@@ -251,9 +252,9 @@ Blocks = function()
     };
 
     /**
-     *  Draw the edges
+     * Do the redraw
      */
-    this.redraw = function()
+    this.doRedraw = function()
     {
         // Set the position for blocks
         for (k in self.blocks) {
@@ -265,6 +266,18 @@ Blocks = function()
 
         for (k in self.edges) {
             self.edges[k].draw(self.context, self.selectedLink == k);
+        }
+
+        self.redrawTimeout = null;
+    };
+
+    /**
+     *  Draw the edges
+     */
+    this.redraw = function()
+    {
+        if (!this.redrawTimeout) {
+            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 50);
         }
     };
 

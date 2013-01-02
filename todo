@@ -3,11 +3,11 @@ Links:
 * Add a disconnect & reconnect system
 
 Blocks:
+* Add a way to delete a block
+* Make the text unselectable for cleaner handling
 * Add a way to add style to blocks (comments etc.)
 * Check the constraints
 * Add a "low opacity" block setup
-* Make the text unselectable for cleaner handling
-* Add a way to delete a block
 * Supports variadic I/Os
 
 Viewer:
