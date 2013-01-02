@@ -2,6 +2,9 @@
 Links:
 * Add a disconnect & reconnect system
 
+Menu:
+* Externalize the menu logic in a separate file
+
 Blocks:
 * Add a way to delete a block
 * Make the text unselectable for cleaner handling
