@@ -285,6 +285,13 @@ Blocks = function()
         if (this.linking) {
             try {
                 var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
+
+                for (k in self.edges) {
+                    var other = self.edges[k];
+                    if (other.same(edge)) {
+                        throw 'This edge already exists';
+                    }
+                }
                 edge.create();
                 this.edges.push(edge);
             } catch (error) {

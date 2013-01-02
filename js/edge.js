@@ -3,6 +3,10 @@
  */
 function Edge(block1, io1, block2, io2, blocks)
 {
+    this.block1 = block1;
+    this.io1 = io1;
+    this.block2 = block2;
+    this.io2 = io2;
     var defaultSize = 3;
     var position1 = block1.linkPositionFor(io1);
     var position2 = block2.linkPositionFor(io2);
@@ -82,5 +86,20 @@ function Edge(block1, io1, block2, io2, blocks)
     {
         block1.eraseEdge(io1, this);
         block2.eraseEdge(io2, this);
+    };
+
+    this.same = function(other)
+    {
+        if (block1 == other.block1 && block2 == other.block2 
+                && io1 == other.io1 && io2 == other.io2) {
+            return true;
+        }
+        
+        if (block1 == other.block2 && block2 == other.block1
+                && io1 == other.io2 && io2 == other.io1) {
+            return true;
+        }
+
+        return false;
     };
 };
