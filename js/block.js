@@ -45,7 +45,12 @@ Block = function(blocks, blockType, id)
     this.getHtml = function()
     {
         html = '<div class="parameters"></div>';
-        html += '<div class="blockTitle">' + blockType.name + ' <div class="blockicon delete"></div><div class="blockicon gear"></div></div>';
+        html += '<div class="blockTitle">' + blockType.name + ' <div class="blockicon delete"></div>';
+        if (blockType.description) {
+            html += '<div class="blockicon info"></div>';
+            html += '<div class="description">' + blockType.description + '</div>';
+        }
+        html += '<div class="blockicon gear"></div></div>';
         html += '<div class="parametersRender"></div>';
 
         // Handling inputs & outputs
@@ -219,6 +224,13 @@ Block = function(blocks, blockType, id)
         // Handle the deletion
         self.div.find('.delete').click(function() {
             blocks.removeBlock(blocks.getBlockId(self));
+        });
+
+        // Show the description
+        self.div.find('.info').hover(function() {
+            self.div.find('.description').show();
+        }, function() {
+            self.div.find('.description').hide();
         });
     };
 

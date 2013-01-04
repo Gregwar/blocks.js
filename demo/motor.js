@@ -1,6 +1,7 @@
 blocks.register({
     name: "Motor",
     family: "Output",
+    description: "This will be sent directly to the motor as goal direction and torque",
     parameters: [
         {
             name: "Name",

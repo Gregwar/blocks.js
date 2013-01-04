@@ -32,5 +32,11 @@ BlockType = function(type)
     } else {
         this.class = '';
     }
+
+    // Description
+    this.description = null;
+    if (type.description != undefined) {
+        this.description = type.description;
+    }
 }
 

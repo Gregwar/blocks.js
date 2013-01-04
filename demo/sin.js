@@ -1,6 +1,7 @@
 blocks.register({
     name: "Sinus",
     family: "Math",
+    description: "Outputs <b>sin(T+phase)*amplitude</b>"
     parameters: [
         {
             name: "Amplitude",

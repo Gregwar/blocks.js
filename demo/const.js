@@ -1,6 +1,7 @@
 blocks.register({
     name: "Constant",
     family: "Math",
+    description: "A simple input constant",
     parameters: [
         {
             name: "Value",

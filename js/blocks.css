@@ -105,6 +105,18 @@
     -o-user-select:none;
 }
 
+.blocks_js_editor .block .description {
+    display:none;
+    width:200px;
+    padding:3px;
+    border:1px solid #083776;
+    border-radius:5px;
+    color:#001531;
+    background-color:#91bcf6;
+    position:absolute;
+    font-weight:normal;
+}
+
 .blocks_js_editor .blockTitle {
     font-weight:bold;
     background-color:#eee;
@@ -128,11 +140,15 @@
 }
 
 .blocks_js_editor .block .gear {
-    background-image:url('gfx/gear.gif');
+    background-image:url('gfx/gear.png');
 }
 
 .blocks_js_editor .block .delete {
     background-image:url('gfx/delete.png');
+}
+
+.blocks_js_editor .block .info {
+    background-image:url('gfx/info.png');
 }
 
 .blocks_js_editor .block_selected {
@@ -204,6 +220,8 @@
     padding:3px;
     z-index:50;
     width:250px;
+    margin-left:-5px;
+    margin-top:-5px;
 }
 
 .blocks_js_editor .block .parameters input,
