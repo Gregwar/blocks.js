@@ -68,13 +68,8 @@ Blocks = function()
             // Inject the initial editor
             self.div.html(
                   '<div class="blocks_js_editor">'
+                + '<div class="contextmenu"><div class="types"></div></div>'
                 + '<canvas></canvas>'
-                + '<div class="menubar">'
-                + '<div class="add">'
-                + '<span>Add a block</span>'
-                + '<div class="types"></div>'
-                + '</div>'
-                + '</div>'
                 + '<div class="blocks"></div>'
                 + '</div>'
             );
@@ -87,22 +82,8 @@ Blocks = function()
             self.center.x = self.div.width()/2;
             self.center.y = self.div.height()/2;
 
-            // Add a block
-            self.div.find('.add').hover(function() {
-                html = '';
-                for (k in self.blockTypes) {
-                    var type = self.blockTypes[k];
-                    html += '<div class="type" rel="'+type.name+'">'+type.name+'</div>';
-                }
-
-                $(this).find('.types').html(html);
-                $(this).find('.types').show();
-                $(this).find('.type').click(function() {
-                    self.addBlock($(this).attr('rel'));
-                });
-            }, function() {
-                $(this).find('.types').hide();
-            });
+            // Run the menu
+            new BlocksMenu(self);
 
             // Listen for mouse position
             self.div[0].addEventListener('mousemove', function(evt) {
@@ -168,13 +149,15 @@ Blocks = function()
     /**
      * Adds a block
      */
-    this.addBlock = function(name)
+    this.addBlock = function(name, x, y)
     {
         for (k in self.blockTypes) {
             var type = self.blockTypes[k];
 
             if (type.name == name) {
                 var block = new Block(self, self.blockTypes[k], this.id);
+                block.x = x;
+                block.y = y;
                 block.create(self.div.find('.blocks'));
                 this.blocks.push(block);
                 this.id++;

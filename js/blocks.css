@@ -31,24 +31,28 @@
     z-index:1;
 }
 
-.blocks_js_editor .menubar .add {
+.blocks_js_editor .contextmenu {
     width:120px;
-    float:right; 
-    margin:5px;
+    background-color:white;
+    padding:3px;
+    border:1px solid #666;
+    border-radius:2px;
+    position:absolute;
+    display:none;
+    float:left;
+    z-index:99;
 }
 
 .blocks_js_editor .menubar .add span {
     color:green;
 }
 
-.blocks_js_editor .types {
-    position:absolute;
+.blocks_js_editor .contextmenu .types {
     background-color:white;
     margin-top:-1px;
-    z-index:99;
 }
 
-.blocks_js_editor .menubar .type {
+.blocks_js_editor .contextmenu .type {
     cursor:pointer;
 }
 
