@@ -19,6 +19,9 @@ Block = function(blocks, blockType, id)
     // Is the user dragging ?
     this.drag = null;
 
+    // Last scale
+    this.lastScale = null;
+
     // Parameters
     this.parameters = null;
     this.parametersManager = null;
@@ -116,19 +119,25 @@ Block = function(blocks, blockType, id)
      */
     this.redraw = function(selected)
     {
+        // Setting the position
         self.div.css('margin-left', blocks.center.x+self.x*blocks.scale+'px');
         self.div.css('margin-top', blocks.center.y+self.y*blocks.scale+'px');
 
-        self.div.css('font-size', Math.round(blocks.scale*defaultFont)+'px');
-        self.div.css('width', Math.round(blocks.scale*defaultWidth)+'px');
+        // Rescaling
+        if (this.lastScale != blocks.scale) {
+            self.div.css('font-size', Math.round(blocks.scale*defaultFont)+'px');
+            self.div.css('width', Math.round(blocks.scale*defaultWidth)+'px');
         
-        var size = Math.round(12*blocks.scale);
-        self.div.find('.circle').css('width', size+'px');
-        self.div.find('.circle').css('height', size+'px');
-        self.div.find('.circle').css('background-size', size+'px '+size+'px');
+            var size = Math.round(12*blocks.scale);
+            self.div.find('.circle').css('width', size+'px');
+            self.div.find('.circle').css('height', size+'px');
+            self.div.find('.circle').css('background-size', size+'px '+size+'px');
 
-        self.div.find('.inputs, .outputs').width(self.div.width()/2-10);
+            self.div.find('.inputs, .outputs').width(self.div.width()/2-10);
+            this.lastScale = blocks.scale
+        }
 
+        // Changing the circle rendering
         for (k in self.ios) {
             var circle = self.div.find('.' + k + ' .circle');
 
@@ -142,9 +151,12 @@ Block = function(blocks, blockType, id)
             this.parametersManager = new ParametersManager(blockType, this);
             this.parameters = this.parametersManager.getDefaults();
         }
+
+        // Rendering parameters
         this.parametersManager.div = this.div.find('.parameters');
         self.div.find('.parametersRender').html(self.parametersManager.getHtml());
 
+        // Is selected ?
         self.div.removeClass('block_selected');
         if (selected) {
             self.div.addClass('block_selected');
