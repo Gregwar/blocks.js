@@ -201,7 +201,7 @@ Blocks = function()
     /**
      * The mouse has moved
      */
-    this.move = function(evt)
+    this.move = function()
     {
         if (self.selectedSide) {
             var distance = Math.sqrt(Math.pow(this.mouseX-this.selectedSide[1],2)+Math.pow(this.mouseY-this.selectedSide[2],2));
