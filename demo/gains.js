@@ -4,6 +4,7 @@ blocks.register({
     parameters: [
         {
             name: "Gains",
+            hide: true,
             type: [
                 {
                     name: "Gain",
@@ -15,14 +16,14 @@ blocks.register({
     ],
     inputs: [
         {
-            variadic: true,
-            name: "Value #"
+            name: "Input #",
+            length: "Gains[Gain]"
         }
     ],
     outputs: [
         {
-            variadic: true,
             name: "Output #",
+            length: "Gains[Gain]"
         }
     ],
     check: function(block) {

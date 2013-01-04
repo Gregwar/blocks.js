@@ -21,7 +21,8 @@ blocks.register({
         },
         {
             name: "Invert",
-            type: "bool"
+            type: "bool",
+            default: false
         }
     ],
     inputs: [

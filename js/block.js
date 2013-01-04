@@ -47,25 +47,40 @@ Block = function(blocks, blockType, id)
 
         // Handling inputs & outputs
         handle = function(key) {
-            html += '<div class="inputs">';
+            html += '<div class="' + key + 's">';
 
             for (k in blockType[key+'s']) {
                 var io = blockType[key+'s'][k];
-                var ion = key + '_' + k;
-                html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + io.name + '</div>';
 
-                var card = [0, '*'];
-                if (io.card != undefined) {
-                    tab = io.card.split('-');
-                    if (tab.length == 1) {
-                        card = [0, tab[0]];
-                    } else {
-                        card = tab;
+                var size = 1;
+                if (io.length != undefined) {
+                    var pkey = io.length + '[]';
+                    if (self.parameters != undefined && self.parameters[pkey] != undefined) {
+                        size = self.parameters[pkey].length;
                     }
                 }
-                self.ios[ion] = card;
+
+                for (x=0; x<size; x++) {
+                    var ion = key + '_' + (k+x);
+                    var label = io.name.replace('#', x+1);
+
+                    // Generating HTML
+                    html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + label + '</div>';
+
+                    // Setting cardinality
+                    var card = [0, '*'];
+                    if (io.card != undefined) {
+                        tab = io.card.split('-');
+                        if (tab.length == 1) {
+                            card = [0, tab[0]];
+                        } else {
+                            card = tab;
+                        }
+                    }
+                    self.ios[ion] = card;
+                }
             }
-            html += '</div>';
+                html += '</div>';
         };
 
         handle('input');
@@ -75,20 +90,25 @@ Block = function(blocks, blockType, id)
     };
 
     /**
+     * Render the block
+     */
+    this.render = function()
+    {
+        this.div.html(this.getHtml());
+        this.initListeners();
+        this.redraw();
+    };
+
+    /**
      * Creates and inject the div
      */
     this.create = function(div)
     {
-        html = '<div id="block' + this.id + '" class="block">'
-            + this.getHtml()
-            + '</div>';
+        html = '<div id="block' + this.id + '" class="block"></div>'
 
         div.append(html);
         this.div = div.find('#block' + this.id);
-        this.parametersManager = new ParametersManager(this.div.find('.parameters'), blockType, this);
-        this.parameters = this.parametersManager.getDefaults();
-        this.initListeners();
-        this.redraw();
+        this.render();
     };
 
     /**
@@ -107,6 +127,8 @@ Block = function(blocks, blockType, id)
         self.div.find('.circle').css('height', size+'px');
         self.div.find('.circle').css('background-size', size+'px '+size+'px');
 
+        self.div.find('.inputs, .outputs').width(self.div.width()/2-10);
+
         for (k in self.ios) {
             var circle = self.div.find('.' + k + ' .circle');
 
@@ -116,6 +138,11 @@ Block = function(blocks, blockType, id)
             }
         }
 
+        if (this.parametersManager == undefined) {
+            this.parametersManager = new ParametersManager(blockType, this);
+            this.parameters = this.parametersManager.getDefaults();
+        }
+        this.parametersManager.div = this.div.find('.parameters');
         self.div.find('.parametersRender').html(self.parametersManager.getHtml());
 
         self.div.removeClass('block_selected');

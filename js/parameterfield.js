@@ -16,7 +16,17 @@ function ParameterField(parameter)
     if (parameter.type == undefined) {
         parameter.type = 'text';
     } else {
-        this.type = parameter.type;
+        var type = parameter.type;
+
+        if (type == 'check' || type == 'bool') {
+            type = 'checkbox';
+        }
+
+        if (type == 'number') {
+            type = 'text';
+        }
+
+        this.type = type;
     }
 
     // Hide the field ?
@@ -111,17 +121,8 @@ function ParameterField(parameter)
             html += '<a href="javascript:void(0);" class="'+this.name+'_remove">Remove</a>';
 
             return html;
-        } else {
-            var type;
-            if (parameter.type == 'check' || parameter.type == 'bool') {
-                type = 'checkbox';
-            }
-
-            if (parameter.type == 'number') {
-                type = 'text';
-            }
-            
-            var field = '<input type="'+type+'" name="'+this.name+'" />'+this.unit;
+        } else { 
+            var field = '<input type="'+this.type+'" name="'+this.name+'" />'+this.unit;
 
             if (!justField) {
                 field = this.prettyName + '<br/>' + field + '<br />';
@@ -151,6 +152,10 @@ function ParameterField(parameter)
                 var param = new ParameterField(type);
                 param.name = this.name + '[' +param.name + '][]';
 
+                if (param.hide) {
+                    continue;
+                }
+
                 head += '<th>'+param.prettyName+'</th>';
 
                 if (parameters[param.name]) {
@@ -175,7 +180,18 @@ function ParameterField(parameter)
 
             return '<table><tr>'+head+'</tr>'+rowsHtml+'</table>';
         } else {
-            return '<b>' + this.name + '</b>: ' + parameters[this.name] + '<br/>';
+            var value = '';
+
+            if (parameters[this.name] != undefined) {
+                value = parameters[this.name];
+
+            }
+
+            if (this.type == 'checkbox') {
+                value = !!value;
+            }
+
+            return '<b>' + this.name + '</b>: ' + value + '<br/>';
         }
     };
 };

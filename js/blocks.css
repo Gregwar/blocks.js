@@ -120,6 +120,19 @@
     border:2px solid #0a0;
 }
 
+.blocks_js_editor .inputs,
+.blocks_js_editor .outputs {
+    width:80px;
+}
+
+.blocks_js_editor .outputs {
+    float:right;
+}
+
+.blocks_js_editor .inputs {
+    float:left;
+}
+
 .blocks_js_editor .input,
 .blocks_js_editor .output {
     background-color:#fff;
@@ -127,6 +140,7 @@
     padding-top:2px;
     background-repeat:no-repeat;
     cursor:pointer;
+    clear:both;
 }
 
 .blocks_js_editor .circle {

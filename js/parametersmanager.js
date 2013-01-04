@@ -1,12 +1,15 @@
 /**
  * Parameters managers
  */
-function ParametersManager(div, blockType, block)
+function ParametersManager(blockType, block)
 {
     var self = this;
 
     // Is the form displayed ?
     this.display = false;
+
+    // Div
+    this.div = null;
 
     // Fields
     this.fields = [];
@@ -44,20 +47,20 @@ function ParametersManager(div, blockType, block)
         
         html += '<a class="close" href="javascript:void(0);">Close</a>';
 
-        div.html(html);
+        this.div.html(html);
 
-        div.find('.close').click(function() {
-            div.hide();
+        this.div.find('.close').click(function() {
+            self.div.hide();
             self.save();
         });
 
-        div.find('form').unserializeForm(block.parameters);
+        this.div.find('form').unserializeForm(block.parameters);
 
         for (k in this.fields) {
-            this.fields[k].setListeners(div);
+            this.fields[k].setListeners(this.div);
         }
 
-        div.show();
+        this.div.show();
         display = true;
     };
 
@@ -80,7 +83,7 @@ function ParametersManager(div, blockType, block)
      */
     this.hide = function()
     {
-        div.hide();
+        this.div.hide();
         display = false;
     };
 
@@ -89,7 +92,9 @@ function ParametersManager(div, blockType, block)
      */
     this.save = function()
     {
-        block.parameters = div.find('form').serializeForm();
+        block.parameters = this.div.find('form').serializeForm();
+        block.render();
+        block.redraw();
     };
 
     /**
