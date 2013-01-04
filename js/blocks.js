@@ -205,7 +205,7 @@ Blocks = function()
         if (self.linking) {
             var position = this.linking[0].linkPositionFor(this.linking[1]);
             self.doRedraw();
-            self.context.lineWidth = 3;
+            self.context.lineWidth = 3 * self.scale;
             self.context.strokeStyle = 'rgba(0, 0, 0, 0.4)';
             self.context.beginPath();
             self.context.moveTo(position.x, position.y);
