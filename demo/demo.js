@@ -7,5 +7,7 @@
     include('sin.js');
     include('gains.js');
     include('const.js');
+    include('motor.js');
+    include('time.js');
     blocks.run('#blocks');
 })();

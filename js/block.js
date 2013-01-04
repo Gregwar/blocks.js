@@ -42,7 +42,7 @@ Block = function(blocks, blockType, id)
     this.getHtml = function()
     {
         html = '<div class="parameters"></div>';
-        html += '<div class="blockTitle">' + blockType.name + ' <div class="gear"></div></div>';
+        html += '<div class="blockTitle">' + blockType.name + ' <div class="blockicon delete"></div><div class="blockicon gear"></div></div>';
         html += '<div class="parametersRender"></div>';
 
         // Handling inputs & outputs
@@ -202,6 +202,11 @@ Block = function(blocks, blockType, id)
         // Handle the parameters
         self.div.find('.gear').click(function() {
             self.parametersManager.toggle();
+        });
+
+        // Handle the deletion
+        self.div.find('.delete').click(function() {
+            blocks.removeBlock(blocks.getBlockId(self));
         });
     };
 

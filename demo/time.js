@@ -1,17 +1,17 @@
 blocks.register({
-    name: "Constant",
-    family: "Math",
+    name: "Chrono",
+    family: "Time",
     parameters: [
         {
-            name: "Value",
+            name: "Factor",
             type: "number",
-            default: 0
+            default: 1
         }
     ],
     outputs: [
         {
             card: "0-*",
-            name: "Value"
+            name: "Time"
         }
     ]
 });

@@ -277,6 +277,44 @@ Blocks = function()
         this.edges[edge].erase();
         arrayRemove(this.edges, edge);
     };
+        
+    /**
+     * Remove a block
+     */
+    this.removeBlock = function(key)
+    {
+        var block = this.blocks[key];
+
+        var newEdges = [];
+        for (k in self.edges) {
+            var edge = self.edges[k];
+            if (edge.block1 == block || edge.block2 == block) {
+                edge.erase();
+            } else {
+                newEdges.push(edge);
+            }
+        }
+        this.edges = newEdges;
+
+        block.erase();
+        arrayRemove(this.blocks, this.selectedBlock);
+
+        this.redraw();
+    };
+
+    /**
+     * Get a block id
+     */
+    this.getBlockId = function(block)
+    {
+        for (k in self.blocks) {
+            if (self.blocks[k] == block) {
+                return k;
+            }
+        }
+
+        return null;
+    };
 
     /**
      * Delete the current link
@@ -285,24 +323,8 @@ Blocks = function()
     {
         // Remove a block and its edges
         if (this.selectedBlock != null) {
-            var block = this.blocks[this.selectedBlock];
-
-            var newEdges = [];
-            for (k in self.edges) {
-                var edge = self.edges[k];
-                if (edge.block1 == block || edge.block2 == block) {
-                    edge.erase();
-                } else {
-                    newEdges.push(edge);
-                }
-            }
-            this.edges = newEdges;
-
-            block.erase();
-            arrayRemove(this.blocks, this.selectedBlock);
-
+            this.removeBlock(this.selectedBlock);
             this.selectedBlock = null;
-            this.redraw();
         }
 
         // Remove an edge

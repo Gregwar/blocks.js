@@ -56,6 +56,12 @@ function ParametersManager(blockType, block)
 
         this.div.find('form').unserializeForm(block.parameters);
 
+        this.div.find('form').submit(function() {
+            self.div.hide();
+            self.save();
+            return false;
+        });
+
         for (k in this.fields) {
             this.fields[k].setListeners(this.div);
         }

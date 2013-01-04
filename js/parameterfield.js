@@ -191,7 +191,7 @@ function ParameterField(parameter)
                 value = !!value;
             }
 
-            return '<b>' + this.name + '</b>: ' + value + '<br/>';
+            return '<b>' + this.name + '</b>: ' + value + ' ' + this.unit + '<br/>';
         }
     };
 };

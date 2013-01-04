@@ -103,17 +103,25 @@
     cursor:move;
 }
 
-.blocks_js_editor .block .gear {
+.blocks_js_editor .block .blockicon
+{
     width:14px;
     height:14px;
-    background-image:url('gfx/gear.gif');
     float:right;
     cursor:pointer;
     opacity:0.5;
 }
 
-.blocks_js_editor .block .gear:hover {
+.blocks_js_editor .block .blockicon:hover {
     opacity:1.0;
+}
+
+.blocks_js_editor .block .gear {
+    background-image:url('gfx/gear.gif');
+}
+
+.blocks_js_editor .block .delete {
+    background-image:url('gfx/delete.png');
 }
 
 .blocks_js_editor .block_selected {
