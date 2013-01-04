@@ -61,7 +61,7 @@
 }
 
 .blocks_js_editor .contextmenu .family .childs {
-    margin-left:125px;
+    margin-left:123px;
     margin-top:-20px;
 }
 
@@ -94,16 +94,30 @@
     -o-user-select:none;
 }
 
-.blocks_js_editor .block_selected {
-    border:2px solid #0a0;
-}
-
-.blocks_js_editor .block h3 {
+.blocks_js_editor .blockTitle {
+    font-weight:bold;
     background-color:#eee;
     padding:1px;
     margin:-1px;
     margin-bottom:2px;
     cursor:move;
+}
+
+.blocks_js_editor .block .gear {
+    width:14px;
+    height:14px;
+    background-image:url('gfx/gear.gif');
+    float:right;
+    cursor:pointer;
+    opacity:0.5;
+}
+
+.blocks_js_editor .block .gear:hover {
+    opacity:1.0;
+}
+
+.blocks_js_editor .block_selected {
+    border:2px solid #0a0;
 }
 
 .blocks_js_editor .input,
@@ -147,4 +161,18 @@
 .blocks_js_editor .output .circle {
     float:right;
     margin:1px;
+}
+
+.blocks_js_editor .block .parameters {
+    display:none;
+    position:absolute;
+    background-color:white;
+    border:2px solid #aaa;
+    padding:3px;
+    z-index:50;
+    width:250px;
+}
+
+.blocks_js_editor .block .parameters input {
+    width:200px;
 }

@@ -19,6 +19,10 @@ Block = function(blocks, blockType, id)
     // Is the user dragging ?
     this.drag = null;
 
+    // Parameters
+    this.parameters = null;
+    this.parametersManager = null;
+
     // Position
     this.x = 0;
     this.y = 0;
@@ -37,7 +41,9 @@ Block = function(blocks, blockType, id)
      */
     this.getHtml = function()
     {
-        html = '<h3>' + blockType.name + '</h3>';
+        html = '<div class="parameters"></div>';
+        html += '<div class="blockTitle">' + blockType.name + ' <div class="gear"></div></div>';
+        html += '<div class="parametersRender"></div>';
 
         // Handling inputs & outputs
         handle = function(key) {
@@ -79,12 +85,14 @@ Block = function(blocks, blockType, id)
 
         div.append(html);
         this.div = div.find('#block' + this.id);
+        this.parametersManager = new ParametersManager(this.div.find('.parameters'), blockType, this);
+        this.parameters = this.parametersManager.getDefaults();
         this.initListeners();
         this.redraw();
     };
 
     /**
-     * Sets the position of the block
+     * Sets the position and the scale of the block
      */
     this.redraw = function(selected)
     {
@@ -108,6 +116,8 @@ Block = function(blocks, blockType, id)
             }
         }
 
+        self.div.find('.parametersRender').html(self.parametersManager.getHtml());
+
         self.div.removeClass('block_selected');
         if (selected) {
             self.div.addClass('block_selected');
@@ -120,7 +130,7 @@ Block = function(blocks, blockType, id)
     this.initListeners = function()
     {
         // Drag & drop the block
-        self.div.find('h3').mousedown(function(event) {
+        self.div.find('.blockTitle').mousedown(function(event) {
             if (event.which == 1) {
                 self.drag = [blocks.mouseX/blocks.scale-self.x, blocks.mouseY/blocks.scale-self.y];
             }
@@ -133,12 +143,14 @@ Block = function(blocks, blockType, id)
             self.hasFocus = false;
         });
 
+        // Handle focus on the I/Os
         self.div.find('.input, .output').hover(function() {
             self.focusedIo = $(this).attr('rel');
         }, function() {
             self.focusedIo = null;
         });
             
+        // Dragging
         $('html').mousemove(function(evt) {
             if (self.drag) {
                 self.x = (blocks.mouseX/blocks.scale-self.drag[0]);
@@ -147,6 +159,7 @@ Block = function(blocks, blockType, id)
             }
         });
 
+        // Drag the block
         $('html').mouseup(function() {
             self.drag = null;
         });
@@ -157,6 +170,11 @@ Block = function(blocks, blockType, id)
                 blocks.beginLink(self, $(this).attr('rel'));
                 event.preventDefault();
             }
+        });
+
+        // Handle the parameters
+        self.div.find('.gear').click(function() {
+            self.parametersManager.toggle();
         });
     };
 

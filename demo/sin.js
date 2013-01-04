@@ -10,14 +10,18 @@ blocks.register({
         {
             name: "Frequency",
             type: "number",
-            units: "Hz",
-            default: 1
+            unit: "Hz",
+            default: 10
         },
         {
             name: "Phase",
             type: "number",
-            units: "°",
+            unit: "°",
             default: 0
+        },
+        {
+            name: "Invert",
+            type: "bool"
         }
     ],
     inputs: [

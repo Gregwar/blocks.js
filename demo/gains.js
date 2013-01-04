@@ -7,10 +7,10 @@ blocks.register({
             type: [
                 {
                     name: "Gain",
-                    type: "number"
+                    type: "number",
+                    default: [1]
                 }
             ],
-            default: [1]
         },
     ],
     inputs: [

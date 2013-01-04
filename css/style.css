@@ -10,3 +10,12 @@ body {
     margin:5px;
     border:1px solid #aaa;
 }
+
+a {
+    color:#c00;
+    font-size:12px;
+}
+
+a:hover {
+    color:black;
+}

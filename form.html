@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/jquery.json.js"></script>
+        <script type="text/javascript" src="js/jquery.formserialize.js"></script>
+
+        <script type="text/javascript" src="js/test.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="js/blocks.css" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+    </head>
+    <body>
+        <h1>Blocks demo</h1>
+        <form>
+            Text:
+            <input type="text" name="textValue" /><br />
+            Checkbox:
+            <input type="checkbox" name="check" /><br />
+            Select:
+            <select name="values">
+                <option value="1">Opt 1</option>
+                <option value="2">Opt 2</option>
+                <option value="3">Opt 3</option>
+            </select><br />
+            Text:
+            <textarea name="text"></textarea><br />
+            Array:
+            <input type="text" name="arr[]" />
+            <input type="text" name="arr[]" />
+            <input type="text" name="arr[]" />
+        </form>
+        <a href="#" class="serialize">Serialize</a>
+    </body>
+</html>

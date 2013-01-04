@@ -104,7 +104,6 @@ Blocks = function()
             // Detect clicks on the canvas
             self.div.mousedown(function(evt) {
                 self.canvasClicked();
-                evt.preventDefault();
             });
 
             self.div.mousedown(function(event) {
