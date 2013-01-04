@@ -49,7 +49,9 @@ function Edge(block1, io1, block2, io2, blocks)
         var dp = segment.distanceP({x: x, y: y});
 
         if (dp[0] >= 0 && dp[0] <= 1) {
-            return dp[1] < (defaultSize*blocks.scale)*1.3;
+            if (dp[1] < (defaultSize*blocks.scale)*2) {
+                return dp[0];
+            }
         }
 
         return false;

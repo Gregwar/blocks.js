@@ -22,6 +22,7 @@ Blocks = function()
 
     // Selected items
     this.selectedLink = null;
+    this.selectedSide = null;
     this.selectedBlock = null;
 
     // BLocks division
@@ -117,8 +118,9 @@ Blocks = function()
             });
 
             // Detect clicks on the canvas
-            self.div.mousedown(function() {
+            self.div.mousedown(function(evt) {
                 self.canvasClicked();
+                evt.preventDefault();
             });
 
             self.div.mousedown(function(event) {
@@ -201,6 +203,23 @@ Blocks = function()
      */
     this.move = function(evt)
     {
+        if (self.selectedSide) {
+            var distance = Math.sqrt(Math.pow(this.mouseX-this.selectedSide[1],2)+Math.pow(this.mouseY-this.selectedSide[2],2));
+            if (distance > 15) {
+                var edge = this.edges[this.selectedLink];
+                if (this.selectedSide[0] == 2) {
+                    this.linking = [edge.block1, edge.io1];
+                } else {
+                    this.linking = [edge.block2, edge.io2];
+                }
+
+                this.removeEdge(this.selectedLink);
+                this.selectedSide = null;
+                this.selectedLink = null;
+                this.redraw();
+            }
+        }
+
         if (self.linking) {
             var position = this.linking[0].linkPositionFor(this.linking[1]);
             self.doRedraw();
@@ -227,6 +246,7 @@ Blocks = function()
     {
         this.selectedBlock = null;
         this.selectedLink = null;
+        this.selectedSide = null;
 
         for (k in this.blocks) {
             var block = this.blocks[k];
@@ -236,7 +256,13 @@ Blocks = function()
         }
 
         for (k in this.edges) {
-            if (this.edges[k].collide(this.mouseX, this.mouseY)) {
+            var collide = this.edges[k].collide(this.mouseX, this.mouseY);
+            if (collide != false) {
+                if (collide < 0.2) {
+                    this.selectedSide = [1, this.mouseX, this.mouseY];
+                } else if (collide > 0.8) {
+                    this.selectedSide = [2, this.mouseX, this.mouseY];
+                }
                 this.selectedLink = k;
                 break;
             }
@@ -315,7 +341,7 @@ Blocks = function()
     this.redraw = function()
     {
         if (!this.redrawTimeout) {
-            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 50);
+            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 20);
         }
     };
 
@@ -324,8 +350,25 @@ Blocks = function()
      */
     this.release = function()
     {
-        self.linking = null;
+        if (self.linking) {
+            self.tryEndLink();
+            self.linking=null;
+        }
         self.redraw();
+    };
+
+    /**
+     * Tries to end a link
+     */
+    this.tryEndLink = function()
+    {
+        for (k in self.blocks) {
+            var block = self.blocks[k];
+            if (block.hasFocus && block.focusedIo) {
+                self.endLink(block, block.focusedIo);
+                break;
+            }
+        }
     };
 
     /**
@@ -333,25 +376,23 @@ Blocks = function()
      */
     this.endLink = function(block, io)
     {
-        if (this.linking) {
-            try {
-                var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
+        try {
+            var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
 
-                for (k in self.edges) {
-                    var other = self.edges[k];
-                    if (other.same(edge)) {
-                        throw 'This edge already exists';
-                    }
+            for (k in self.edges) {
+                var other = self.edges[k];
+                if (other.same(edge)) {
+                    throw 'This edge already exists';
                 }
-                edge.create();
-                this.edges.push(edge);
-            } catch (error) {
-                alert('Unable to create this edge :' + "\n" + error);
             }
-            this.linking = null;
-            this.selectedBlock = null;
-            this.redraw();
+            edge.create();
+            this.edges.push(edge);
+        } catch (error) {
+            alert('Unable to create this edge :' + "\n" + error);
         }
+        this.linking = null;
+        this.selectedBlock = null;
+        this.redraw();
     };
 };
 

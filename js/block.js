@@ -26,6 +26,9 @@ Block = function(blocks, blockType, id)
     // I/Os cardinality
     this.ios = {};
 
+    // Which IO has focus ?
+    this.focusedIo = null;
+
     // Edges
     this.edges = {};
 
@@ -116,10 +119,17 @@ Block = function(blocks, blockType, id)
             }
         });
 
+        // Handle focus
         self.div.hover(function() {
             self.hasFocus = true;
         }, function() {
             self.hasFocus = false;
+        });
+
+        self.div.find('.input, .output').hover(function() {
+            self.focusedIo = $(this).attr('rel');
+        }, function() {
+            self.focusedIo = null;
         });
             
         $('html').mousemove(function(evt) {
@@ -135,26 +145,10 @@ Block = function(blocks, blockType, id)
         });
 
         // Draw a link
-        self.div.find('.input').mousedown(function(event) {
+        self.div.find('.input, .output').mousedown(function(event) {
             if (event.which == 1) {
                 blocks.beginLink(self, $(this).attr('rel'));
                 event.preventDefault();
-            }
-        });
-        self.div.find('.output').mousedown(function(event) {
-            if (event.which == 1) {
-                blocks.beginLink(self, $(this).attr('rel'));
-                event.preventDefault();
-            }
-        });
-        self.div.find('.input').mouseup(function(event) {
-            if (event.which == 1) {
-                blocks.endLink(self, $(this).attr('rel'));
-            }
-        });
-        self.div.find('.output').mouseup(function(event) {
-            if (event.which == 1) {
-                blocks.endLink(self, $(this).attr('rel'));
             }
         });
     };
