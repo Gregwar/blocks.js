@@ -135,16 +135,12 @@ Blocks = function()
                 if (e.keyCode == 46) {
                     self.deleteEvent();
                 }
+            });
 
-                // Temp: using "p" and "m" for the zoom
-                if (e.keyCode == 80) {
-                    self.scale *= 1.1;
-                    self.redraw();
-                }
-                if (e.keyCode == 77) {
-                    self.scale /= 1.1;
-                    self.redraw();
-                }
+            // Binding the mouse wheel
+            self.div.bind('mousewheel', function(event, delta, deltaX, deltaY) {
+                self.scale *= Math.pow(1.1, deltaY);
+                self.redraw();
             });
         });
     };
