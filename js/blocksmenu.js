@@ -28,8 +28,8 @@ function BlocksMenu(blocks)
      */
     this.show = function()
     {
-        self.menu.css('margin-left', (10+blocks.mouseX)+'px');
-        self.menu.css('margin-top', (10+blocks.mouseY)+'px');
+        self.menu.css('margin-left', (5+blocks.mouseX)+'px');
+        self.menu.css('margin-top', (5+blocks.mouseY)+'px');
         self.menu.show();
         self.visible = true;
     };
@@ -41,8 +41,7 @@ function BlocksMenu(blocks)
         if (self.visible) {
             self.hide();
         } else {
-            self.position.x = (blocks.mouseX-blocks.center.x)/blocks.scale;
-            self.position.y = (blocks.mouseY-blocks.center.y)/blocks.scale;
+            self.position = blocks.getPosition();
 
             // Sorting types by family
             var families = {};

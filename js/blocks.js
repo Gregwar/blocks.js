@@ -139,10 +139,27 @@ Blocks = function()
 
             // Binding the mouse wheel
             self.div.bind('mousewheel', function(event, delta, deltaX, deltaY) {
-                self.scale *= Math.pow(1.1, deltaY);
+                var dX = self.mouseX - self.center.x;
+                var dY = self.mouseY - self.center.y;
+                var deltaScale = Math.pow(1.1, deltaY);
+                self.center.x -= dX*(deltaScale-1);
+                self.center.y -= dY*(deltaScale-1);
+                self.scale *= deltaScale;
                 self.redraw();
             });
         });
+    };
+
+    /**
+     * Gets the mouse position
+     */
+    this.getPosition = function()
+    {
+        var position = {};
+        position.x = (blocks.mouseX-blocks.center.x)/blocks.scale;
+        position.y = (blocks.mouseY-blocks.center.y)/blocks.scale;
+
+        return position;
     };
 
     /**
