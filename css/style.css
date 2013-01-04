@@ -1,12 +1,12 @@
 body {
-    width:950px;
+    width:1100px;
     margin:auto;
     font-family:Sans-serif;
 }
 
 #blocks {
-    width:950px;
-    height:500px;
+    width:1100px;
+    height:600px;
     margin:5px;
     border:1px solid #aaa;
 }

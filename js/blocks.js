@@ -202,21 +202,14 @@ Blocks = function()
             }
         }
 
-        if (self.linking) {
-            var position = this.linking[0].linkPositionFor(this.linking[1]);
-            self.doRedraw();
-            self.context.lineWidth = 3 * self.scale;
-            self.context.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-            self.context.beginPath();
-            self.context.moveTo(position.x, position.y);
-            self.context.lineTo(self.mouseX, self.mouseY);
-            self.context.stroke();
-        }
-
         if (self.moving) {
             self.center.x += (self.mouseX-self.moving[0]);
             self.center.y += (self.mouseY-self.moving[1]);
             self.moving = [self.mouseX, self.mouseY];
+            self.redraw();
+        }
+
+        if (self.linking) {
             self.redraw();
         }
     };
@@ -314,6 +307,16 @@ Blocks = function()
             self.edges[k].draw(self.context, self.selectedLink == k);
         }
 
+        if (self.linking) {
+            var position = this.linking[0].linkPositionFor(this.linking[1]);
+            self.context.lineWidth = 3 * self.scale;
+            self.context.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            self.context.beginPath();
+            self.context.moveTo(position.x, position.y);
+            self.context.lineTo(self.mouseX, self.mouseY);
+            self.context.stroke();
+        }
+        
         self.redrawTimeout = null;
     };
 
@@ -323,7 +326,7 @@ Blocks = function()
     this.redraw = function()
     {
         if (!this.redrawTimeout) {
-            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 20);
+            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 50);
         }
     };
 
