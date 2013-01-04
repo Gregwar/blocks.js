@@ -10,11 +10,11 @@ blocks.register({
     ],
     inputs: [
         {
-            card: "0-*",
+            card: "0-1",
             name: "Angle"
         },
         {
-            card: "0-*",
+            card: "0-1",
             name: "Torque"
         }
     ]
