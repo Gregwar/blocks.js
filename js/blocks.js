@@ -103,7 +103,9 @@ Blocks = function()
 
             // Detect clicks on the canvas
             self.div.mousedown(function(evt) {
-                self.canvasClicked();
+                if (self.canvasClicked()) {
+                    evt.preventDefault();
+                }
             });
 
             self.div.mousedown(function(event) {
@@ -235,6 +237,7 @@ Blocks = function()
      */
     this.canvasClicked = function()
     {
+        var prevent = false;
         this.selectedBlock = null;
         this.selectedLink = null;
         this.selectedSide = null;
@@ -246,20 +249,24 @@ Blocks = function()
             }
         }
 
-        for (k in this.edges) {
-            var collide = this.edges[k].collide(this.mouseX, this.mouseY);
-            if (collide != false) {
-                if (collide < 0.2) {
-                    this.selectedSide = [1, this.mouseX, this.mouseY];
-                } else if (collide > 0.8) {
-                    this.selectedSide = [2, this.mouseX, this.mouseY];
+        if (!this.selectedBlock) {
+            for (k in this.edges) {
+                var collide = this.edges[k].collide(this.mouseX, this.mouseY);
+                if (collide != false) {
+                    if (collide < 0.2) {
+                        this.selectedSide = [1, this.mouseX, this.mouseY];
+                    } else if (collide > 0.8) {
+                        this.selectedSide = [2, this.mouseX, this.mouseY];
+                    }
+                    this.selectedLink = k;
+                    prevent = true;
+                    break;
                 }
-                this.selectedLink = k;
-                break;
             }
         }
                 
         this.redraw();
+        return prevent;
     };
 
     /**
