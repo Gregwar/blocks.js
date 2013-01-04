@@ -46,7 +46,7 @@ Block = function(blocks, blockType, id)
             for (k in blockType[key+'s']) {
                 var io = blockType[key+'s'][k];
                 var ion = key + '_' + k;
-                html += '<div class="'+key+' ' + ion + '" rel="' + ion + '">' + io.name + '</div>';
+                html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + io.name + '</div>';
 
                 var card = [0, '*'];
                 if (io.card != undefined) {
@@ -93,11 +93,18 @@ Block = function(blocks, blockType, id)
 
         self.div.css('font-size', Math.round(blocks.scale*defaultFont)+'px');
         self.div.css('width', Math.round(blocks.scale*defaultWidth)+'px');
+        
+        var size = Math.round(12*blocks.scale);
+        self.div.find('.circle').css('width', size+'px');
+        self.div.find('.circle').css('height', size+'px');
+        self.div.find('.circle').css('background-size', size+'px '+size+'px');
 
         for (k in self.ios) {
-            self.div.find('.' + k).removeClass('io_active');
+            var circle = self.div.find('.' + k + ' .circle');
+
+            circle.removeClass('io_active');
             if (self.edges[k] != undefined && self.edges[k].length) {
-                self.div.find('.' + k).addClass('io_active');
+                circle.addClass('io_active');
             }
         }
 
@@ -158,15 +165,10 @@ Block = function(blocks, blockType, id)
      */
     this.linkPositionFor = function(io)
     {
-        div = self.div.find('.' + io);
+        div = self.div.find('.' + io + ' .circle');
 
-        if (div.hasClass('input')) {
-            var x = (div.offset().left-blocks.div.offset().left)+10;
-            var y = (div.offset().top-blocks.div.offset().top)+div.height()/2;
-        } else {
-            var x = (div.offset().left-blocks.div.offset().left)+div.width()+10;
-            var y = (div.offset().top-blocks.div.offset().top)+div.height()/2;
-        }
+        var x = (div.offset().left-blocks.div.offset().left)+div.width()/2;
+        var y = (div.offset().top-blocks.div.offset().top)+div.height()/2;
 
         return {x: x, y: y};
     };
