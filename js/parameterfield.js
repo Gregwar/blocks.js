@@ -35,6 +35,11 @@ function ParameterField(parameter)
         this.hide = true;
     }
 
+    this.hideLabel = false;
+    if (parameter.hideLabel != undefined) {
+        this.hideLabel = true;
+    }
+
     // Field name
     this.name = parameter.name;
     this.prettyName = parameter.name;
@@ -122,7 +127,11 @@ function ParameterField(parameter)
 
             return html;
         } else { 
-            var field = '<input type="'+this.type+'" name="'+this.name+'" />'+this.unit;
+            if (this.type == 'textarea') {
+                var field = '<textarea name="'+this.name+'"></textarea>';
+            } else {
+                var field = '<input type="'+this.type+'" name="'+this.name+'" />'+this.unit;
+            }
 
             if (!justField) {
                 field = this.prettyName + '<br/>' + field + '<br />';
@@ -180,6 +189,7 @@ function ParameterField(parameter)
 
             return '<table><tr>'+head+'</tr>'+rowsHtml+'</table>';
         } else {
+            var html = '';
             var value = '';
 
             if (parameters[this.name] != undefined) {
@@ -191,7 +201,13 @@ function ParameterField(parameter)
                 value = !!value;
             }
 
-            return '<b>' + this.name + '</b>: ' + value + ' ' + this.unit + '<br/>';
+            if (!this.hideLabel) {
+                html += '<b>' + this.name + '</b>: ';
+            }
+            
+            html += value + ' ' + this.unit + '<br/>';
+
+            return html;
         }
     };
 };

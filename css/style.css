@@ -19,3 +19,16 @@ a {
 a:hover {
     color:black;
 }
+
+/**
+ * Extra CSS
+ */
+.blocks_js_editor .commentblock {
+    background-color:#ffe6aa;
+    color:#571b00;
+    font-style:italic;
+}
+
+.blocks_js_editor .commentblock .blockTitle {
+    background-color:#f4c659;
+}

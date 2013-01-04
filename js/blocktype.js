@@ -25,5 +25,12 @@ BlockType = function(type)
     } else {
         this.family = type.family;
     }
+
+    // Style
+    if (type.class != undefined) {
+        this.class = type.class;
+    } else {
+        this.class = '';
+    }
 }
 

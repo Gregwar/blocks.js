@@ -9,5 +9,6 @@
     include('const.js');
     include('motor.js');
     include('time.js');
+    include('comment.js');
     blocks.run('#blocks');
 })();

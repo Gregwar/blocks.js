@@ -107,7 +107,7 @@ Block = function(blocks, blockType, id)
      */
     this.create = function(div)
     {
-        html = '<div id="block' + this.id + '" class="block"></div>'
+        html = '<div id="block' + this.id + '" class="block ' + blockType.class + '"></div>'
 
         div.append(html);
         this.div = div.find('#block' + this.id);
