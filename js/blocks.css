@@ -31,7 +31,7 @@
     z-index:1;
 }
 
-.blocks_js_editor .contextmenu {
+.blocks_js_editor .contextmenu, .blocks_js_editor .childs {
     width:120px;
     background-color:white;
     padding:3px;
@@ -53,6 +53,25 @@
 }
 
 .blocks_js_editor .contextmenu .type {
+    cursor:pointer;
+}
+
+.blocks_js_editor .contextmenu .type:hover {
+    background-color:#eee;
+}
+
+.blocks_js_editor .contextmenu .family .childs {
+    margin-left:125px;
+    margin-top:-20px;
+}
+
+.blocks_js_editor .contextmenu .family .familyName span {
+    float:right;
+}
+
+.blocks_js_editor .contextmenu .family h3 {
+    font-size:100%;
+    font-weight:bold;
     cursor:pointer;
 }
 

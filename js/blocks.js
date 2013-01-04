@@ -13,6 +13,9 @@ Blocks = function()
     // Is the user dragging the view ?
     this.moving = null;
 
+    // Context menu
+    this.menu;
+
     // Mouse
     this.mouseX = 0;
     this.mouseY = 0;
@@ -83,7 +86,7 @@ Blocks = function()
             self.center.y = self.div.height()/2;
 
             // Run the menu
-            new BlocksMenu(self);
+            self.menu = new BlocksMenu(self);
 
             // Listen for mouse position
             self.div[0].addEventListener('mousemove', function(evt) {

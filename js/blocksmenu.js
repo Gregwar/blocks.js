@@ -44,10 +44,33 @@ function BlocksMenu(blocks)
             self.position.x = (blocks.mouseX-blocks.center.x)/blocks.scale;
             self.position.y = (blocks.mouseY-blocks.center.y)/blocks.scale;
 
-            html = '';
+            // Sorting types by family
+            var families = {};
             for (k in blocks.blockTypes) {
                 var type = blocks.blockTypes[k];
-                html += '<div class="type" rel="'+type.name+'">'+type.name+'</div>';
+
+                if (families[type.family] == undefined) {
+                    families[type.family] = [type];
+                } else {
+                    families[type.family].push(type);
+                }
+            }
+
+            html = '';
+            for (family in families) {
+                if (family) {
+                    html += '<div class="family">';
+                    html += '<div class="familyName">'+family+' <span>&raquo;</span></div>';
+                    html += '<div class="childs">';
+                }
+                for (k in families[family]) {
+                    var type = families[family][k];
+                    html += '<div class="type" rel="'+type.name+'">'+type.name+'</div>';
+                }
+                if (family) {
+                    html += '</div>';
+                    html += '</div>';
+                }
             }
 
             self.menu.find('.types').html(html);
@@ -56,6 +79,18 @@ function BlocksMenu(blocks)
             self.menu.find('.type').click(function() {
                 blocks.addBlock($(this).attr('rel'), self.position.x, self.position.y);
                 self.hide();
+            });
+
+            self.menu.find('.family').each(function() {
+                var family = $(this);
+                $(this).find('.familyName').hover(function() {
+                    self.menu.find('.childs').hide();
+                    family.find('.childs').show();
+                });
+            });
+
+            $(this).find('.types > .type').hover(function() {
+                self.menu.find('.childs').hide();
             });
         }
         

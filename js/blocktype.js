@@ -18,5 +18,12 @@ BlockType = function(type)
             this[key] = [];
         }
     }
+
+    // Checking the family
+    if (type.family == undefined) {
+        this.family = ''; // Root family
+    } else {
+        this.family = type.family;
+    }
 }
 
