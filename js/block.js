@@ -159,7 +159,12 @@ Block = function(blocks, blockType, id)
 
         // Rendering parameters
         this.parametersManager.div = this.div.find('.parameters');
-        self.div.find('.parametersRender').html(self.parametersManager.getHtml());
+        if (blocks.compactMode) {
+            self.div.find('.parametersRender').hide();
+        } else {
+            self.div.find('.parametersRender').show();
+            self.div.find('.parametersRender').html(self.parametersManager.getHtml());
+        }
 
         // Is selected ?
         self.div.removeClass('block_selected');

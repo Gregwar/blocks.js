@@ -56,6 +56,9 @@ function BlocksMenu(blocks)
             }
 
             html = '';
+
+            html += '<div class="menuentry compactmode">Compact</div>';
+
             for (family in families) {
                 if (family) {
                     html += '<div class="family">';
@@ -86,6 +89,11 @@ function BlocksMenu(blocks)
                     self.menu.find('.childs').hide();
                     family.find('.childs').show();
                 });
+            });
+
+            self.menu.find('.compactmode').click(function() {
+                blocks.toggleCompact();
+                self.hide();
             });
 
             $(this).find('.types > .type').hover(function() {

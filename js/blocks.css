@@ -59,6 +59,7 @@
 }
 
 .blocks_js_editor .contextmenu .type,
+.blocks_js_editor .contextmenu .menuentry,
 .blocks_js_editor .contextmenu .family {
     padding:3px;
     border:1px solid #aaa;

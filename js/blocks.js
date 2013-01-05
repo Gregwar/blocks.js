@@ -13,6 +13,9 @@ Blocks = function()
     // Is the user dragging the view ?
     this.moving = null;
 
+    // Compact mode
+    this.compactMode = false;
+
     // Context menu
     this.menu;
 
@@ -422,6 +425,15 @@ Blocks = function()
         }
         this.linking = null;
         this.selectedBlock = null;
+        this.redraw();
+    };
+
+    /**
+     * Changing the compact mode
+     */
+    this.toggleCompact = function()
+    {
+        this.compactMode = !this.compactMode;
         this.redraw();
     };
 };
