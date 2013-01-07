@@ -280,6 +280,20 @@ Blocks = function()
         this.edges[edge].erase();
         arrayRemove(this.edges, edge);
     };
+
+    /**
+     * Returns an edge id
+     */
+    this.getEdgeId = function(edge)
+    {
+	for (k in this.edges) {
+	    if (edge == this.edges[k]) {
+		return k;
+	    }
+	}
+
+	return false;
+    };
         
     /**
      * Remove a block

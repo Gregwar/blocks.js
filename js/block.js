@@ -53,6 +53,7 @@ Block = function(blocks, blockType, id)
         html += '<div class="blockicon gear"></div></div>';
         html += '<div class="parametersRender"></div>';
 
+	self.ios = {};
         // Handling inputs & outputs
         handle = function(key) {
             html += '<div class="' + key + 's">';
@@ -69,7 +70,7 @@ Block = function(blocks, blockType, id)
                 }
 
                 for (x=0; x<size; x++) {
-                    var ion = key + '_' + (k+x);
+                    var ion = key + '_' + (parseInt(k)+x);
                     var label = io.name.replace('#', x+1);
 
                     // Generating HTML
@@ -93,6 +94,7 @@ Block = function(blocks, blockType, id)
 
         handle('input');
         handle('output');
+	this.checkEdges();
 
         return html;
     };
@@ -283,6 +285,33 @@ Block = function(blocks, blockType, id)
 
         tab.push(edge);
         this.edges[ion] = tab;
+    };
+
+    /**
+     * Check that all edges reference a valid I/O
+     */
+    this.checkEdges = function()
+    {
+	var toDelete = [];
+	for (ion in this.edges) {
+	    var edges = this.edges[ion];
+
+	    if (!(ion in this.ios)) {
+		for (k in edges) {
+		    toDelete.push(edges[k]);
+		}
+
+		delete this.edges[ion];
+	    }
+	}
+
+	for (k in toDelete) {
+	    blocks.removeEdge(blocks.getEdgeId(toDelete[k]));
+	}
+
+	if (toDelete.length) {
+	    blocks.redraw();
+	}
     };
 
     /**
