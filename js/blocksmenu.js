@@ -21,6 +21,39 @@ function BlocksMenu(blocks)
 	    action: function(blocks) {
 		blocks.toggleCompact();
 	    }
+	},
+	{
+	    label: 'Scale',
+	    action: function(blocks) {
+		var xMin = null, xMax = null;
+		var yMin = null, yMax = null;
+
+		for (k in blocks.blocks) {
+		    var block = blocks.blocks[k];
+		    if (xMin == null) {
+			xMin = xMax = block.x;
+			yMin = yMax = block.y;
+		    } else {
+			xMin = Math.min(xMin, block.x);
+			xMax = Math.max(xMax, block.x);
+			yMin = Math.min(yMin, block.y);
+			yMax = Math.max(yMax, block.y);
+		    }
+		}
+		xMin -= 15;
+		yMin -= 15;
+		xMax += 200;
+		yMax += 150;
+		var scaleA = blocks.div.width()/(xMax-xMin);
+		var scaleB = blocks.div.height()/(yMax-yMin);
+		var scale = Math.min(scaleA, scaleB);
+
+		blocks.scale = scale;
+		blocks.center.x = blocks.div.width()/2 - scale*(xMin+xMax)/2.0;
+		blocks.center.y = blocks.div.height()/2 - scale*(yMin+yMax)/2.0;
+
+		blocks.redraw();
+	    }
 	}
     ];
 
