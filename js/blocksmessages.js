@@ -23,8 +23,8 @@ function BlocksMessages(messages, width)
 
 	var classes = 'message';
 
-	if (options.class != undefined) {
-	    classes += ' '+options.class;
+	if (options['class'] != undefined) {
+	    classes += ' '+options['class'];
 	}
 
 	html = '<div class="'+classes+'">'+text+'</div>';

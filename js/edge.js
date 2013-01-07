@@ -111,7 +111,7 @@ function Edge(block1, io1, block2, io2, blocks)
     /**
      * Exports the edge to JSON
      */
-    this.export = function()
+    this.exportData = function()
     {
 	return {
 	    block1: block1.id,

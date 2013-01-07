@@ -480,7 +480,7 @@ Blocks = function()
             edge.create();
             this.edges.push(edge);
         } catch (error) {
-            this.messages.show('Unable to create this edge :' + "\n" + error, {class: 'error'});
+            this.messages.show('Unable to create this edge :' + "\n" + error, {'class': 'error'});
         }
         this.linking = null;
         this.selectedBlock = null;
@@ -499,17 +499,17 @@ Blocks = function()
     /**
      * Export the scene
      */
-    this.export = function()
+    this.exportData = function()
     {
 	var blocks = [];
 	var edges = [];
 
 	for (k in this.blocks) {
-	    blocks.push(this.blocks[k].export());
+	    blocks.push(this.blocks[k].exportData());
 	}
 
 	for (k in this.edges) {
-	    edges.push(this.edges[k].export());
+	    edges.push(this.edges[k].exportData());
 	}
 
 	return {
@@ -557,7 +557,7 @@ Blocks = function()
 			text += '<li>' + errors[k] + '</li>';
 		    }
 		    text += '</ul>';
-		    self.messages.show(text, {class: 'error'});
+		    self.messages.show(text, {'class': 'error'});
 		}
 
 		self.redraw();

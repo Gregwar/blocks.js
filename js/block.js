@@ -114,7 +114,7 @@ Block = function(blocks, blockType, id)
      */
     this.create = function(div)
     {
-        html = '<div id="block' + this.id + '" class="block ' + blockType.class + '"></div>'
+        html = '<div id="block' + this.id + '" class="block ' + blockType['class'] + '"></div>'
 
         div.append(html);
         this.div = div.find('#block' + this.id);
@@ -342,14 +342,14 @@ Block = function(blocks, blockType, id)
     /**
      * Exports the block to JSON
      */
-    this.export = function()
+    this.exportData = function()
     {
 	return {
 	    id: this.id,
 	    x: this.x,
 	    y: this.y,
 	    type: blockType.name,
-	    parameters: this.parametersManager.export(this.parameters)
+	    parameters: this.parametersManager.exportData(this.parameters)
 	};
     };
 };

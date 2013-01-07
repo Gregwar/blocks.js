@@ -17,7 +17,7 @@
 
     blocks.ready(function() {
 	blocks.menu.addAction('Export', function(blocks) {
-	    alert($.toJSON(blocks.export()));
+	    alert($.toJSON(blocks.exportData()));
 	});
     });
 })();

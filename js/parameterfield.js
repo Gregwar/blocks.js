@@ -59,8 +59,8 @@ function ParameterField(parameter)
      */
     this.appendDefault = function(object)
     {
-        if (parameter.default != undefined) {
-            object[this.name] = parameter.default;
+        if (parameter['default'] != undefined) {
+            object[this.name] = parameter['default'];
         }
 
         if (parameter.type instanceof Array) {

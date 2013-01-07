@@ -118,7 +118,7 @@ function ParametersManager(blockType, block)
     /**
      *  Format parameters for export
      */
-    this.export = function(parameters)
+    this.exportData = function(parameters)
     {
 	var exportData = {};
 

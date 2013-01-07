@@ -27,10 +27,10 @@ BlockType = function(type)
     }
 
     // Style
-    if (type.class != undefined) {
-        this.class = type.class;
+    if (type['class'] != undefined) {
+        this['class'] = type['class'];
     } else {
-        this.class = '';
+        this['class'] = '';
     }
 
     // Description
