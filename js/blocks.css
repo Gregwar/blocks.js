@@ -68,6 +68,7 @@
 }
 
 .blocks_js_editor .contextmenu .family:hover,
+.blocks_js_editor .contextmenu .menuentry:hover,
 .blocks_js_editor .contextmenu .type:hover {
     background-color:#eee;
 }

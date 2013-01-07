@@ -14,4 +14,10 @@
 
     blocks.run('#blocks');
     blocks.load(scene);
+
+    blocks.ready(function() {
+	blocks.menu.addAction('Export', function(blocks) {
+	    alert($.toJSON(blocks.export()));
+	});
+    });
 })();

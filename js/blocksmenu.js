@@ -14,6 +14,24 @@ function BlocksMenu(blocks)
     // Menu div
     this.menu = blocks.div.find('.contextmenu');
 
+    // Menu items
+    this.actions = [
+	{
+	    label: 'Compact',
+	    action: function(blocks) {
+		blocks.toggleCompact();
+	    }
+	}
+    ];
+
+    /**
+     * Adds an action
+     */
+    this.addAction = function(name, action)
+    {
+	this.actions.push({label: name, action: action});
+    };
+
     /**
      * Hide the menu
      */
@@ -57,8 +75,9 @@ function BlocksMenu(blocks)
 
             html = '';
 
-            html += '<div class="menuentry export">Export</div>';
-            html += '<div class="menuentry compactmode">Compact</div>';
+	    for (action in self.actions) {
+		html += '<div rel="'+action+'" class="menuentry menu_action_'+action+'">'+self.actions[action].label+'</div>';
+	    }
 
             for (family in families) {
                 if (family) {
@@ -92,15 +111,13 @@ function BlocksMenu(blocks)
                 });
             });
 
-            self.menu.find('.compactmode').click(function() {
-                blocks.toggleCompact();
-                self.hide();
-            });
-
-	    self.menu.find('.export').click(function() {
-		alert($.toJSON(blocks.export()));
-		self.hide();
-	    });
+	    for (k in self.actions) {
+		self.menu.find('.menu_action_'+k).click(function() {
+		    var action = self.actions[$(this).attr('rel')];
+		    action.action(blocks);
+		    self.hide();
+		});
+	    }
 
             $(this).find('.types > .type').hover(function() {
                 self.menu.find('.childs').hide();
