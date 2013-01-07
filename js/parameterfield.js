@@ -83,7 +83,7 @@ function ParameterField(parameter)
                 self.rows.append(self.row);
             });
             div.find('.' + this.name + '_remove').click(function() {
-                self.rows.find('td').last().remove();
+                self.rows.find('tr').last().remove();
             });
         }
     };

@@ -228,9 +228,10 @@
 
 .blocks_js_editor .block .parameters input,
 .blocks_js_editor .block .parameters textarea {
-    width:220px;
+    width:50px;
 }
 
 .blocks_js_editor .block .parameters textarea {
+    width:150px;
     height:50px;
 }
