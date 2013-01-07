@@ -57,6 +57,7 @@ function BlocksMenu(blocks)
 
             html = '';
 
+            html += '<div class="menuentry export">Export</div>';
             html += '<div class="menuentry compactmode">Compact</div>';
 
             for (family in families) {
@@ -95,6 +96,11 @@ function BlocksMenu(blocks)
                 blocks.toggleCompact();
                 self.hide();
             });
+
+	    self.menu.find('.export').click(function() {
+		alert($.toJSON(blocks.export()));
+		self.hide();
+	    });
 
             $(this).find('.types > .type').hover(function() {
                 self.menu.find('.childs').hide();

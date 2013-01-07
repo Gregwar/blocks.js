@@ -114,4 +114,43 @@ function ParametersManager(blockType, block)
             this.show();
         }
     };
+
+    /**
+     *  Format parameters for export
+     */
+    this.export = function(parameters)
+    {
+	var exportData = {};
+
+	for (key in parameters) {
+	    var eKey = key;
+	    if (key.substr(-2) == '[]') {
+		eKey = key.substr(0, key.length-3);
+		eKey = eKey.replace('[', '.');
+	    }
+
+	    exportData[eKey] = parameters[key];
+	}
+
+	return exportData;
+    };
+};
+
+/**
+ * Import some parameters
+ */
+function ParametersImport(data)
+{
+    var parameters = {};
+
+    for (key in data) {
+	var entry = data[key];
+	if (key.indexOf('.') > 0) {
+	    key = key.replace('.', '[');
+	    key += '][]';
+	}
+	parameters[key] = entry;
+    }
+
+    return parameters;
 };

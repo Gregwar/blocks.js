@@ -10,5 +10,8 @@
     include('motor.js');
     include('time.js');
     include('comment.js');
+    include('scene.js');
+
     blocks.run('#blocks');
+    blocks.load(scene);
 })();

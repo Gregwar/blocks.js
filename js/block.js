@@ -156,7 +156,9 @@ Block = function(blocks, blockType, id)
 
         if (this.parametersManager == undefined) {
             this.parametersManager = new ParametersManager(blockType, this);
-            this.parameters = this.parametersManager.getDefaults();
+	    if (this.parameters == null) {
+                this.parameters = this.parametersManager.getDefaults();
+	    }
         }
 
         // Rendering parameters
@@ -246,7 +248,7 @@ Block = function(blocks, blockType, id)
      */
     this.linkPositionFor = function(io)
     {
-        div = self.div.find('.' + io + ' .circle');
+        div = self.div.find('.' + io + ' .circle')
 
         var x = (div.offset().left-blocks.div.offset().left)+div.width()/2;
         var y = (div.offset().top-blocks.div.offset().top)+div.height()/2;
@@ -336,4 +338,37 @@ Block = function(blocks, blockType, id)
     {
         self.div.remove();
     };
+    
+    /**
+     * Exports the block to JSON
+     */
+    this.export = function()
+    {
+	return {
+	    id: this.id,
+	    x: this.x,
+	    y: this.y,
+	    type: blockType.name,
+	    parameters: this.parametersManager.export(this.parameters)
+	};
+    };
+};
+
+/**
+ * Imports a block from its data
+ */
+function BlockImport(blocks, data)
+{
+    for (t in blocks.blockTypes) {
+	var blockType = blocks.blockTypes[t];
+	if (blockType.name == data.type) {
+	    var block = new Block(blocks, blockType, data.id);
+	    block.x = data.x;
+	    block.y = data.y;
+	    block.parameters = ParametersImport(data.parameters);
+	    return block;
+	}
+    }
+
+    throw 'Unable to create a block of type ' + data.type;
 };

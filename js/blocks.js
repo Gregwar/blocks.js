@@ -13,6 +13,9 @@ Blocks = function()
     // Is the user dragging the view ?
     this.moving = null;
 
+    // Is the system ready ?
+    this.isReady = false;
+
     // Compact mode
     this.compactMode = false;
 
@@ -151,7 +154,39 @@ Blocks = function()
                 self.scale *= deltaScale;
                 self.redraw();
             });
+
+	    self.postReady();
         });
+    };
+
+    /**
+     * Tell the system is ready
+     */
+    this.postReady = function()
+    {
+	this.isReady = true;
+	if (this.readyQueue != undefined) {
+	    for (k in this.readyQueue) {
+		this.readyQueue[k]();
+	    }
+	}
+    };
+
+    /**
+     * Callback when ready
+     */
+    this.ready = function(callback) 
+    {
+	if (this.isReady) {
+	    callback();
+	} else {
+	    var queue = [];
+	    if (this.readyQueue != undefined) {
+		queue = this.readyQueue;
+	    }
+	    queue.push(callback);
+	    this.readyQueue = queue;
+	}
     };
 
     /**
@@ -334,6 +369,20 @@ Blocks = function()
     };
 
     /**
+     * Retreive a block by ID
+     */
+    this.getBlockById = function (blockId)
+    {
+	for (k in self.blocks) {
+	    if (self.blocks[k].id == blockId) {
+		return self.blocks[k];
+	    }
+	}
+
+	return null;
+    };
+
+    /**
      * Delete the current link
      */
     this.deleteEvent = function()
@@ -449,6 +498,55 @@ Blocks = function()
     {
         this.compactMode = !this.compactMode;
         this.redraw();
+    };
+
+    /**
+     * Export the scene
+     */
+    this.export = function()
+    {
+	var blocks = [];
+	var edges = [];
+
+	for (k in this.blocks) {
+	    blocks.push(this.blocks[k].export());
+	}
+
+	for (k in this.edges) {
+	    edges.push(this.edges[k].export());
+	}
+
+	return {
+	    edges: edges,
+	    blocks: blocks
+	};
+    };
+
+    /**
+     * Loads the scene
+     */
+    this.load = function(scene)
+    {
+	self.ready(function() {
+	    self.id = 1;
+
+	    for (k in scene.blocks) {
+		var data = scene.blocks[k];
+		var block = BlockImport(self, data);
+		self.id = Math.max(self.id, block.id+1);
+		block.create(self.div.find('.blocks'));
+		self.blocks.push(block);
+	    }
+
+	    for (k in scene.edges) {
+		var data = scene.edges[k];
+		var edge = EdgeImport(self, data);
+		edge.create();
+		self.edges.push(edge);
+	    }
+	    
+	    self.redraw();
+	});
     };
 };
 

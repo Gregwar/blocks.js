@@ -107,4 +107,28 @@ function Edge(block1, io1, block2, io2, blocks)
 
         return false;
     };
+
+    /**
+     * Exports the edge to JSON
+     */
+    this.export = function()
+    {
+	return {
+	    block1: block1.id,
+	    io1: io1,
+	    block2: block2.id,
+	    io2: io2
+	};
+    };
+};
+
+/**
+ * Imports JSON data into an edge
+ */
+function EdgeImport(blocks, data)
+{
+    var block1 = blocks.getBlockById(data.block1);
+    var block2 = blocks.getBlockById(data.block2);
+
+    return new Edge(block1, data.io1, block2, data.io2, blocks);
 };
