@@ -235,3 +235,32 @@
     width:150px;
     height:50px;
 }
+
+/**
+ * Messages
+ */
+.blocks_js_editor .messages {
+    display:none;
+    width:350px;
+    position:absolute;
+    z-index:100;
+}
+
+.blocks_js_editor .message {
+    padding:5px;
+    font-size:14px;
+    cursor:pointer;
+    border:3px solid;
+    border-radius:5px;
+}
+
+.blocks_js_editor .messages ul {
+    list-style:circle;
+    margin-left:20px;
+}
+
+.blocks_js_editor .message.error {
+    color:red;
+    border-color:red;
+    background-color:#ffe3e3;
+}

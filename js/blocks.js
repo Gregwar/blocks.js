@@ -55,14 +55,6 @@ Blocks = function()
     this.id = 1;
     
     /**
-     * Errors
-     */
-    this.error = function(message)
-    {
-        throw 'Blocks: ' + message;
-    };
-
-    /**
      * Runs the blocks editor
      */
     this.run = function(selector)
@@ -71,12 +63,13 @@ Blocks = function()
             self.div = $(selector);
 
             if (!self.div.size()) {
-                this.error('Unable to find ' + selector);
+                alert('blocks.js: Unable to find ' + selector);
             }
 
             // Inject the initial editor
             self.div.html(
                   '<div class="blocks_js_editor">'
+		+ '<div class="messages"></div>'
                 + '<div class="contextmenu"><div class="types"></div></div>'
                 + '<canvas></canvas>'
                 + '<div class="blocks"></div>'
@@ -93,6 +86,9 @@ Blocks = function()
 
             // Run the menu
             self.menu = new BlocksMenu(self);
+
+	    // Create the message handler
+	    self.messages = new BlocksMessages(self.div.find('.messages'), self.div.width());
 
             // Listen for mouse position
             self.div[0].addEventListener('mousemove', function(evt) {
@@ -484,7 +480,7 @@ Blocks = function()
             edge.create();
             this.edges.push(edge);
         } catch (error) {
-            alert('Unable to create this edge :' + "\n" + error);
+            this.messages.show('Unable to create this edge :' + "\n" + error, {class: 'error'});
         }
         this.linking = null;
         this.selectedBlock = null;
@@ -528,25 +524,44 @@ Blocks = function()
     this.load = function(scene)
     {
 	self.ready(function() {
-	    self.id = 1;
+		var errors = [];
+		self.id = 1;
 
-	    for (k in scene.blocks) {
-		var data = scene.blocks[k];
-		var block = BlockImport(self, data);
-		self.id = Math.max(self.id, block.id+1);
-		block.create(self.div.find('.blocks'));
-		self.blocks.push(block);
-	    }
+		for (k in scene.blocks) {
+		    try {
+			var data = scene.blocks[k];
+			var block = BlockImport(self, data);
+			self.id = Math.max(self.id, block.id+1);
+			block.create(self.div.find('.blocks'));
+			self.blocks.push(block);
+		    } catch (error) {
+			errors.push(error);
+		    }
+		}
 
-	    for (k in scene.edges) {
-		var data = scene.edges[k];
-		var edge = EdgeImport(self, data);
-		edge.create();
-		self.edges.push(edge);
-	    }
+		for (k in scene.edges) {
+		    try {
+			var data = scene.edges[k];
+			var edge = EdgeImport(self, data);
+			edge.create();
+			self.edges.push(edge);
+		    } catch (error) {
+			errors.push(error);
+		    }
+		}
 
-	    self.redraw();
-	    self.perfectScale();	    
+		if (errors.length) {
+		    var text = errors.length + " loading errors :<br/>";
+		    text += '<ul>';
+		    for (k in errors) {
+			text += '<li>' + errors[k] + '</li>';
+		    }
+		    text += '</ul>';
+		    self.messages.show(text, {class: 'error'});
+		}
+
+		self.redraw();
+		self.perfectScale();	    
 	});
     };
 

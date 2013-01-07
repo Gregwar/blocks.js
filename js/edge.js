@@ -130,5 +130,9 @@ function EdgeImport(blocks, data)
     var block1 = blocks.getBlockById(data.block1);
     var block2 = blocks.getBlockById(data.block2);
 
+    if (!block1 || !block2) {
+	throw "Error while importing an edge, a block did not exists";
+    }
+
     return new Edge(block1, data.io1, block2, data.io2, blocks);
 };
