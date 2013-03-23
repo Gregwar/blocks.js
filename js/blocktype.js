@@ -8,7 +8,7 @@ BlockType = function(type)
     this.name = type.name;
 
     // Checking for parameters, inputs and outputs
-    var keys = ['parameters', 'inputs', 'outputs'];
+    var keys = ['parametersEditor', 'parameters', 'inputs', 'outputs'];
 
     for (k in keys) {
         var key = keys[k];

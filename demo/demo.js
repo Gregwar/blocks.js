@@ -11,6 +11,9 @@
     include('time.js');
     include('comment.js');
     include('scene.js');
+    include('add.js');
+    include('io.js');
+    include('spline.js');
 
     blocks.run('#blocks');
     blocks.load(scene);

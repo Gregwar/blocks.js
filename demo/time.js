@@ -3,9 +3,9 @@ blocks.register({
     family: "Time",
     parameters: [
         {
-            name: "Factor",
+            name: "DeltaT",
             type: "number",
-            default: 1
+            default: 0.02
         }
     ],
     outputs: [

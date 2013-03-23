@@ -108,10 +108,16 @@ function ParametersManager(blockType, block)
      */
     this.toggle = function()
     {
-        if (this.display) {
-            this.hide();
+        if (blockType.parametersEditor != undefined) {
+            blockType.parametersEditor(block.parameters, function(parameters) {
+                block.parameters = parameters;
+            });
         } else {
-            this.show();
+            if (this.display) {
+                this.hide();
+            } else {
+                this.show();
+            }
         }
     };
 
