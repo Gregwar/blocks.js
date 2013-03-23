@@ -3,7 +3,7 @@ DIRECTORY := ../lib/
 TARGET := blocks.js
 TEMP := blocks.all.js
 
-SOURCES := jquery.json.js jquery.mousewheel.js jquery.formserialize.js \
+SOURCES := jquery.json.js jquery.mousewheel.js jquery.formserialize.js jquery.svg.min.js \
     utils.js parameterfield.js parametersmanager.js segment.js \
     edge.js blocksmessages.js blocksmenu.js blocktype.js \
     block.js blocks.js

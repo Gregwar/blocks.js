@@ -71,14 +71,16 @@ Blocks = function()
                   '<div class="blocks_js_editor">'
 		+ '<div class="messages"></div>'
                 + '<div class="contextmenu"><div class="types"></div></div>'
-                + '<canvas></canvas>'
+                + '<svg xmlns="http://www.w3.org/2000/svg" version="1.1"></svg>'
                 + '<div class="blocks"></div>'
                 + '</div>'
             );
 
-            self.div.find('canvas').attr('width',(self.div.width()));
-            self.div.find('canvas').attr('height',(self.div.height()));
-            self.context = self.div.find('canvas')[0].getContext('2d');
+            self.div.find('svg').attr('width',(self.div.width()));
+            self.div.find('svg').attr('height',(self.div.height()));
+            self.div.find('svg').width(self.div.width());
+            self.div.find('svg').height(self.div.height());
+            self.context = self.div.find('svg');
 
             // Setting up default viewer center
             self.center.x = self.div.width()/2;
@@ -123,10 +125,7 @@ Blocks = function()
             });
             
             // Initializing canvas
-            self.context.clearRect(0, 0, self.div.width(), self.div.height());
-            self.context.strokeStyle = 'rgb(0, 0, 0)';
-            self.context.beginPath();
-            self.context.stroke();
+            self.context.svg();
 
             // Detecting key press
             $(document).keydown(function(e){
@@ -408,20 +407,20 @@ Blocks = function()
         }
 
         // Redraw edges
-        self.context.clearRect(0, 0, self.div.width(), self.div.height());
+        var svg = self.context.svg('get');
+        svg.clear();
 
         for (k in self.edges) {
-            self.edges[k].draw(self.context, self.selectedLink == k);
+            self.edges[k].draw(svg, self.selectedLink == k);
         }
 
         if (self.linking) {
             var position = this.linking[0].linkPositionFor(this.linking[1]);
-            self.context.lineWidth = 3 * self.scale;
-            self.context.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-            self.context.beginPath();
-            self.context.moveTo(position.x, position.y);
-            self.context.lineTo(self.mouseX, self.mouseY);
-            self.context.stroke();
+
+            svg.line(position.x, position.y, self.mouseX, self.mouseY, {
+                stroke: 'rgba(0,0,0,0.4)',
+                strokeWidth: 3*self.scale
+            });
         }
         
         self.redrawTimeout = null;

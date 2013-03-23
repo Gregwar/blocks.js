@@ -18,7 +18,7 @@ function Edge(block1, io1, block2, io2, blocks)
     /**
      * Draws the edge
      */
-    this.draw = function(context, selected)
+    this.draw = function(svg, selected)
     {
         position1 = block1.linkPositionFor(io1);
         position2 = block2.linkPositionFor(io2);
@@ -28,17 +28,16 @@ function Edge(block1, io1, block2, io2, blocks)
                 position2.x-position1.x, position2.y-position1.y
                 );
 
-        context.lineWidth = defaultSize*blocks.scale;
+        var lineWidth = defaultSize*blocks.scale;
 
         if (selected) {
-            context.strokeStyle = 'rgba(0, 200, 0, 1)';
+            var strokeStyle = 'rgba(0, 200, 0, 1)';
         } else {
-            context.strokeStyle = 'rgba(200, 200, 0, 1)';
+            var strokeStyle = 'rgba(200, 200, 0, 1)';
         }
-        context.beginPath();
-        context.moveTo(position1.x, position1.y);
-        context.lineTo(position2.x, position2.y);
-        context.stroke();
+        svg.line(position1.x, position1.y, position2.x, position2.y, {
+            stroke: strokeStyle, strokeWidth: lineWidth
+        });
     };
 
     /**

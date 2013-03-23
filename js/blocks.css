@@ -10,7 +10,7 @@
     position:relative;
 }
 
-.blocks_js_editor canvas {
+.blocks_js_editor svg {
     position:absolute;
     z-index:-1;
     background-color:white;
