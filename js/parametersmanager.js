@@ -108,7 +108,7 @@ function ParametersManager(blockType, block)
      */
     this.toggle = function()
     {
-        if (blockType.parametersEditor != undefined) {
+        if (blockType.parametersEditor != undefined && typeof(blockType.parametersEditor) == 'function') {
             blockType.parametersEditor(block.parameters, function(parameters) {
                 block.parameters = parameters;
             });
