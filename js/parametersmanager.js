@@ -98,7 +98,17 @@ function ParametersManager(blockType, block)
      */
     this.save = function()
     {
-        block.parameters = this.div.find('form').serializeForm();
+        var serialize = this.div.find('form').serializeForm();
+        var parameters = {};
+        for (key in serialize) {
+            var newKey = key;
+            if (newKey.substr(newKey.length-2, 2) == '[]') {
+                newKey = newKey.substr(0, newKey.length-2);
+            }
+            parameters[newKey] = serialize[key];
+        }
+
+        block.parameters = parameters;
         block.render();
         block.redraw();
     };
@@ -111,6 +121,8 @@ function ParametersManager(blockType, block)
         if (blockType.parametersEditor != undefined && typeof(blockType.parametersEditor) == 'function') {
             blockType.parametersEditor(block.parameters, function(parameters) {
                 block.parameters = parameters;
+                block.render();
+                block.redraw();
             });
         } else {
             if (this.display) {
@@ -126,19 +138,7 @@ function ParametersManager(blockType, block)
      */
     this.exportData = function(parameters)
     {
-	var exportData = {};
-
-	for (key in parameters) {
-	    var eKey = key;
-	    if (key.substr(-2) == '[]') {
-		eKey = key.substr(0, key.length-3);
-		eKey = eKey.replace('[', '.');
-	    }
-
-	    exportData[eKey] = parameters[key];
-	}
-
-	return exportData;
+        return parameters;
     };
 };
 
@@ -147,16 +147,5 @@ function ParametersManager(blockType, block)
  */
 function ParametersImport(data)
 {
-    var parameters = {};
-
-    for (key in data) {
-	var entry = data[key];
-	if (key.indexOf('.') > 0) {
-	    key = key.replace('.', '[');
-	    key += '][]';
-	}
-	parameters[key] = entry;
-    }
-
-    return parameters;
+    return data;
 };

@@ -66,7 +66,7 @@ function ParameterField(parameter)
         if (parameter.type instanceof Array) {
             for (k in parameter.type) {
                 var param = new ParameterField(parameter.type[k]);
-                param.name = this.name + '[' +param.name + '][]';
+                param.name = this.name + '.' +param.name;
                 param.appendDefault(object);
             }
         }
@@ -105,7 +105,7 @@ function ParameterField(parameter)
             for (k in parameter.type) {
                 var type = parameter.type[k];
                 var param = new ParameterField(type);
-                param.name = this.name + '[' +param.name + '][]';
+                param.name = this.name + '.' +param.name;
 
                 if (parameters[param.name] != undefined) {
                     nb = Math.max(nb, parameters[param.name].length);
@@ -159,7 +159,7 @@ function ParameterField(parameter)
                 var rowsHtml = '';
                 var type = parameter.type[k];
                 var param = new ParameterField(type);
-                param.name = this.name + '[' +param.name + '][]';
+                param.name = this.name + '.' +param.name;
 
                 if (param.hide) {
                     continue;

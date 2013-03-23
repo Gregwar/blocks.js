@@ -63,7 +63,7 @@ Block = function(blocks, blockType, id)
 
                 var size = 1;
                 if (io.length != undefined) {
-                    var pkey = io.length + '[]';
+                    var pkey = io.length;
                     if (self.parameters != undefined && self.parameters[pkey] != undefined) {
                         size = self.parameters[pkey].length;
                     }
@@ -118,6 +118,14 @@ Block = function(blocks, blockType, id)
 
         div.append(html);
         this.div = div.find('#block' + this.id);
+        
+        if (this.parametersManager == undefined) {
+            this.parametersManager = new ParametersManager(blockType, this);
+	    if (this.parameters == null) {
+                this.parameters = this.parametersManager.getDefaults();
+	    }
+        }
+
         this.render();
     };
 
@@ -152,13 +160,6 @@ Block = function(blocks, blockType, id)
             if (self.edges[k] != undefined && self.edges[k].length) {
                 circle.addClass('io_active');
             }
-        }
-
-        if (this.parametersManager == undefined) {
-            this.parametersManager = new ParametersManager(blockType, this);
-	    if (this.parameters == null) {
-                this.parameters = this.parametersManager.getDefaults();
-	    }
         }
 
         // Rendering parameters
