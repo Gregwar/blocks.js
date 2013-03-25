@@ -100,6 +100,9 @@
     margin-left:0px;
     margin-top:0px;
     background-color:#fafafa;
+    opacity:0.8;
+    box-shadow:5px 5px 5px #ddd;
+    border-radius:5px;
     font-size:14px;
     -moz-user-select:none;
     -khtml-user-select:none;
@@ -155,6 +158,10 @@
 
 .blocks_js_editor .block_selected {
     border:2px solid #0a0;
+}
+
+.blocks_js_editor .block_selected .blockTitle {
+    background-color:#0c0;
 }
 
 .blocks_js_editor .inputs,
