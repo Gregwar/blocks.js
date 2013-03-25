@@ -59,7 +59,9 @@ Block = function(blocks, blockType, id)
             var key = 'param_'+k;
             if (!blocks.compactMode || (self.edges[key]!=undefined && self.edges[key].length>0)) {
                 self.ios[key] = [0,1];
-                html += '<div class="parameter '+key+'" rel="'+key+'"><div class="circle"></div> '+chunks[k]+'</div>';
+                if (chunks[k]) {
+                    html += '<div class="parameter '+key+'" rel="'+key+'"><div class="circle"></div> '+chunks[k]+'</div>';
+                }
             }
         }
 
