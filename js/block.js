@@ -134,6 +134,8 @@ Block = function(blocks, blockType, id)
      */
     this.redraw = function(selected)
     {
+        self.hasFocus = false;
+
         // Setting the position
         self.div.css('margin-left', blocks.center.x+self.x*blocks.scale+'px');
         self.div.css('margin-top', blocks.center.y+self.y*blocks.scale+'px');
