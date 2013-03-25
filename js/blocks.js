@@ -492,6 +492,9 @@ Blocks = function()
     this.toggleCompact = function()
     {
         this.compactMode = !this.compactMode;
+        for (k in this.blocks) {
+            this.blocks[k].render();
+        }
         this.redraw();
     };
 

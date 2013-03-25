@@ -195,7 +195,8 @@
     float:left;
 }
 
-.blocks_js_editor .input .circle {
+.blocks_js_editor .input .circle,
+.blocks_js_editor .parameter .circle {
     float:left;
     margin:1px;
 }

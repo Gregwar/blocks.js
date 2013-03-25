@@ -85,6 +85,20 @@ function ParametersManager(blockType, block)
     };
 
     /**
+     * Return the HTML render of each params
+     */
+    this.getHtmlChunks = function()
+    {
+        var chunks = [];
+
+        for (k in this.fields) {
+            chunks.push(this.fields[k].getHtml(block.parameters));
+        }
+
+        return chunks;
+    };
+
+    /**
      * Hide the form
      */
     this.hide = function()

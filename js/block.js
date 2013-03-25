@@ -44,6 +44,8 @@ Block = function(blocks, blockType, id)
      */
     this.getHtml = function()
     {
+	self.ios = {};
+
         html = '<div class="parameters"></div>';
         html += '<div class="blockTitle">' + blockType.name + ' <div class="blockicon delete"></div>';
         if (blockType.description) {
@@ -51,9 +53,16 @@ Block = function(blocks, blockType, id)
             html += '<div class="description">' + blockType.description + '</div>';
         }
         html += '<div class="blockicon gear"></div></div>';
-        html += '<div class="parametersRender"></div>';
+        
+        chunks = self.parametersManager.getHtmlChunks();
+        for (k in chunks) {
+            var key = 'param_'+k;
+            if (!blocks.compactMode || (self.edges[key]!=undefined && self.edges[key].length>0)) {
+                self.ios[key] = [0,1];
+                html += '<div class="parameter '+key+'" rel="'+key+'"><div class="circle"></div> '+chunks[k]+'</div>';
+            }
+        }
 
-	self.ios = {};
         // Handling inputs & outputs
         handle = function(key) {
             html += '<div class="' + key + 's">';
@@ -104,6 +113,7 @@ Block = function(blocks, blockType, id)
      */
     this.render = function()
     {
+        this.hasFocus = false;
         this.div.html(this.getHtml());
         this.initListeners();
         this.redraw();
@@ -134,8 +144,6 @@ Block = function(blocks, blockType, id)
      */
     this.redraw = function(selected)
     {
-        self.hasFocus = false;
-
         // Setting the position
         self.div.css('margin-left', blocks.center.x+self.x*blocks.scale+'px');
         self.div.css('margin-top', blocks.center.y+self.y*blocks.scale+'px');
@@ -164,14 +172,8 @@ Block = function(blocks, blockType, id)
             }
         }
 
-        // Rendering parameters
+        // Updating the parameters manager div
         this.parametersManager.div = this.div.find('.parameters');
-        if (blocks.compactMode) {
-            self.div.find('.parametersRender').hide();
-        } else {
-            self.div.find('.parametersRender').show();
-            self.div.find('.parametersRender').html(self.parametersManager.getHtml());
-        }
 
         // Is selected ?
         self.div.removeClass('block_selected');
@@ -200,7 +202,7 @@ Block = function(blocks, blockType, id)
         });
 
         // Handle focus on the I/Os
-        self.div.find('.input, .output').hover(function() {
+        self.div.find('.input, .output, .parameter').hover(function() {
             self.focusedIo = $(this).attr('rel');
         }, function() {
             self.focusedIo = null;
