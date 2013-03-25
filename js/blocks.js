@@ -476,6 +476,12 @@ Blocks = function()
                     throw 'This edge already exists';
                 }
             }
+
+            var fromTo = edge.fromTo();
+            if (fromTo[1].allSuccessors().indexOf(fromTo[0].id) != -1) {
+                throw 'You can not create a loop';
+            }
+
             edge.create();
             this.edges.push(edge);
         } catch (error) {

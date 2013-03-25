@@ -343,6 +343,40 @@ Block = function(blocks, blockType, id)
     {
         self.div.remove();
     };
+
+    /**
+     * Find all successors of a block, and their successors
+     */
+    this.allSuccessors = function()
+    {
+        // Blocks already explored
+        var explored = {};
+        var exploreList = [this];
+        var ids = [this.id];
+        explored[this.id] = true;
+
+        while (exploreList.length > 0) {
+            var currentBlock = exploreList.pop();
+
+            for (key in currentBlock.edges) {
+                for (i in currentBlock.edges[key]) {
+                    fromTo = currentBlock.edges[key][i].fromTo();
+
+                    if (fromTo[0] == currentBlock) {
+                        target = fromTo[1];
+                        
+                        if (!(target.id in explored)) {
+                            explored[target.id] = true;
+                            exploreList.push(target);
+                            ids.push(target.id);
+                        }
+                    }
+                }
+            }
+        }
+
+        return ids;
+    };
     
     /**
      * Exports the block to JSON
