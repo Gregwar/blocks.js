@@ -22,10 +22,6 @@ function ParameterField(parameter)
             type = 'checkbox';
         }
 
-        if (type == 'number') {
-            type = 'text';
-        }
-
         this.type = type;
     }
 

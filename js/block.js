@@ -54,13 +54,19 @@ Block = function(blocks, blockType, id)
         }
         html += '<div class="blockicon gear"></div></div>';
         
-        chunks = self.parametersManager.getHtmlChunks();
-        for (k in chunks) {
+        var parameters = self.parametersManager.fields;
+        for (k in parameters) {
+            var parameter = parameters[k];
+            var parameterHtml = parameter.getHtml(self.parameters);
             var key = 'param_'+k;
             if (!blocks.compactMode || (self.edges[key]!=undefined && self.edges[key].length>0)) {
                 self.ios[key] = [0,1];
-                if (chunks[k]) {
-                    html += '<div class="parameter '+key+'" rel="'+key+'"><div class="circle"></div> '+chunks[k]+'</div>';
+                if (parameterHtml) {
+                    html += '<div class="parameter '+key+'" rel="'+key+'">';
+                    if (parameter.type == 'number') {
+                        html += '<div class="circle"></div>';
+                    }
+                    html += parameterHtml+'</div>';
                 }
             }
         }
