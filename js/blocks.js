@@ -190,8 +190,8 @@ Blocks = function()
     this.getPosition = function()
     {
         var position = {};
-        position.x = (blocks.mouseX-blocks.center.x)/blocks.scale;
-        position.y = (blocks.mouseY-blocks.center.y)/blocks.scale;
+        position.x = (self.mouseX-self.center.x)/self.scale;
+        position.y = (self.mouseY-self.center.y)/self.scale;
 
         return position;
     };
