@@ -6,7 +6,8 @@ blocks.register({
             name: "Comment",
             hideLabel: true,
             type: "textarea",
-            default: 'Comment text'
+            default: 'Comment text',
+            card: 0
         }
     ]
 });

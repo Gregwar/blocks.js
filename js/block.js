@@ -40,6 +40,35 @@ Block = function(blocks, blockType, id)
     this.edges = {};
 
     /**
+     * Parses the cardinality
+     */
+    this.parseCardinality = function(ioCard)
+    {
+        var card = [0, '*'];
+
+        if (ioCard != undefined) {
+            if (typeof(ioCard) != 'string') {
+                card = [ioCard, ioCard];
+            } else {
+                tab = ioCard.split('-');
+                if (tab.length == 1) {
+                    card = [0, tab[0]];
+                } else {
+                    card = tab;
+                }
+            }
+        }
+
+        for (idx in card) {
+            if (card[idx] != '*') {
+                card[idx] = parseInt(card[idx]);
+            }
+        }
+
+        return card;
+    }
+
+    /**
      * Returns the render of the block
      */
     this.getHtml = function()
@@ -63,7 +92,8 @@ Block = function(blocks, blockType, id)
                 self.ios[key] = [0,1];
                 if (parameterHtml) {
                     html += '<div class="parameter '+key+'" rel="'+key+'">';
-                    if (parameter.type == 'number') {
+                    var card = self.parseCardinality(parameter.card);
+                    if (card[1] == '*' || card[1] > 0) {
                         html += '<div class="circle"></div>';
                     }
                     html += parameterHtml+'</div>';
@@ -94,16 +124,7 @@ Block = function(blocks, blockType, id)
                     html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + label + '</div>';
 
                     // Setting cardinality
-                    var card = [0, '*'];
-                    if (io.card != undefined) {
-                        tab = io.card.split('-');
-                        if (tab.length == 1) {
-                            card = [0, tab[0]];
-                        } else {
-                            card = tab;
-                        }
-                    }
-                    self.ios[ion] = card;
+                    self.ios[ion] = self.parseCardinality(io.card);
                 }
             }
                 html += '</div>';
@@ -261,10 +282,14 @@ Block = function(blocks, blockType, id)
      */
     this.linkPositionFor = function(io)
     {
-        div = self.div.find('.' + io + ' .circle')
+        try {
+            div = self.div.find('.' + io + ' .circle')
 
-        var x = (div.offset().left-blocks.div.offset().left)+div.width()/2;
-        var y = (div.offset().top-blocks.div.offset().top)+div.height()/2;
+            var x = (div.offset().left-blocks.div.offset().left)+div.width()/2;
+            var y = (div.offset().top-blocks.div.offset().top)+div.height()/2;
+        } catch (error) {
+            throw 'Unable to find link position for '+io+' ('+error+')';
+        }
 
         return {x: x, y: y};
     };

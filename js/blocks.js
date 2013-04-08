@@ -543,7 +543,7 @@ Blocks = function()
 			block.create(self.div.find('.blocks'));
 			self.blocks.push(block);
 		    } catch (error) {
-			errors.push(error);
+			errors.push('Block #'+k+ ':'+error);
 		    }
 		}
 
@@ -554,7 +554,7 @@ Blocks = function()
 			edge.create();
 			self.edges.push(edge);
 		    } catch (error) {
-			errors.push(error);
+			errors.push('Edge #'+k+' :'+error);
 		    }
 		}
 

@@ -12,6 +12,9 @@ function ParameterField(parameter)
         this.unit = parameter.unit;
     }
 
+    // Setting the cardinality
+    self.card = parameter.card
+
     // Default type
     if (parameter.type == undefined) {
         parameter.type = 'text';

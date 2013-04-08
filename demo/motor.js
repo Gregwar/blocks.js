@@ -6,6 +6,7 @@ blocks.register({
         {
             name: "Name",
             type: "text",
+            card: "0"
         }
     ],
     inputs: [
