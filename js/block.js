@@ -42,9 +42,13 @@ Block = function(blocks, blockType, id)
     /**
      * Parses the cardinality
      */
-    this.parseCardinality = function(ioCard)
+    this.parseCardinality = function(ioCard, isOutput = false)
     {
-        var card = [0, '*'];
+        var card = [0, 1];
+
+        if (isOutput) {
+            card = [0, '*'];
+        }
 
         if (ioCard != undefined) {
             if (typeof(ioCard) != 'string') {
@@ -89,10 +93,10 @@ Block = function(blocks, blockType, id)
             var parameterHtml = parameter.getHtml(self.parameters);
             var key = 'param_'+k;
             if (!blocks.compactMode || (self.edges[key]!=undefined && self.edges[key].length>0)) {
-                self.ios[key] = [0,1];
+                var card = self.parseCardinality(parameter.card)
+                self.ios[key] = card;
                 if (parameterHtml) {
                     html += '<div class="parameter '+key+'" rel="'+key+'">';
-                    var card = self.parseCardinality(parameter.card);
                     if (card[1] == '*' || card[1] > 0) {
                         html += '<div class="circle"></div>';
                     }
@@ -124,7 +128,7 @@ Block = function(blocks, blockType, id)
                     html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + label + '</div>';
 
                     // Setting cardinality
-                    self.ios[ion] = self.parseCardinality(io.card);
+                    self.ios[ion] = self.parseCardinality(io.card, (key == 'output'));
                 }
             }
                 html += '</div>';
