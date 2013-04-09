@@ -148,6 +148,7 @@ Blocks = function()
                 self.center.y -= dY*(deltaScale-1);
                 self.scale *= deltaScale;
                 self.redraw();
+                event.preventDefault();
             });
 
 	    self.postReady();
