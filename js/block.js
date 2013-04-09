@@ -42,7 +42,7 @@ Block = function(blocks, blockType, id)
     /**
      * Parses the cardinality
      */
-    this.parseCardinality = function(ioCard, isOutput = false)
+    this.parseCardinality = function(ioCard, isOutput)
     {
         var card = [0, 1];
 
@@ -93,7 +93,7 @@ Block = function(blocks, blockType, id)
             var parameterHtml = parameter.getHtml(self.parameters);
             var key = 'param_'+k;
             if (!blocks.compactMode || (self.edges[key]!=undefined && self.edges[key].length>0)) {
-                var card = self.parseCardinality(parameter.card)
+                var card = self.parseCardinality(parameter.card, false)
                 self.ios[key] = card;
                 if (parameterHtml) {
                     html += '<div class="parameter '+key+'" rel="'+key+'">';
