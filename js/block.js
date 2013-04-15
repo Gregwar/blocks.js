@@ -145,7 +145,7 @@ Block = function(blocks, blockType, id)
                 }
 
                 for (x=0; x<size; x++) {
-                    var ion = key + '_' + (parseInt(k)+x);
+                    var ion = key + '_' + k;
                     var label = io.name.replace('#', x+1);
 
                     if (isVariadic) {
