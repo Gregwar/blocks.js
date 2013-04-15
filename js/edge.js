@@ -20,11 +20,7 @@ function Edge(block1, io1, block2, io2, blocks)
      */
     this.fromTo = function()
     {
-        if (io1.substr(0, 6) == "output") {
-            return [block1, block2];
-        } else {
-            return [block2, block1];
-        }
+        return [block1, block2];
     };
 
     /**

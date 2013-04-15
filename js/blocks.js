@@ -473,7 +473,11 @@ Blocks = function()
     this.endLink = function(block, io)
     {
         try {
-            var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
+            if (this.linking[1].substr(0, 6) == 'output') {
+                var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
+            } else {
+                var edge = new Edge(block, io, this.linking[0], this.linking[1], self);
+            }
 
             for (k in self.edges) {
                 var other = self.edges[k];
