@@ -272,3 +272,9 @@
     border-color:red;
     background-color:#ffe3e3;
 }
+
+.blocks_js_editor .message.valid {
+    color:green;
+    border-color:green;
+    background-color:#eeffee;
+}
