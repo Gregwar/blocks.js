@@ -12,14 +12,15 @@
 
 .blocks_js_editor svg {
     position:absolute;
-    z-index:-1;
-    background-color:white;
+    z-index:1;
 }
 
 .blocks_js_editor .blocks {
+    overflow:hidden;
+    position:absolute;
+    z-index:3;
     width:100%;
     height:100%;
-    overflow:hidden;
 }
 
 /**
