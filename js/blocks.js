@@ -437,7 +437,7 @@ Blocks = function()
     this.redraw = function()
     {
         if (!this.redrawTimeout) {
-            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 50);
+            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 20);
         }
     };
 
