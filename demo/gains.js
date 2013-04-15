@@ -18,13 +18,13 @@ blocks.register({
     inputs: [
         {
             name: "Input #",
-            length: "Gains.Gain"
+            length: "Gains.length"
         }
     ],
     outputs: [
         {
             name: "Output #",
-            length: "Gains.Gain"
+            length: "Gains.length"
         }
     ],
     check: function(block) {

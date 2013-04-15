@@ -19,6 +19,23 @@ function ParametersManager(blockType, block)
         this.fields.push(field);
     }
 
+    /**
+     * Returns the size of a multi-dimension parameter
+     */
+    this.getParameterSize = function(name)
+    {
+        var size = 0;
+        var prefix = name + '.';
+
+        for (var name in block.parameters) {
+            if (name.substr(0, prefix.length) == prefix) {
+                size = Math.max(size, block.parameters[name].length);
+            }
+        }
+
+        return size;
+    };
+
     // Parameters defaults
     this.getDefaults = function()
     {

@@ -4,6 +4,7 @@
     }
 
     blocks = new Blocks;
+    
     include('sin.js');
     include('gains.js');
     include('const.js');
@@ -14,6 +15,7 @@
     include('add.js');
     include('io.js');
     include('spline.js');
+    include('multiplexer.js');
 
     blocks.run('#blocks');
     blocks.load(scene);

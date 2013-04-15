@@ -70,7 +70,32 @@ Block = function(blocks, blockType, id)
         }
 
         return card;
-    }
+    };
+
+    /**
+     * Parses a length
+     */
+    this.parseLength = function(length)
+    {
+        if (typeof(length) == 'number') {
+            return length;
+        }
+
+        expression = length.split(/\./);
+
+        if (expression.length == 2) {
+            var key = expression[0];
+            var operation = expression[1];
+
+            if (operation == 'length') {
+                return self.parametersManager.getParameterSize(key);
+            }
+
+            if (operation == 'value') {
+                return parseInt(self.parameters[key]);
+            }
+        }
+    };
 
     /**
      * Returns the render of the block
@@ -110,19 +135,22 @@ Block = function(blocks, blockType, id)
             html += '<div class="' + key + 's">';
 
             for (k in blockType[key+'s']) {
+                var isVariadic = false;
                 var io = blockType[key+'s'][k];
 
                 var size = 1;
                 if (io.length != undefined) {
-                    var pkey = io.length;
-                    if (self.parameters != undefined && self.parameters[pkey] != undefined) {
-                        size = self.parameters[pkey].length;
-                    }
+                    isVariadic = true;
+                    size = self.parseLength(io.length);
                 }
 
                 for (x=0; x<size; x++) {
                     var ion = key + '_' + (parseInt(k)+x);
                     var label = io.name.replace('#', x+1);
+
+                    if (isVariadic) {
+                        ion += '_' + x;
+                    }
 
                     // Generating HTML
                     html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + label + '</div>';
