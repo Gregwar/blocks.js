@@ -45,6 +45,10 @@
     z-index:99;
 }
 
+.blocks_js_editor .contextmenu {
+    box-shadow:5px 5px 5px #ddd;
+}
+
 .blocks_js_editor .menubar .add span {
     color:green;
 }
