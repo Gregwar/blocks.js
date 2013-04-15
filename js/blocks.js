@@ -122,6 +122,10 @@ Blocks = function()
                 if (event.which == 2) {
                     self.moving = null;
                 }
+               
+                if (event.which == 1) {
+                    self.menu.hide();
+                }
             });
             
             // Initializing canvas
