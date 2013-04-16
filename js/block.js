@@ -106,7 +106,7 @@ Block = function(blocks, blockType, id)
 	self.ios = {};
 
         html = '<div class="parameters"></div>';
-        html += '<div class="blockTitle">' + blockType.name + ' <div class="blockicon delete"></div>';
+        html += '<div class="blockTitle">' + blockType.name + '<span class="blockId">#' + self.id + '</span> <div class="blockicon delete"></div>';
         if (blockType.description) {
             html += '<div class="blockicon info"></div>';
             html += '<div class="description">' + blockType.description + '</div>';

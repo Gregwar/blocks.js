@@ -136,6 +136,10 @@
     cursor:move;
 }
 
+.blocks_js_editor .blockTitle .blockId {
+    color:#aaa;
+}
+
 .blocks_js_editor .block .blockicon
 {
     width:14px;
