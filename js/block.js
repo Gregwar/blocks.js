@@ -174,6 +174,7 @@ Block = function(blocks, blockType, id)
      */
     this.render = function()
     {
+        this.lastScale = null;
         this.hasFocus = false;
         this.div.html(this.getHtml());
         this.initListeners();
