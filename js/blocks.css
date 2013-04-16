@@ -137,7 +137,7 @@
 }
 
 .blocks_js_editor .blockTitle .blockId {
-    color:#aaa;
+    opacity:0.4;
 }
 
 .blocks_js_editor .block .blockicon
