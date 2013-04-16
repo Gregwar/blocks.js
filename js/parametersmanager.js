@@ -83,6 +83,16 @@ function ParametersManager(blockType, block)
             this.fields[k].setListeners(this.div);
         }
 
+        this.div.find('input').click(function() {
+            var val = $(this).val();
+            $(this).val('');
+            $(this).val(val);
+        });
+
+        this.div.find('input').dblclick(function() {
+            $(this).select();
+        });
+
         this.div.show();
         display = true;
     };

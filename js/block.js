@@ -5,6 +5,7 @@ Block = function(blocks, blockType, id)
 {
     var defaultFont = 13;
     var defaultWidth = 170;
+    var defaultInputWidth = 80;
     var self = this;
 
     // Id
@@ -221,6 +222,8 @@ Block = function(blocks, blockType, id)
             self.div.find('.circle').css('background-size', size+'px '+size+'px');
 
             self.div.find('.inputs, .outputs').width(self.div.width()/2-10);
+    
+            self.cssParameters();
             this.lastScale = blocks.scale
         }
 
@@ -242,7 +245,17 @@ Block = function(blocks, blockType, id)
         if (selected) {
             self.div.addClass('block_selected');
         }
-    }
+    };
+
+    /**
+     * Sets the css for the inputs
+     */
+    this.cssParameters = function()
+    {
+        self.div.find('input').css('font-size', Math.round(blocks.scale*defaultFont)+'px');
+        self.div.find('input').css('width', Math.round(blocks.scale*defaultInputWidth)+'px');
+        self.div.find('.parameters').css('width', Math.round(blocks.scale*defaultWidth)+'px');
+    };
 
     /**
      * Init the function listeners
@@ -295,6 +308,7 @@ Block = function(blocks, blockType, id)
         // Handle the parameters
         self.div.find('.gear').click(function() {
             self.parametersManager.toggle();
+            self.cssParameters();
         });
 
         // Handle the deletion
