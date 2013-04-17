@@ -207,6 +207,10 @@
     background-image:url('gfx/circle_full.png');
 }
 
+.blocks_js_editor input {
+    font-family:Courier;
+}
+
 .blocks_js_editor .input {
     float:left;
 }
