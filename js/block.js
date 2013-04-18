@@ -3,7 +3,7 @@
  */
 Block = function(blocks, blockType, id)
 {
-    var defaultFont = 13;
+    var defaultFont = 12;
     var defaultWidth = 170;
     var defaultInputWidth = 80;
     var self = this;
