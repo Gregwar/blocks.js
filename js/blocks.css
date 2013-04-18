@@ -6,8 +6,11 @@
 .blocks_js_editor {
     width:100%;
     height:100%;
-    overflow:hidden;
     position:relative;
+}
+
+.blocks_js_editor .blocks {
+    overflow:hidden;
 }
 
 .blocks_js_editor svg {
@@ -66,7 +69,8 @@
 .blocks_js_editor .contextmenu .type,
 .blocks_js_editor .contextmenu .menuentry,
 .blocks_js_editor .contextmenu .family {
-    padding:3px;
+    font-size:14px;
+    padding:1px;
     border:1px solid #aaa;
     margin-bottom:-1px;
     cursor:pointer;
