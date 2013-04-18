@@ -53,6 +53,19 @@ Blocks = function()
      * Next block id
      */
     this.id = 1;
+
+    /**
+     * Clears blocks
+     */
+    this.clear = function()
+    {
+        this.edges = [];
+        this.blocks = [];
+        this.id = 1;
+        this.div.find('.blocks').html('');
+        this.redraw();
+        this.render();
+    }
     
     /**
      * Runs the blocks editor
