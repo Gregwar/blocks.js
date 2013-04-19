@@ -7,6 +7,8 @@ BlockType = function(type)
 
     this.name = type.name;
 
+    this.loopable = ('loopable' in type && type['loopable']);
+
     // Checking for parameters, inputs and outputs
     var keys = ['parametersEditor', 'parameters', 'inputs', 'outputs'];
 

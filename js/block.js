@@ -40,6 +40,12 @@ Block = function(blocks, blockType, id)
     // Edges
     this.edges = {};
 
+    // Can this block be used to break a loop ?
+    this.isLoopable = function()
+    {
+        return blockType.loopable;
+    };
+
     /**
      * Parses the cardinality
      */
@@ -143,7 +149,7 @@ Block = function(blocks, blockType, id)
 
         // Handling inputs & outputs
         handle = function(key) {
-            html += '<div class="' + key + 's">';
+            html += '<div class="' + key + 's '+(self.isLoopable() ? 'loopable' : '')+'">';
 
             for (k in blockType[key+'s']) {
                 var isVariadic = false;
@@ -450,7 +456,11 @@ Block = function(blocks, blockType, id)
 
             for (key in currentBlock.edges) {
                 for (i in currentBlock.edges[key]) {
-                    fromTo = currentBlock.edges[key][i].fromTo();
+                    var edge = currentBlock.edges[key][i];
+                    if (edge.isLoopable()) {
+                        continue;
+                    }
+                    fromTo = edge.fromTo();
 
                     if (fromTo[0] == currentBlock) {
                         target = fromTo[1];

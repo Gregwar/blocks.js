@@ -16,6 +16,14 @@ function Edge(block1, io1, block2, io2, blocks)
     );
 
     /**
+     * Should this edge be ignored in loop analysis ?
+     */
+    this.isLoopable = function()
+    {
+        return (block1.isLoopable() || block2.isLoopable());
+    }
+
+    /**
      * Returns an array with the blocks ordered
      */
     this.fromTo = function()

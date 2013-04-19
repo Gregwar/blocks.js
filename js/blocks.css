@@ -190,6 +190,14 @@
     float:left;
 }
 
+.blocks_js_editor .inputs.loopable {
+    float:right;
+}
+
+.blocks_js_editor .outputs.loopable {
+    float:left;
+}
+
 .blocks_js_editor .input,
 .blocks_js_editor .output {
     background-color:#fff;
@@ -215,26 +223,34 @@
     font-family:Courier;
 }
 
-.blocks_js_editor .input {
+.blocks_js_editor .input,
+.blocks_js_editor .loopable .output
+{
     float:left;
 }
 
 .blocks_js_editor .input .circle,
+.blocks_js_editor .loopable .output .circle,
 .blocks_js_editor .parameter .circle {
     float:left;
     margin:1px;
 }
 
-.blocks_js_editor .input .circle.io_active {
+.blocks_js_editor .input .circle.io_active,
+.blocks_js_editor .loopable .output .circle.io_active
+{
     float:left;
     margin:1px;
 }
 
-.blocks_js_editor .output {
+.blocks_js_editor .output,
+.blocks_js_editor .loopable .input {
     float:right;
 }
 
-.blocks_js_editor .output .circle {
+.blocks_js_editor .output .circle,
+.blocks_js_editor .loopable .input .circle
+{
     float:right;
     margin:1px;
 }
