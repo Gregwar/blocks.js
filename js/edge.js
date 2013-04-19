@@ -54,6 +54,27 @@ function Edge(block1, io1, block2, io2, blocks)
         svg.line(position1.x, position1.y, position2.x, position2.y, {
             stroke: strokeStyle, strokeWidth: lineWidth
         });
+        
+        var xM = ((position1.x+position2.x)/2.0);
+        var yM = ((position1.y+position2.y)/2.0);
+        var norm = Math.sqrt(Math.pow(position1.x-position2.x,2)+Math.pow(position1.y-position2.y,2));
+        var alpha = 30;
+        alpha = (alpha*Math.PI/180.0);
+        var cos = Math.cos(alpha);
+        var sin = Math.sin(alpha);
+        var cosB = Math.cos(-alpha);
+        var sinB = Math.sin(-alpha);
+
+        var xA = (position1.x-xM)*blocks.scale*10/(norm/2);
+        var yA = (position1.y-yM)*blocks.scale*10/(norm/2);
+        var lineWidth = defaultSize*blocks.scale/3.0;
+
+        svg.line(xM, yM, xM+(xA*cos-yA*sin), yM+(yA*cos+xA*sin), {
+            stroke: strokeStyle, strokeWidth: lineWidth
+        });
+        svg.line(xM, yM, xM+(xA*cosB-yA*sinB), yM+(yA*cosB+xA*sinB), {
+            stroke: strokeStyle, strokeWidth: lineWidth
+        });
     };
 
     /**
