@@ -315,7 +315,7 @@ Block = function(blocks, blockType, id)
         });
 
         // Draw a link
-        self.div.find('.input, .output').mousedown(function(event) {
+        self.div.find('.input, .output, .parameter').mousedown(function(event) {
             if (event.which == 1) {
                 blocks.beginLink(self, $(this).attr('rel'));
                 event.preventDefault();
