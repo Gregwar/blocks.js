@@ -99,6 +99,16 @@ Block = function(blocks, blockType, id)
     };
 
     /**
+     * Html entities on a string
+     */
+    this.htmlentities = function(str)
+    {
+        str = str.replace(/</, '&lt;');
+        str = str.replace(/>/, '&gt;');
+        return str;
+    }
+
+    /**
      * Returns the render of the block
      */
     this.getHtml = function()
@@ -154,7 +164,7 @@ Block = function(blocks, blockType, id)
                     }
 
                     // Generating HTML
-                    html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + label + '</div>';
+                    html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + self.htmlentities(label) + '</div>';
 
                     // Setting cardinality
                     self.ios[ion] = self.parseCardinality(io.card, (key == 'output'));
