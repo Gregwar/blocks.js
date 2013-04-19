@@ -60,6 +60,7 @@ function ParametersManager(blockType, block)
         for (k in this.fields) {
             html += this.fields[k].getFieldHtml(false, block.parameters);
         }
+        html += '<input type="submit" style="display:none" width="0" height="0" />';
         html += '</form>';
         
         html += '<a class="close" href="javascript:void(0);">Close</a>';

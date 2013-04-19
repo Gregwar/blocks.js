@@ -133,7 +133,7 @@ function ParameterField(parameter)
             }
 
             if (!justField) {
-                field = this.prettyName + '<br/>' + field + '<br />';
+                field = this.prettyName + ':&nbsp;' + field + '<br />';
             }
 
             return field;
