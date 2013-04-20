@@ -100,8 +100,7 @@ function BlocksMenu(blocks)
                 }
                 for (k in families[family]) {
                     var type = families[family][k];
-                    var className = type.name.replace(/[^a-zA-Z]/g,'');
-                    html += '<div class="type type_'+type.name+'" rel="'+type.name+'"><div class="menu_icon menu_icon_type_'+className+'"></div>'+type.name+'</div>';
+                    html += '<div class="type type_'+type.name+'" rel="'+type.name+'">'+type.name+'</div>';
                 }
                 if (family) {
                     html += '</div>';
