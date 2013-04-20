@@ -10,6 +10,9 @@ Blocks = function()
     this.scale = 1.0;
     this.redrawTimeout = null;
 
+    // History manager
+    this.history = null;
+
     // Is the user dragging the view ?
     this.moving = null;
 
@@ -64,7 +67,6 @@ Blocks = function()
         this.id = 1;
         this.div.find('.blocks').html('');
         this.redraw();
-        this.render();
     }
     
     /**
@@ -168,6 +170,7 @@ Blocks = function()
                 event.preventDefault();
             });
 
+            self.history = new History(self);
 	    self.postReady();
         });
     };
@@ -227,6 +230,7 @@ Blocks = function()
                 block.x = x;
                 block.y = y;
                 block.create(self.div.find('.blocks'));
+                this.history.save();
                 this.blocks.push(block);
                 this.id++;
             }
@@ -402,12 +406,14 @@ Blocks = function()
     {
         // Remove a block and its edges
         if (this.selectedBlock != null) {
+            this.history.save();
             this.removeBlock(this.selectedBlock);
             this.selectedBlock = null;
         }
 
         // Remove an edge
         if (this.selectedLink != null) {
+            this.history.save();
             this.removeEdge(this.selectedLink);
             this.selectedLink = null;
             this.redraw();
@@ -504,6 +510,7 @@ Blocks = function()
                 throw 'You can not create a loop';
             }
 
+            this.history.save();
             edge.create();
             this.edges.push(edge);
         } catch (error) {
@@ -549,9 +556,26 @@ Blocks = function()
     };
 
     /**
-     * Loads the scene
+     * Import some data
+     */
+    this.importData = function(scene)
+    {
+        this.clear();
+        this.doLoad(scene, false);
+    }
+
+    /**
+     * Lads a scene
      */
     this.load = function(scene)
+    {
+        this.doLoad(scene, true);
+    }
+
+    /**
+     * Loads the scene
+     */
+    this.doLoad = function(scene, init)
     {
 	self.ready(function() {
 		var errors = [];
@@ -591,7 +615,10 @@ Blocks = function()
 		}
 
 		self.redraw();
-		self.perfectScale();	    
+
+                if (init) {
+		    self.perfectScale();	    
+                }
 	});
     };
 

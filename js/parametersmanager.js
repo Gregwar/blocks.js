@@ -136,7 +136,7 @@ function ParametersManager(blockType, block)
             parameters[newKey] = serialize[key];
         }
 
-        block.parameters = parameters;
+        block.updateParameters(parameters);
         block.render();
         block.redraw();
     };

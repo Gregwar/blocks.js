@@ -9,6 +9,9 @@ Block = function(blocks, blockType, id)
     var defaultInputWidth = 100;
     var self = this;
 
+    // History saved before move
+    this.historySaved = false;
+
     // Id
     this.id = id;
 
@@ -45,6 +48,15 @@ Block = function(blocks, blockType, id)
     this.isLoopable = function()
     {
         return blockType.loopable;
+    };
+
+    /**
+     * Update the block parameters
+     */
+    this.updateParameters = function(parameters)
+    {
+        blocks.history.save();
+        this.parameters = parameters;
     };
 
     /**
@@ -282,6 +294,7 @@ Block = function(blocks, blockType, id)
         // Drag & drop the block
         self.div.find('.blockTitle').mousedown(function(event) {
             if (event.which == 1) {
+                self.historySaved = false;
                 self.drag = [blocks.mouseX/blocks.scale-self.x, blocks.mouseY/blocks.scale-self.y];
             }
         });
@@ -303,6 +316,10 @@ Block = function(blocks, blockType, id)
         // Dragging
         $('html').mousemove(function(evt) {
             if (self.drag) {
+                if (!self.historySaved) {
+                    blocks.history.save();
+                    self.historySaved = true;
+                }
                 self.x = (blocks.mouseX/blocks.scale-self.drag[0]);
                 self.y = (blocks.mouseY/blocks.scale-self.drag[1]);
                 blocks.redraw();
