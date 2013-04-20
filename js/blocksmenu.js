@@ -93,13 +93,15 @@ function BlocksMenu(blocks)
 
             for (family in families) {
                 if (family) {
+                    var className = family.replace(/[^a-zA-Z]/g,'');
                     html += '<div class="family">';
-                    html += '<div class="familyName family_'+family+'"><div class="menu_icon menu_icon_family_'+family+'"></div>'+family+' <span>&raquo;</span></div>';
+                    html += '<div class="familyName family_'+family+'"><div class="menu_icon menu_icon_family_'+className+'"></div>'+family+' <span>&raquo;</span></div>';
                     html += '<div class="childs">';
                 }
                 for (k in families[family]) {
                     var type = families[family][k];
-                    html += '<div class="type type_'+type.name+'" rel="'+type.name+'"><div class="menu_icon menu_icon_type_'+type.name+'"></div>'+type.name+'</div>';
+                    var className = type.name.replace(/[^a-zA-Z]/g,'');
+                    html += '<div class="type type_'+type.name+'" rel="'+type.name+'"><div class="menu_icon menu_icon_type_'+className+'"></div>'+type.name+'</div>';
                 }
                 if (family) {
                     html += '</div>';
