@@ -32,3 +32,23 @@ a:hover {
 .blocks_js_editor .commentblock .blockTitle {
     background-color:#f4c659;
 }
+
+.blocks_js_editor .menu_icon_type_Comment {
+    background-image:url('gfx/comment.gif');
+}
+
+.blocks_js_editor .menu_icon_family_Time {
+    background-image:url('gfx/time.png');
+}
+
+.blocks_js_editor .menu_icon_family_Output {
+    background-image:url('gfx/output.png');
+}
+
+.blocks_js_editor .menu_icon_family_Math {
+    background-image:url('gfx/math.png');
+}
+
+.blocks_js_editor .menu_icon_export {
+    background-image:url('gfx/export.png');
+}

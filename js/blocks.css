@@ -39,18 +39,19 @@
 .blocks_js_editor .contextmenu,
 .blocks_js_editor .childs {
     width:120px;
-    background-color:white;
     padding:0px;
-    border:1px solid #aaa;
-    border-radius:2px;
     position:absolute;
     display:none;
     float:left;
     z-index:99;
 }
 
-.blocks_js_editor .contextmenu {
-    box-shadow:5px 5px 5px #ddd;
+.blocks_js_editor .contextmenu,
+.blocks_js_editor .childs
+{
+    box-shadow:0px 0px 5px #666;
+    border:1px solid #aaa;
+    background-color:#fff;
 }
 
 .blocks_js_editor .menubar .add span {
@@ -58,12 +59,6 @@
 }
 
 .blocks_js_editor .contextmenu .types {
-    background-color:white;
-    margin-top:-1px;
-}
-
-.blocks_js_editor .contextmenu .type {
-    cursor:pointer;
 }
 
 .blocks_js_editor .contextmenu .type,
@@ -71,19 +66,49 @@
 .blocks_js_editor .contextmenu .family {
     font-size:14px;
     padding:1px;
-    border:1px solid #aaa;
-    margin-bottom:-1px;
     cursor:pointer;
+    background-color:#fff;
+    height:18px;
+    background-image:url('gfx/menufade.png');
+    color:#666;
+    border-left:1px solid #aaa;
+    border-right:1px solid #aaa;
+    border-top:none;
+    border-bottom:none;
+    margin-left:-1px;
+    margin-right:-1px;
+    background-repeat:repeat-x;
+    padding:3px;
+}
+
+.blocks_js_editor .contextmenu .menu_icon
+{
+    width:16px;
+    height:16px;
+    float:left;
+    background-repeat:no-repeat;
+    margin-right:3px;
+}
+
+.blocks_js_editor .contextmenu .menu_icon_compact
+{
+    background-image:url('gfx/compact.png');
+}
+
+.blocks_js_editor .contextmenu .menu_icon_scale
+{
+    background-image:url('gfx/scale.png');
 }
 
 .blocks_js_editor .contextmenu .family:hover,
 .blocks_js_editor .contextmenu .menuentry:hover,
 .blocks_js_editor .contextmenu .type:hover {
-    background-color:#eee;
+    background-image:url('gfx/menufadeOver.png');
+    color:black;
 }
 
 .blocks_js_editor .contextmenu .family .childs {
-    margin-left:120px;
+    margin-left:121px;
     margin-top:-20px;
 }
 

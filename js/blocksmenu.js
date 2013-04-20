@@ -20,22 +20,24 @@ function BlocksMenu(blocks)
 	    label: 'Compact',
 	    action: function(blocks) {
 		blocks.toggleCompact();
-	    }
+	    },
+            icon: 'compact'
 	},
 	{
 	    label: 'Scale',
 	    action: function(blocks) {
 		blocks.perfectScale();
-	    }
+	    },
+            icon: 'scale'
 	}
     ];
 
     /**
      * Adds an action
      */
-    this.addAction = function(name, action)
+    this.addAction = function(name, action, icon)
     {
-	this.actions.push({label: name, action: action});
+	this.actions.push({label: name, action: action, icon: icon});
     };
 
     /**
@@ -82,18 +84,22 @@ function BlocksMenu(blocks)
             html = '';
 
 	    for (action in self.actions) {
-		html += '<div rel="'+action+'" class="menuentry menu_action_'+action+'">'+self.actions[action].label+'</div>';
+                var icon = 'none';
+                if ('icon' in self.actions[action]) {
+                    icon = self.actions[action].icon;
+                }
+		html += '<div rel="'+action+'" class="menuentry menu_action_'+action+'"><div class="menu_icon menu_icon_'+icon+'"></div>'+self.actions[action].label+'</div>';
 	    }
 
             for (family in families) {
                 if (family) {
                     html += '<div class="family">';
-                    html += '<div class="familyName">'+family+' <span>&raquo;</span></div>';
+                    html += '<div class="familyName family_'+family+'"><div class="menu_icon menu_icon_family_'+family+'"></div>'+family+' <span>&raquo;</span></div>';
                     html += '<div class="childs">';
                 }
                 for (k in families[family]) {
                     var type = families[family][k];
-                    html += '<div class="type" rel="'+type.name+'">'+type.name+'</div>';
+                    html += '<div class="type type_'+type.name+'" rel="'+type.name+'"><div class="menu_icon menu_icon_type_'+type.name+'"></div>'+type.name+'</div>';
                 }
                 if (family) {
                     html += '</div>';

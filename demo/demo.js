@@ -23,6 +23,6 @@
     blocks.ready(function() {
 	blocks.menu.addAction('Export', function(blocks) {
 	    alert($.toJSON(blocks.exportData()));
-	});
+	}, 'export');
     });
 })();
