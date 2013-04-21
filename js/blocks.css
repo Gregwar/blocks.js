@@ -290,6 +290,7 @@
     width:250px;
     margin-left:-5px;
     margin-top:-5px;
+    background-color:white;
 }
 
 .blocks_js_editor .block .parameters input,
