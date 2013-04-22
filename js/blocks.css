@@ -127,6 +127,8 @@
  */
 
 .blocks_js_editor .block {
+    background-image:url('gfx/blockFade.png');
+    background-repeat:repeat-x;
     width:180px;
     position:absolute;
     border:2px solid #aaa;
@@ -159,6 +161,8 @@
 .blocks_js_editor .blockTitle {
     font-weight:bold;
     background-color:#eee;
+    background-image:url('gfx/titleFade.png');
+    background-repeat:repeat-x;
     padding:1px;
     margin:-1px;
     margin-bottom:2px;
