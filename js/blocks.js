@@ -439,12 +439,16 @@ Blocks = function()
         }
 
         if (self.linking) {
-            var position = this.linking[0].linkPositionFor(this.linking[1]);
+            try {
+                var position = this.linking[0].linkPositionFor(this.linking[1]);
 
-            svg.line(position.x, position.y, self.mouseX, self.mouseY, {
-                stroke: 'rgba(0,0,0,0.4)',
-                strokeWidth: 3*self.scale
-            });
+                svg.line(position.x, position.y, self.mouseX, self.mouseY, {
+                    stroke: 'rgba(0,0,0,0.4)',
+                    strokeWidth: 3*self.scale
+                });
+            } catch (error) {
+                self.linking = null;
+            }
         }
         
         self.redrawTimeout = null;
