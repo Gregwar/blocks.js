@@ -178,6 +178,10 @@ Block = function(blocks, blockType, id)
                     var ion = key + '_' + k;
                     var label = io.name.replace('#', x+1);
 
+                    if (io.variadicLabel) {
+                        label = String(eval(io.variadicLabel));
+                    }
+
                     if (isVariadic) {
                         ion += '_' + x;
                     }
