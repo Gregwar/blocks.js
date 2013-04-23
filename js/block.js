@@ -5,7 +5,7 @@ Block = function(blocks, blockType, id)
 {
     var parametersRatio = 1.3;
     var defaultFont = 12;
-    var defaultWidth = 170;
+    var defaultWidth = 135;
     var defaultInputWidth = 100;
     var self = this;
 
