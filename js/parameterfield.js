@@ -4,6 +4,7 @@
 function ParameterField(parameter)
 {
     var self = this;
+    this.onUpdate = null;
 
     // Default unit
     if (parameter.unit == undefined) {
@@ -80,10 +81,21 @@ function ParameterField(parameter)
             this.rows = div.find('.' + this.name + '_rows');
             div.find('.' + this.name + '_add').click(function() {
                 self.rows.append(self.row);
+                self.updated();
             });
             div.find('.' + this.name + '_remove').click(function() {
                 self.rows.find('tr').last().remove();
             });
+        }
+    };
+
+    /**
+     * The render was updated
+     */
+    this.updated = function()
+    {
+        if (this.onUpdate) {
+            this.onUpdate();
         }
     };
 

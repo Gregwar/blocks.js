@@ -16,6 +16,9 @@ function ParametersManager(blockType, block)
     for (k in blockType.parameters) {
         var parameter = blockType.parameters[k];
         var field = new ParameterField(parameter);
+        field.onUpdate = function() {
+            block.cssParameters();
+        };
         this.fields.push(field);
     }
 
