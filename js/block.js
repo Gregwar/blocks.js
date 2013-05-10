@@ -525,7 +525,8 @@ function BlockImport(blocks, data)
 {
     for (t in blocks.blockTypes) {
 	var blockType = blocks.blockTypes[t];
-	if (blockType.name == data.type) {
+        var module = ('module' in data) ? data.module : null;
+	if (blockType.name == data.type && blockType.module == module) {
 	    var block = new Block(blocks, blockType, data.id);
 	    block.x = data.x;
 	    block.y = data.y;

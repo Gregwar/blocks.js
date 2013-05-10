@@ -26,6 +26,8 @@ BlockType = function(type)
     // Adding module
     if ('module' in type) {
         this.module = type.module;
+    } else {
+        this.module = null;
     }
 
     // Checking the family
