@@ -5,9 +5,11 @@ Block = function(blocks, blockType, id)
 {
     var parametersRatio = 1.3;
     var defaultFont = 12;
-    var defaultWidth = 170;
     var defaultInputWidth = 100;
     var self = this;
+    
+    // Width
+    this.defaultWidth = blockType.size == 'small' ? 100 : 135;
 
     // History saved before move
     this.historySaved = false;
@@ -178,6 +180,10 @@ Block = function(blocks, blockType, id)
                     var ion = key + '_' + k;
                     var label = io.name.replace('#', x+1);
 
+                    if (io.dynamicLabel) {
+                        label = String(eval(io.dynamicLabel));
+                    }
+
                     if (isVariadic) {
                         ion += '_' + x;
                     }
@@ -243,7 +249,7 @@ Block = function(blocks, blockType, id)
         // Rescaling
         if (this.lastScale != blocks.scale) {
             self.div.css('font-size', Math.round(blocks.scale*defaultFont)+'px');
-            self.div.css('width', Math.round(blocks.scale*defaultWidth)+'px');
+            self.div.css('width', Math.round(blocks.scale*self.defaultWidth)+'px');
         
             var size = Math.round(12*blocks.scale);
             self.div.find('.circle').css('width', size+'px');
@@ -283,7 +289,7 @@ Block = function(blocks, blockType, id)
     {
         self.div.find('input').css('font-size', Math.round(blocks.scale*defaultFont)+'px');
         self.div.find('input').css('width', Math.round(blocks.scale*defaultInputWidth)+'px');
-        self.div.find('.parameters').css('width', parametersRatio*Math.round(blocks.scale*defaultWidth)+'px');
+        self.div.find('.parameters').css('width', parametersRatio*Math.round(blocks.scale*self.defaultWidth)+'px');
     };
 
     /**

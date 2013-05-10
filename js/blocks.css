@@ -127,8 +127,10 @@
  */
 
 .blocks_js_editor .block {
-    width:180px;
+    background-image:url('gfx/blockFade.png');
+    background-repeat:repeat-x;
     position:absolute;
+    width: auto;
     border:2px solid #aaa;
     padding:1px;
     margin-left:0px;
@@ -159,10 +161,13 @@
 .blocks_js_editor .blockTitle {
     font-weight:bold;
     background-color:#eee;
+    background-image:url('gfx/titleFade.png');
+    background-repeat:repeat-x;
     padding:1px;
     margin:-1px;
     margin-bottom:2px;
     cursor:move;
+    font-size:80%;
 }
 
 .blocks_js_editor .blockTitle .blockId {
@@ -290,6 +295,7 @@
     width:250px;
     margin-left:-5px;
     margin-top:-5px;
+    background-color:white;
 }
 
 .blocks_js_editor .block .parameters input,

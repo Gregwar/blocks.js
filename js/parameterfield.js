@@ -4,6 +4,7 @@
 function ParameterField(parameter)
 {
     var self = this;
+    this.onUpdate = null;
 
     // Default unit
     if (parameter.unit == undefined) {
@@ -77,13 +78,34 @@ function ParameterField(parameter)
     this.setListeners = function(div)
     {
         if (parameter.type instanceof Array) {
+            var updateNumbers = function() {
+                div.find('table').each(function() {
+                    var number = 1;
+                    $(this).find('.number').each(function() {
+                        $(this).text(number++);
+                    });
+                });
+            }
+            updateNumbers();
             this.rows = div.find('.' + this.name + '_rows');
             div.find('.' + this.name + '_add').click(function() {
                 self.rows.append(self.row);
+                self.updated();
+                updateNumbers();
             });
             div.find('.' + this.name + '_remove').click(function() {
                 self.rows.find('tr').last().remove();
             });
+        }
+    };
+
+    /**
+     * The render was updated
+     */
+    this.updated = function()
+    {
+        if (this.onUpdate) {
+            this.onUpdate();
         }
     };
 
@@ -97,8 +119,8 @@ function ParameterField(parameter)
         }
 
         if (parameter.type instanceof Array) {
-            var head = '';
-            var row = '';
+            var head = '<th></th>';
+            var row = '<td class="number"></td>';
             var nb = 1;
 
             for (k in parameter.type) {
@@ -120,7 +142,7 @@ function ParameterField(parameter)
                 initRows += this.row;
             }
 
-            var html = '<table><tr>'+head+'</tr><tbody class="'+this.name+'_rows">'+initRows+'</tbody></table>';
+            var html = '<table class="fields"><tr>'+head+'</tr><tbody class="'+this.name+'_rows">'+initRows+'</tbody></table>';
             html += '<a href="javascript:void(0);" class="'+this.name+'_add">Add</a> ';
             html += '<a href="javascript:void(0);" class="'+this.name+'_remove">Remove</a>';
 
