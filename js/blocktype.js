@@ -21,6 +21,11 @@ BlockType = function(type)
         }
     }
 
+    // Adding module
+    if ('module' in type) {
+        this.module = type.module;
+    }
+
     // Checking the family
     if (type.family == undefined) {
         this.family = ''; // Root family

@@ -506,6 +506,7 @@ Block = function(blocks, blockType, id)
 	    x: this.x,
 	    y: this.y,
 	    type: blockType.name,
+            module: blockType.module,
 	    parameters: this.parametersManager.exportData(this.parameters)
 	};
     };
