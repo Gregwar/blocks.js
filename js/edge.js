@@ -3,12 +3,14 @@
  */
 function Edge(id, block1, io1, block2, io2, blocks)
 {
+    this.label = null;
     this.id = parseInt(id);
     this.block1 = block1;
     this.io1 = io1;
     this.block2 = block2;
     this.io2 = io2;
     var defaultSize = 3;
+    var defaultFontSize = 10;
     var position1 = block1.linkPositionFor(io1);
     var position2 = block2.linkPositionFor(io2);
     var segment = new Segment(
@@ -30,6 +32,14 @@ function Edge(id, block1, io1, block2, io2, blocks)
     this.fromTo = function()
     {
         return [block1, block2];
+    };
+
+    /**
+     * Sets the label of the edge
+     */
+    this.setLabel = function(label)
+    {
+        this.label = label;
     };
 
     /**
@@ -76,6 +86,21 @@ function Edge(id, block1, io1, block2, io2, blocks)
         svg.line(xM, yM, xM+(xA*cosB-yA*sinB), yM+(yA*cosB+xA*sinB), {
             stroke: strokeStyle, strokeWidth: lineWidth
         });
+
+        if (this.label != null) {
+            var fontSize = Math.round(defaultFontSize*blocks.scale);
+
+            svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
+                fontSize: fontSize+'px',
+                fill: '#3a3b01',
+                stroke: '#fff',
+                strokeWidth: 2
+            });
+            svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
+                fontSize: fontSize+'px',
+                fill: '#3a3b01',
+            });
+        }
     };
 
     /**

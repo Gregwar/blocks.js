@@ -24,5 +24,15 @@
 	blocks.menu.addAction('Export', function(blocks) {
 	    alert($.toJSON(blocks.exportData()));
 	}, 'export');
+
+        $('.setLabel').click(function() {
+            labels = {}
+            
+            for (k in blocks.edges) {
+                labels[k] = "Edge #"+k;
+            }
+
+            blocks.setLabels(labels);
+        });
     });
 })();

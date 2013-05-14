@@ -672,5 +672,19 @@ Blocks = function()
 
 	this.redraw();
     }
+
+    /**
+     * Write labels on the edges, edges is an object of ids => label
+     */
+    this.setLabels = function(labels)
+    {
+        for (k in self.edges) {
+            var edge = self.edges[k];
+
+            if (edge.id in labels) {
+                edge.setLabel(labels[k]);
+            }
+        }
+    }
 };
 
