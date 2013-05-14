@@ -58,6 +58,11 @@ Blocks = function()
     this.id = 1;
 
     /**
+     * Next edge id
+     */
+    this.edgeId = 1;
+
+    /**
      * Clears blocks
      */
     this.clear = function()
@@ -65,6 +70,7 @@ Blocks = function()
         this.edges = [];
         this.blocks = [];
         this.id = 1;
+        this.edgeId = 1;
         this.div.find('.blocks').html('');
         this.redraw();
     }
@@ -496,10 +502,12 @@ Blocks = function()
     this.endLink = function(block, io)
     {
         try {
+            var id = this.edgeId++;
+
             if (this.linking[1].substr(0, 6) == 'output') {
-                var edge = new Edge(this.linking[0], this.linking[1], block, io, self);
+                var edge = new Edge(id, this.linking[0], this.linking[1], block, io, self);
             } else {
-                var edge = new Edge(block, io, this.linking[0], this.linking[1], self);
+                var edge = new Edge(id, block, io, this.linking[0], this.linking[1], self);
             }
 
             for (k in self.edges) {
@@ -584,6 +592,7 @@ Blocks = function()
 	self.ready(function() {
 		var errors = [];
 		self.id = 1;
+                self.edgeId = 1;
 
 		for (k in scene.blocks) {
 		    try {
@@ -601,6 +610,9 @@ Blocks = function()
 		    try {
 			var data = scene.edges[k];
 			var edge = EdgeImport(self, data);
+
+                        self.edgeId = Math.max(self.edgeId, edge.id+1);
+
 			edge.create();
 			self.edges.push(edge);
 		    } catch (error) {

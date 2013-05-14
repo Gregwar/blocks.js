@@ -1,8 +1,9 @@
 /**
  * An edge linking two blocks
  */
-function Edge(block1, io1, block2, io2, blocks)
+function Edge(id, block1, io1, block2, io2, blocks)
 {
+    this.id = parseInt(id);
     this.block1 = block1;
     this.io1 = io1;
     this.block2 = block2;
@@ -150,6 +151,7 @@ function Edge(block1, io1, block2, io2, blocks)
     this.exportData = function()
     {
 	return {
+            id: this.id,
 	    block1: block1.id,
 	    io1: io1,
 	    block2: block2.id,
@@ -163,6 +165,10 @@ function Edge(block1, io1, block2, io2, blocks)
  */
 function EdgeImport(blocks, data)
 {
+    if (!'id' in data) {
+        throw "An edge does not have id";
+    }
+
     var block1 = blocks.getBlockById(data.block1);
     var block2 = blocks.getBlockById(data.block2);
 
@@ -170,5 +176,5 @@ function EdgeImport(blocks, data)
 	throw "Error while importing an edge, a block did not exists";
     }
 
-    return new Edge(block1, data.io1, block2, data.io2, blocks);
+    return new Edge(data.id, block1, data.io1, block2, data.io2, blocks);
 };
