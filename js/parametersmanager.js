@@ -136,6 +136,12 @@ function ParametersManager(blockType, block)
             if (newKey.substr(newKey.length-2, 2) == '[]') {
                 newKey = newKey.substr(0, newKey.length-2);
             }
+            if (serialize[key] == null) {
+                serialize[key] = [];
+            }
+            if ((typeof serialize[key]) != 'object') {
+                serialize[key] = [serialize[key]];
+            }
             parameters[newKey] = serialize[key];
         }
 
