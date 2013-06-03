@@ -130,6 +130,14 @@ Block = function(blocks, blockType, id)
     }
 
     /**
+     * Set the infos of the block
+     */
+    this.setInfos = function(html)
+    {
+        self.div.find('.infos').html(html);
+    };
+
+    /**
      * Returns the render of the block
      */
     this.getHtml = function()
@@ -143,6 +151,7 @@ Block = function(blocks, blockType, id)
             html += '<div class="description">' + blockType.description + '</div>';
         }
         html += '<div class="blockicon gear"></div></div>';
+        html += '<div class="infos"></div>';
         
         var parameters = self.parametersManager.fields;
         for (k in parameters) {

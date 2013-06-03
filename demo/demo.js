@@ -34,5 +34,12 @@
 
             blocks.setLabels(labels);
         });
+
+        $('.setInfos').click(function() {
+            for (k in blocks.blocks) {
+                var block = blocks.blocks[k];
+                block.setInfos('Hello, I am the block #'+block.id);
+            }
+        });
     });
 })();

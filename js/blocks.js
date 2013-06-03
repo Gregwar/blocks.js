@@ -394,7 +394,7 @@ Blocks = function()
     /**
      * Retreive a block by ID
      */
-    this.getBlockById = function (blockId)
+    this.getBlockById = function(blockId)
     {
 	for (k in self.blocks) {
 	    if (self.blocks[k].id == blockId) {
