@@ -3,7 +3,7 @@
         $('head').append('<script type="text/javascript" src="demo/'+file+'"></script>');
     }
 
-    blocks = new Blocks;
+    blocks = new Blocks();
     
     include('sin.js');
     include('gains.js');

@@ -1,9 +1,19 @@
 /**
  * Manage the blocks
+ *
+ * Options can contains :
+ * - canLinkInputs (default false): can inputs be linked together?
+ * - orientatiion (default true): is the graph oriented?
  */
-Blocks = function()
+Blocks = function(options)
 {
     var self = this;
+
+    if (typeof options != 'undefined') {
+        this.options = options;
+    } else {
+        this.options = {};
+    }
 
     // View center & scale
     this.center = {};
@@ -73,6 +83,18 @@ Blocks = function()
         this.edgeId = 1;
         this.div.find('.blocks').html('');
         this.redraw();
+    }
+
+    /**
+     * Gets an option value
+     */
+    this.getOption = function(key, defaultValue)
+    {
+        if (key in this.options) {
+            return this.options[key];
+        } else {
+            return defaultValue;
+        }
     }
     
     /**

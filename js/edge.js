@@ -76,16 +76,18 @@ function Edge(id, block1, io1, block2, io2, blocks)
         var cosB = Math.cos(-alpha);
         var sinB = Math.sin(-alpha);
 
-        var xA = (position1.x-xM)*blocks.scale*10/(norm/2);
-        var yA = (position1.y-yM)*blocks.scale*10/(norm/2);
-        var lineWidth = defaultSize*blocks.scale/3.0;
-
-        svg.line(xM, yM, xM+(xA*cos-yA*sin), yM+(yA*cos+xA*sin), {
-            stroke: strokeStyle, strokeWidth: lineWidth
-        });
-        svg.line(xM, yM, xM+(xA*cosB-yA*sinB), yM+(yA*cosB+xA*sinB), {
-            stroke: strokeStyle, strokeWidth: lineWidth
-        });
+        // Drawing the arrow
+        if (blocks.getOption('orientation', true)) {
+            var xA = (position1.x-xM)*blocks.scale*10/(norm/2);
+            var yA = (position1.y-yM)*blocks.scale*10/(norm/2);
+            var lineWidth = defaultSize*blocks.scale/3.0;
+            svg.line(xM, yM, xM+(xA*cos-yA*sin), yM+(yA*cos+xA*sin), {
+                stroke: strokeStyle, strokeWidth: lineWidth
+            });
+            svg.line(xM, yM, xM+(xA*cosB-yA*sinB), yM+(yA*cosB+xA*sinB), {
+                stroke: strokeStyle, strokeWidth: lineWidth
+            });
+        }
 
         if (this.label != null) {
             var fontSize = Math.round(defaultFontSize*blocks.scale);
@@ -130,7 +132,7 @@ function Edge(id, block1, io1, block2, io2, blocks)
         }
 
         // You have to link an input with an output
-        if (io1[0] == io2[0]) {
+        if (!blocks.getOption('canLinkInputs', false) && io1[0] == io2[0]) {
             throw 'You have to link an input with an output';
         }
 
