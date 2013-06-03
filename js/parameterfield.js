@@ -16,6 +16,9 @@ function ParameterField(parameter)
     // Setting the cardinality
     self.card = parameter.card
 
+    // Is this parameter a title ?
+    self.asTitle = 'asTitle' in parameter && parameter.asTitle;
+
     // Default type
     if (parameter.type == undefined) {
         parameter.type = 'text';

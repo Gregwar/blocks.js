@@ -6,6 +6,8 @@ blocks.register({
         {
             name: "Name",
             type: "text",
+            asTitle: true,
+            hideLabel: true,
             card: "0"
         }
     ],

@@ -143,9 +143,18 @@ Block = function(blocks, blockType, id)
     this.getHtml = function()
     {
 	self.ios = {};
+        var title = blockType.name + '<span class="blockId">#' + self.id + '</span>';
+        
+        var parameters = self.parametersManager.fields;
+        for (k in parameters) {
+            var parameter = parameters[k];
+            if (parameter.asTitle) {
+                title = parameter.getHtml(self.parameters);
+            }
+        }
 
         html = '<div class="parameters"></div>';
-        html += '<div class="blockTitle">' + blockType.name + '<span class="blockId">#' + self.id + '</span> <div class="blockicon delete"></div>';
+        html += '<div class="blockTitle"><span class="titleText">'+title+'</span><div class="blockicon delete"></div>';
         if (blockType.description) {
             html += '<div class="blockicon info"></div>';
             html += '<div class="description">' + blockType.description + '</div>';
@@ -158,7 +167,7 @@ Block = function(blocks, blockType, id)
             var parameter = parameters[k];
             var parameterHtml = parameter.getHtml(self.parameters);
             var key = 'param_'+k;
-            if (!blocks.compactMode || (self.edges[key]!=undefined && self.edges[key].length>0)) {
+            if (!parameter.asTitle && (!blocks.compactMode || (self.edges[key]!=undefined && self.edges[key].length>0))) {
                 var card = self.parseCardinality(parameter.card, false)
                 self.ios[key] = card;
                 if (parameterHtml) {
