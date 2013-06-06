@@ -7,6 +7,9 @@ Block = function(blocks, blockType, id)
     var defaultFont = 12;
     var defaultInputWidth = 100;
     var self = this;
+
+    // Custom description
+    this.description = null;
     
     // Width
     this.defaultWidth = blockType.size == 'small' ? 100 : 135;
@@ -50,6 +53,15 @@ Block = function(blocks, blockType, id)
     this.isLoopable = function()
     {
         return blockType.loopable;
+    };
+
+    /**
+     * Sets the block description to something custom
+     */
+    this.setDescription = function(description)
+    {
+        this.description = description;
+        this.div.find('.description').html(description);
     };
 
     /**
@@ -155,9 +167,16 @@ Block = function(blocks, blockType, id)
 
         html = '<div class="parameters"></div>';
         html += '<div class="blockTitle"><span class="titleText">'+title+'</span><div class="blockicon delete"></div>';
-        if (blockType.description) {
-            html += '<div class="blockicon info"></div>';
-            html += '<div class="description">' + blockType.description + '</div>';
+        html += '<div class="blockicon info"></div>';
+
+        if (self.description) {
+            html += '<div class="description">' + self.description + '</div>';
+        } else {
+            if (blockType.description) {
+                html += '<div class="description">' + blockType.description + '</div>';
+            } else {
+                html += '<div class="description">No description</div>';
+            }
         }
         html += '<div class="blockicon gear"></div></div>';
         html += '<div class="infos"></div>';

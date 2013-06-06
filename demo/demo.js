@@ -41,5 +41,12 @@
                 block.setInfos('Hello, I am the block #'+block.id);
             }
         });
+
+        $('.setDescriptions').click(function() {
+            for (k in blocks.blocks) {
+                var block = blocks.blocks[k];
+                block.setDescription('This is the block #'+block.id);
+            }
+        });
     });
 })();
