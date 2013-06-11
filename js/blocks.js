@@ -119,10 +119,9 @@ Blocks = function(options)
                 + '</div>'
             );
 
-            self.div.find('svg').attr('width',(self.div.width()));
-            self.div.find('svg').attr('height',(self.div.height()));
-            self.div.find('svg').width(self.div.width());
-            self.div.find('svg').height(self.div.height());
+            self.div.find('svg').css('width', '100%');
+            self.div.find('svg').css('height', '100%');
+
             self.context = self.div.find('svg');
 
             // Setting up default viewer center
@@ -199,7 +198,10 @@ Blocks = function(options)
             });
 
             self.history = new History(self);
-	    self.postReady();
+
+            if (!self.isReady) {
+       	        self.postReady();
+            }
         });
     };
 

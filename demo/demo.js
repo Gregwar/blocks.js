@@ -48,5 +48,10 @@
                 block.setDescription('This is the block #'+block.id);
             }
         });
+
+        $('.resize').click(function() {
+            $('#blocks').width('300px');
+            blocks.perfectScale();
+        });
     });
 })();
