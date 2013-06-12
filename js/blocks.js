@@ -96,6 +96,19 @@ Blocks = function(options)
             return defaultValue;
         }
     }
+
+    /**
+     * Show/hide icons
+     */
+    this.showIcons = function(show)
+    {
+        for (k in this.blocks) {
+            var block = this.blocks[k];
+            block.showIcons = show;
+        }
+
+        redraw();
+    };
     
     /**
      * Runs the blocks editor

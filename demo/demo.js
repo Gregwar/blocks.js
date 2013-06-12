@@ -53,5 +53,9 @@
             $('#blocks').width('300px');
             blocks.perfectScale();
         });
+
+        $('.hideIcons').click(function() {
+            blocks.showIcons(false);
+        });
     });
 })();
