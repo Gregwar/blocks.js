@@ -161,7 +161,7 @@ Block = function(blocks, blockType, id)
         for (k in parameters) {
             var parameter = parameters[k];
             if (parameter.asTitle) {
-                title = parameter.getHtml(self.parameters);
+                title = self.parameters[parameter.name];
             }
         }
 
