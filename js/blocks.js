@@ -667,6 +667,10 @@ Blocks = function(options)
      */
     this.perfectScale = function()
     {
+        if (!this.div) {
+            return;
+        }
+
 	var xMin = null, xMax = null;
 	var yMin = null, yMax = null;
 
