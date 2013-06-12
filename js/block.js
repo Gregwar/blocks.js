@@ -8,9 +8,6 @@ Block = function(blocks, blockType, id)
     var defaultInputWidth = 100;
     var self = this;
 
-    // Show icons
-    this.showIcons = true;
-
     // Custom description
     this.description = null;
     
@@ -287,7 +284,7 @@ Block = function(blocks, blockType, id)
         self.div.css('margin-top', blocks.center.y+self.y*blocks.scale+'px');
 
         // Showing/hiding icons
-        if (self.showIcons) {
+        if (blocks.showIcons) {
             self.div.find('.blockicon').show();
         } else {
             self.div.find('.blockicon').hide();

@@ -55,7 +55,8 @@
         });
 
         $('.hideIcons').click(function() {
-            blocks.showIcons(false);
+            blocks.showIcons = false;
+            blocks.redraw();
         });
     });
 })();
