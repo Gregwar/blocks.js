@@ -107,7 +107,7 @@ Blocks = function(options)
             block.showIcons = show;
         }
 
-        redraw();
+        this.redraw();
     };
     
     /**
