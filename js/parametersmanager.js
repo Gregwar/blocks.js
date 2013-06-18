@@ -131,15 +131,18 @@ function ParametersManager(blockType, block)
     {
         var serialize = this.div.find('form').serializeForm();
         var parameters = {};
+
         for (key in serialize) {
             var newKey = key;
+            var isArray = false;
             if (newKey.substr(newKey.length-2, 2) == '[]') {
                 newKey = newKey.substr(0, newKey.length-2);
+                isArray = true;
             }
             if (serialize[key] == null) {
                 serialize[key] = [];
             }
-            if ((typeof serialize[key]) != 'object') {
+            if ((typeof serialize[key]) != 'object' && isArray) {
                 serialize[key] = [serialize[key]];
             }
             parameters[newKey] = serialize[key];
