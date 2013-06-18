@@ -164,7 +164,11 @@ Block = function(blocks, blockType, id)
         for (k in parameters) {
             var parameter = parameters[k];
             if (parameter.asTitle) {
-                title = self.parameters[parameter.name];
+                if (parameter.name in self.parameters) {
+                    title = self.parameters[parameter.name];
+                } else {
+                    title = '?';
+                }
             }
         }
 
