@@ -100,15 +100,7 @@ Blocks = function(options)
     /**
      * Show/hide icons
      */
-    this.showIcons = function(show)
-    {
-        for (k in this.blocks) {
-            var block = this.blocks[k];
-            block.showIcons = show;
-        }
-
-        this.redraw();
-    };
+    this.showIcons = true;
     
     /**
      * Runs the blocks editor
