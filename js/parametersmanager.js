@@ -139,6 +139,9 @@ function ParametersManager(blockType, block)
                 newKey = newKey.substr(0, newKey.length-2);
                 isArray = true;
             }
+            if (newKey.indexOf('.') >= 0) {
+                isArray = tuue;
+            }
             if (serialize[key] == null) {
                 serialize[key] = [];
             }
