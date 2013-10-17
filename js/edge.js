@@ -3,187 +3,189 @@
  */
 function Edge(id, block1, io1, block2, io2, blocks)
 {
+    this.blocks = blocks;
     this.label = null;
     this.id = parseInt(id);
     this.block1 = block1;
     this.io1 = io1;
     this.block2 = block2;
     this.io2 = io2;
-    var defaultSize = 3;
-    var defaultFontSize = 10;
-    var position1 = block1.linkPositionFor(io1);
-    var position2 = block2.linkPositionFor(io2);
-    var segment = new Segment(
-            position1.x, position1.y, 
-            position2.x-position1.x, position2.y-position1.y
+
+    this.defaultSize = 3;
+    this.defaultFontSize = 10;
+    this.position1 = block1.linkPositionFor(io1);
+    this.position2 = block2.linkPositionFor(io2);
+    this.segment = new Segment(
+        this.position1.x, this.position1.y, 
+        this.position2.x-this.position1.x, this.position2.y-this.position1.y
+    );
+};
+
+/**
+ * Should this edge be ignored in loop analysis ?
+ */
+Edge.prototype.isLoopable = function()
+{
+    return (this.block1.isLoopable() || this.block2.isLoopable());
+}
+
+/**
+ * Returns an array with the blocks ordered
+ */
+Edge.prototype.fromTo = function()
+{
+    return [this.block1, this.block2];
+};
+
+/**
+ * Sets the label of the edge
+ */
+Edge.prototype.setLabel = function(label)
+{
+    this.label = label;
+};
+
+/**
+ * Draws the edge
+ */
+Edge.prototype.draw = function(svg, selected)
+{
+    this.position1 = this.block1.linkPositionFor(this.io1);
+    this.position2 = this.block2.linkPositionFor(this.io2);
+    
+    this.segment = new Segment(
+        this.position1.x, this.position1.y, 
+        this.position2.x-this.position1.x, this.position2.y-this.position1.y
     );
 
-    /**
-     * Should this edge be ignored in loop analysis ?
-     */
-    this.isLoopable = function()
-    {
-        return (block1.isLoopable() || block2.isLoopable());
+    var lineWidth = this.defaultSize*blocks.scale;
+
+    if (selected) {
+        var strokeStyle = 'rgba(0, 200, 0, 1)';
+    } else {
+        var strokeStyle = 'rgba(200, 200, 0, 1)';
     }
+    svg.line(this.position1.x, this.position1.y, this.position2.x, this.position2.y, {
+        stroke: strokeStyle, strokeWidth: lineWidth
+    });
+    
+    var xM = ((this.position1.x+this.position2.x)/2.0);
+    var yM = ((this.position1.y+this.position2.y)/2.0);
+    var norm = Math.sqrt(Math.pow(this.position1.x-this.position2.x,2)+Math.pow(this.position1.y-this.position2.y,2));
+    var alpha = 30;
+    alpha = (alpha*Math.PI/180.0);
+    var cos = Math.cos(alpha);
+    var sin = Math.sin(alpha);
+    var cosB = Math.cos(-alpha);
+    var sinB = Math.sin(-alpha);
 
-    /**
-     * Returns an array with the blocks ordered
-     */
-    this.fromTo = function()
-    {
-        return [block1, block2];
-    };
-
-    /**
-     * Sets the label of the edge
-     */
-    this.setLabel = function(label)
-    {
-        this.label = label;
-    };
-
-    /**
-     * Draws the edge
-     */
-    this.draw = function(svg, selected)
-    {
-        position1 = block1.linkPositionFor(io1);
-        position2 = block2.linkPositionFor(io2);
-        
-        segment = new Segment(
-                position1.x, position1.y, 
-                position2.x-position1.x, position2.y-position1.y
-                );
-
-        var lineWidth = defaultSize*blocks.scale;
-
-        if (selected) {
-            var strokeStyle = 'rgba(0, 200, 0, 1)';
-        } else {
-            var strokeStyle = 'rgba(200, 200, 0, 1)';
-        }
-        svg.line(position1.x, position1.y, position2.x, position2.y, {
+    // Drawing the arrow
+    if (blocks.getOption('orientation', true)) {
+        var xA = (this.position1.x-xM)*blocks.scale*10/(norm/2);
+        var yA = (this.position1.y-yM)*blocks.scale*10/(norm/2);
+        var lineWidth = this.defaultSize*blocks.scale/3.0;
+        svg.line(xM, yM, xM+(xA*cos-yA*sin), yM+(yA*cos+xA*sin), {
             stroke: strokeStyle, strokeWidth: lineWidth
         });
-        
-        var xM = ((position1.x+position2.x)/2.0);
-        var yM = ((position1.y+position2.y)/2.0);
-        var norm = Math.sqrt(Math.pow(position1.x-position2.x,2)+Math.pow(position1.y-position2.y,2));
-        var alpha = 30;
-        alpha = (alpha*Math.PI/180.0);
-        var cos = Math.cos(alpha);
-        var sin = Math.sin(alpha);
-        var cosB = Math.cos(-alpha);
-        var sinB = Math.sin(-alpha);
+        svg.line(xM, yM, xM+(xA*cosB-yA*sinB), yM+(yA*cosB+xA*sinB), {
+            stroke: strokeStyle, strokeWidth: lineWidth
+        });
+    }
 
-        // Drawing the arrow
-        if (blocks.getOption('orientation', true)) {
-            var xA = (position1.x-xM)*blocks.scale*10/(norm/2);
-            var yA = (position1.y-yM)*blocks.scale*10/(norm/2);
-            var lineWidth = defaultSize*blocks.scale/3.0;
-            svg.line(xM, yM, xM+(xA*cos-yA*sin), yM+(yA*cos+xA*sin), {
-                stroke: strokeStyle, strokeWidth: lineWidth
-            });
-            svg.line(xM, yM, xM+(xA*cosB-yA*sinB), yM+(yA*cosB+xA*sinB), {
-                stroke: strokeStyle, strokeWidth: lineWidth
-            });
-        }
+    if (this.label != null) {
+        var fontSize = Math.round(this.defaultFontSize*blocks.scale);
 
-        if (this.label != null) {
-            var fontSize = Math.round(defaultFontSize*blocks.scale);
-
-            svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
-                fontSize: fontSize+'px',
-                fill: '#3a3b01',
-                stroke: '#fff',
-                strokeWidth: 2
-            });
-            svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
-                fontSize: fontSize+'px',
-                fill: '#3a3b01',
-            });
-        }
+        svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
+            fontSize: fontSize+'px',
+            fill: '#3a3b01',
+            stroke: '#fff',
+            strokeWidth: 2
+        });
+        svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
+            fontSize: fontSize+'px',
+            fill: '#3a3b01',
+        });
+    }
     };
 
-    /**
-     * Does the position collide the line ?
-     */
-    this.collide = function(x, y)
-    {
-        var dp = segment.distanceP({x: x, y: y});
+/**
+ * Does the position collide the line ?
+ */
+Edge.prototype.collide = function(x, y)
+{
+    var dp = this.segment.distanceP({x: x, y: y});
 
-        if (dp[0] >= 0 && dp[0] <= 1) {
-            if (dp[1] < (defaultSize*blocks.scale)*2) {
-                return dp[0];
-            }
+    if (dp[0] >= 0 && dp[0] <= 1) {
+        if (dp[1] < (this.defaultSize*blocks.scale)*2) {
+            return dp[0];
         }
+    }
 
-        return false;
-    };
+    return false;
+};
 
-    /**
-     * Initializes the edge and do some tests
-     */ 
-    this.create = function()
-    {
-        // You can't link a block to itself
-        if (block1 == block2) {
-            throw 'You can\'t link a block to itself';
-        }
+/**
+ * Initializes the edge and do some tests
+ */ 
+Edge.prototype.create = function()
+{
+    // You can't link a block to itself
+    if (this.block1 == this.block2) {
+        throw 'You can\'t link a block to itself';
+    }
 
-        // You have to link an input with an output
-        if (!blocks.getOption('canLinkInputs', false) && io1[0] == io2[0]) {
-            throw 'You have to link an input with an output';
-        }
+    // You have to link an input with an output
+    if (!this.blocks.getOption('canLinkInputs', false) && this.io1[0] == this.io2[0]) {
+        throw 'You have to link an input with an output';
+    }
 
-        // The cards have to be okay
-        if ((!block1.canLink(io1)) || (!block2.canLink(io2))) {
-            throw 'Can\'t create such an edge because of the cardinalities';
-        }
+    // The cards have to be okay
+    if ((!this.block1.canLink(this.io1)) || (!this.block2.canLink(this.io2))) {
+        throw 'Can\'t create such an edge because of the cardinalities';
+    }
 
-        block1.addEdge(io1, this);
-        block2.addEdge(io2, this);
-    };
+    this.block1.addEdge(this.io1, this);
+    this.block2.addEdge(this.io2, this);
+};
 
-    /**
-     * Erase an edge
-     */
-    this.erase = function()
-    {
-        block1.eraseEdge(io1, this);
-        block2.eraseEdge(io2, this);
-    };
+/**
+ * Erase an edge
+ */
+Edge.prototype.erase = function()
+{
+    this.block1.eraseEdge(this.io1, this);
+    this.block2.eraseEdge(this.io2, this);
+};
 
-    /**
-     * Test if this edge is the same than another
-     */
-    this.same = function(other)
-    {
-        if (block1 == other.block1 && block2 == other.block2 
-                && io1 == other.io1 && io2 == other.io2) {
-            return true;
-        }
-        
-        if (block1 == other.block2 && block2 == other.block1
-                && io1 == other.io2 && io2 == other.io1) {
-            return true;
-        }
+/**
+ * Test if this edge is the same than another
+ */
+Edge.prototype.same = function(other)
+{
+    if (this.block1 == other.block1 && this.block2 == other.block2 
+            && this.io1 == other.io1 && this.io2 == other.io2) {
+        return true;
+    }
+    
+    if (this.block1 == other.block2 && this.block2 == other.block1
+            && this.io1 == other.io2 && this.io2 == other.io1) {
+        return true;
+    }
 
-        return false;
-    };
+    return false;
+};
 
-    /**
-     * Exports the edge to JSON
-     */
-    this.exportData = function()
-    {
-	return {
-            id: this.id,
-	    block1: block1.id,
-	    io1: io1,
-	    block2: block2.id,
-	    io2: io2
-	};
+/**
+ * Exports the edge to JSON
+ */
+Edge.prototype.exportData = function()
+{
+    return {
+        id: this.id,
+        block1: this.block1.id,
+        io1: this.io1,
+        block2: this.block2.id,
+        io2: this.io2
     };
 };
 
