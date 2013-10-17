@@ -8,41 +8,49 @@ function BlocksMessages(messages, width)
     // Timer to hide
     this.hideTimer = null;
 
+    // Messages
+    this.messages = messages;
+
+    // Width
+    this.width = width;
+
     messages.click(function() {
 	self.hide();
     });
+};
 
-    /**
-     * Show a message
-     */
-    this.show = function(text, options)
-    {
-	if (this.hideTimer != null) {
-	    clearTimeout(this.hideTimer);
-	}
+/**
+ * Show a message
+ */
+BlocksMessages.prototype.show = function(text, options)
+{
+    var self = this;
 
-	var classes = 'message';
+    if (this.hideTimer != null) {
+        clearTimeout(this.hideTimer);
+    }
 
-	if (options['class'] != undefined) {
-	    classes += ' '+options['class'];
-	}
+    var classes = 'message';
 
-	html = '<div class="'+classes+'">'+text+'</div>';
+    if (options['class'] != undefined) {
+        classes += ' '+options['class'];
+    }
 
-	messages.html(html);
-	messages.fadeIn();
-	messages.css('margin-left', Math.round((width-350)/2.0)+'px');
-	messages.css('margin-top', '20px');
+    html = '<div class="'+classes+'">'+text+'</div>';
 
-	this.hideTimer = setTimeout(function() { self.hide(); }, 5000);
-    };
+    this.messages.html(html);
+    this.messages.fadeIn();
+    this.messages.css('margin-left', Math.round((this.width-350)/2.0)+'px');
+    this.messages.css('margin-top', '20px');
 
-    /**
-     * Hide the message
-     */
-    this.hide = function()
-    {
-	messages.fadeOut();
-	this.hideTimer = null;
-    };
+    this.hideTimer = setTimeout(function() { self.hide(); }, 5000);
+};
+
+/**
+ * Hide the message
+ */
+BlocksMessages.prototype.hide = function()
+{
+    this.messages.fadeOut();
+    this.hideTimer = null;
 };

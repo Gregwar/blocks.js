@@ -11,6 +11,9 @@ function BlocksMenu(blocks)
     // Position on the scene
     this.position = {};
 
+    // Blocks
+    this.blocks = blocks;
+
     // Menu div
     this.menu = blocks.div.find('.contextmenu');
 
@@ -135,8 +138,8 @@ BlocksMenu.prototype.hide = function()
  */
 BlocksMenu.prototype.show = function()
 {
-    this.menu.css('margin-left', (5+blocks.mouseX)+'px');
-    this.menu.css('margin-top', (5+blocks.mouseY)+'px');
+    this.menu.css('margin-left', (5+this.blocks.mouseX)+'px');
+    this.menu.css('margin-top', (5+this.blocks.mouseY)+'px');
     this.menu.show();
     this.visible = true;
 };
