@@ -33,34 +33,6 @@ function BlocksMenu(blocks)
     ];
 
     /**
-     * Adds an action
-     */
-    this.addAction = function(name, action, icon)
-    {
-	this.actions.push({label: name, action: action, icon: icon});
-    };
-
-    /**
-     * Hide the menu
-     */
-    this.hide = function()
-    {
-        self.menu.hide();
-        self.visible = false;
-    };
-
-    /**
-     * Show the menu
-     */
-    this.show = function()
-    {
-        self.menu.css('margin-left', (5+blocks.mouseX)+'px');
-        self.menu.css('margin-top', (5+blocks.mouseY)+'px');
-        self.menu.show();
-        self.visible = true;
-    };
-
-    /**
      * Initialisation
      */
     blocks.div.bind('contextmenu', function() {
@@ -140,3 +112,32 @@ function BlocksMenu(blocks)
         return false;
     });
 }
+
+/**
+ * Adds an action
+ */
+BlocksMenu.prototype.addAction = function(name, action, icon)
+{
+    this.actions.push({label: name, action: action, icon: icon});
+};
+
+/**
+ * Hide the menu
+ */
+BlocksMenu.prototype.hide = function()
+{
+    this.menu.hide();
+    this.visible = false;
+};
+
+/**
+ * Show the menu
+ */
+BlocksMenu.prototype.show = function()
+{
+    this.menu.css('margin-left', (5+blocks.mouseX)+'px');
+    this.menu.css('margin-top', (5+blocks.mouseY)+'px');
+    this.menu.show();
+    this.visible = true;
+};
+
