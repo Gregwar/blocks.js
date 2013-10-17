@@ -4,8 +4,9 @@
 function History(blocks)
 {
     var self = this;
-    var historySize = 30;
+    this.historySize = 30;
 
+    this.blocks = blocks;
     this.history = [];
     this.historyPos = 0;
     this.ctrlDown = false;
@@ -26,29 +27,29 @@ function History(blocks)
             self.ctrlDown = false;
         }
     });
+};
 
-    /**
-     * Save the current situation to the history
-     */
-    this.save = function()
-    {
-        this.history.push(blocks.exportData());
+/**
+ * Save the current situation to the history
+ */
+History.prototype.save = function()
+{
+    this.history.push(this.blocks.exportData());
 
-        if (this.history.length > historySize) {
-            this.history.shift();
-        }
-    };
+    if (this.history.length > this.historySize) {
+        this.history.shift();
+    }
+};
 
-    /**
-     * Restores the last saved situation
-     */
-    this.restoreLast = function()
-    {
-        if (this.history.length) {
-            var last = this.history.pop();
-            blocks.importData(last);
-        } else {
-            alert('Nothing to get');
-        }
-    };
+/**
+ * Restores the last saved situation
+ */
+History.prototype.restoreLast = function()
+{
+    if (this.history.length) {
+        var last = this.history.pop();
+        this.blocks.importData(last);
+    } else {
+        alert('Nothing to get');
+    }
 };
