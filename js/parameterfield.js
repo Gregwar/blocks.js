@@ -170,68 +170,36 @@ function ParameterField(parameter)
      */
     this.getHtml = function(parameters)
     {
-        if (this.hide) {
-            return '';
+        var html = '';
+
+        if (this.type == 'checkbox') {
+            value = !!value;
         }
 
-        if (parameter.type instanceof Array) {
-            var head = '';
-            var rows = [];
+        if (!this.hideLabel) {
+            html += '<b>' + this.name + '</b>: ';
+        }
+        
+        html += this.getValue(parameters) + '<br/>';
 
-            for (k in parameter.type) {
-                var rows = [];
-                var rowsHtml = '';
-                var type = parameter.type[k];
-                var param = new ParameterField(type);
-                param.name = this.name + '.' +param.name;
+        return html;
+    };
 
-                if (param.hide) {
-                    continue;
-                }
+    /**
+     * Return the (value) HTML rendering
+     */
+    this.getValue = function(parameters)
+    {
+        var value = '';
 
-                head += '<th>'+param.prettyName+'</th>';
-
-                if (parameters[param.name]) {
-                    for (k in parameters[param.name]) {
-                        var val = parameters[param.name][k];
-
-                        if (rows[k] == undefined) {
-                            rows[k] = [];
-                        }
-                        rows[k].push(val);
-                    }
-
-                    for (k in rows) {
-                        rowsHtml += '<tr>';
-                        for (n in rows[k]) {
-                            rowsHtml += '<td>'+rows[k][n]+'</td>';
-                        }
-                        rowsHtml += '</tr>';
-                    }
-                }
-            }
-
-            return '<table><tr>'+head+'</tr>'+rowsHtml+'</table>';
+        if (this.name in parameters) {
+            value = parameters[this.name];
+        } else if ('default' in this) {
+            value = this['default'];
         } else {
-            var html = '';
-            var value = '';
-
-            if (parameters[this.name] != undefined) {
-                value = parameters[this.name];
-
-            }
-
-            if (this.type == 'checkbox') {
-                value = !!value;
-            }
-
-            if (!this.hideLabel) {
-                html += '<b>' + this.name + '</b>: ';
-            }
-            
-            html += value + ' ' + this.unit + '<br/>';
-
-            return html;
+            value = '?';
         }
+
+        return value + ' ' + this.unit;
     };
 };

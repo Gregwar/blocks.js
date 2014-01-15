@@ -13,6 +13,7 @@ function ParametersManager(blockType, block)
 
     // Fields
     this.fields = [];
+    this.indexedFields = {};
     for (k in blockType.parameters) {
         var parameter = blockType.parameters[k];
         var field = new ParameterField(parameter);
@@ -20,7 +21,16 @@ function ParametersManager(blockType, block)
             block.cssParameters();
         };
         this.fields.push(field);
+        this.indexedFields[field.name] = field;
     }
+
+    /**
+     * Getting a field by name
+     */
+    this.getField = function(name)
+    {
+        return (name in this.indexedFields ? this.indexedFields[name] : null);
+    };
 
     /**
      * Returns the size of a multi-dimension parameter

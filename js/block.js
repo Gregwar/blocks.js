@@ -194,15 +194,9 @@ Block.prototype.getHtml = function()
     for (k in parameters) {
         var parameter = parameters[k];
         var parameterHtml = parameter.getHtml(self.parameters);
-        var key = 'param_'+k;
-        if (!parameter.asTitle && (!this.blocks.compactMode || (self.edges[key]!=undefined && self.edges[key].length>0))) {
-            var card = self.parseCardinality(parameter.card, false)
-            self.ios[key] = card;
+        if (!parameter.hide && !parameter.asTitle && (!this.blocks.compactMode)) {
             if (parameterHtml) {
-                html += '<div class="parameter '+key+'" rel="'+key+'">';
-                if (card[1] == '*' || card[1] > 0) {
-                    html += '<div class="circle"></div>';
-                }
+                html += '<div class="parameter">';
                 html += parameterHtml+'</div>';
             }
         }
@@ -229,13 +223,18 @@ Block.prototype.getHtml = function()
                 if (io.dynamicLabel) {
                     label = String(eval(io.dynamicLabel));
                 }
-
                 if (isVariadic) {
                     ion += '_' + x;
                 }
 
+                var value = '';
+                var field = self.parametersManager.getField(io.name);
+                if (field) {
+                    value = ' ('+field.getValue(self.parameters)+')';
+                }
+
                 // Generating HTML
-                html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + self.htmlentities(label) + '</div>';
+                html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + self.htmlentities(label) + value + '</div>';
 
                 // Setting cardinality
                 self.ios[ion] = self.parseCardinality(io.card, (key == 'output'));

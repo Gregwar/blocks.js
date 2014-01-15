@@ -58,5 +58,13 @@
             blocks.showIcons = false;
             blocks.redraw();
         });
+
+        $('.stressTest').click(function() {
+            for (var x=0; x<1000; x+=100) {
+                for (var y=0; y<1000; y+=100) {
+                    blocks.addBlock('Sinus', x, y);
+                }
+            }
+        });
     });
 })();

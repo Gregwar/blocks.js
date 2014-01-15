@@ -58,12 +58,12 @@ Edge.prototype.draw = function(svg, selected)
         this.position2.x-this.position1.x, this.position2.y-this.position1.y
     );
 
-    var lineWidth = this.defaultSize*blocks.scale;
+    var lineWidth = this.defaultSize*this.blocks.scale;
 
     if (selected) {
         var strokeStyle = 'rgba(0, 200, 0, 1)';
     } else {
-        var strokeStyle = 'rgba(200, 200, 0, 1)';
+        var strokeStyle = 'rgba(255, 200, 0, 1)';
     }
     svg.line(this.position1.x, this.position1.y, this.position2.x, this.position2.y, {
         stroke: strokeStyle, strokeWidth: lineWidth
@@ -80,10 +80,10 @@ Edge.prototype.draw = function(svg, selected)
     var sinB = Math.sin(-alpha);
 
     // Drawing the arrow
-    if (blocks.getOption('orientation', true)) {
-        var xA = (this.position1.x-xM)*blocks.scale*10/(norm/2);
-        var yA = (this.position1.y-yM)*blocks.scale*10/(norm/2);
-        var lineWidth = this.defaultSize*blocks.scale/3.0;
+    if (this.blocks.getOption('orientation', true)) {
+        var xA = (this.position1.x-xM)*this.blocks.scale*10/(norm/2);
+        var yA = (this.position1.y-yM)*this.blocks.scale*10/(norm/2);
+        var lineWidth = this.defaultSize*this.blocks.scale/3.0;
         svg.line(xM, yM, xM+(xA*cos-yA*sin), yM+(yA*cos+xA*sin), {
             stroke: strokeStyle, strokeWidth: lineWidth
         });
@@ -93,7 +93,7 @@ Edge.prototype.draw = function(svg, selected)
     }
 
     if (this.label != null) {
-        var fontSize = Math.round(this.defaultFontSize*blocks.scale);
+        var fontSize = Math.round(this.defaultFontSize*this.blocks.scale);
 
         svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
             fontSize: fontSize+'px',

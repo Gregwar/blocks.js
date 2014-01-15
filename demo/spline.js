@@ -15,27 +15,25 @@ blocks.register({
     parameters: [
         {
             name: "Data",
-            hide: true,
             type: [
                 {
                     name: "Curves",
                     default: [1,2,3]
                 }
-            ]
-        }
-    ],
-    inputs: [
+            ],
+            attrs: "editable"
+        },
         {
             card: "0-1",
             name: "Input #",
-            length: "Data.Curves"
-        }
-    ],
-    outputs: [
+            length: "Data.Curves",
+            attrs: "intput"
+        },
         {
             card: "0-1",
             name: "Output #",
-            length: "Data.Curves"
+            length: "Data.Curves",
+            attrs: "output"
         }
     ],
 });

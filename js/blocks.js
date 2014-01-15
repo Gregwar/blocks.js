@@ -495,7 +495,7 @@ Blocks = function(options)
     this.redraw = function()
     {
         if (!this.redrawTimeout) {
-            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 20);
+            this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 25);
         }
     };
 
@@ -555,6 +555,7 @@ Blocks = function(options)
             edge.create();
             this.edges.push(edge);
         } catch (error) {
+            throw error;
             this.messages.show('Unable to create this edge :' + "\n" + error, {'class': 'error'});
         }
         this.linking = null;

@@ -2,39 +2,41 @@ blocks.register({
     name: "Sinus",
     family: "Math",
     description: "Outputs <b>sin(T+phase)*amplitude</b>",
-    parameters: [
+    fields: [
         {
             name: "Amplitude",
             type: "number",
-            default: 1
+            default: 1,
+            attrs: "editable input"
         },
         {
             name: "Frequency",
             type: "number",
             unit: "Hz",
-            default: 10
+            default: 10,
+            attrs: "editable input"
         },
         {
             name: "Phase",
             type: "number",
             unit: "°",
-            default: 0
+            default: 0,
+            attrs: "editable input"
         },
         {
             name: "Invert",
             type: "bool",
-            default: false
-        }
-    ],
-    inputs: [
+            default: false,
+            attrs: "editable input"
+        },
         {
             card: "1",
-            name: "T"
-        }
-    ],
-    outputs: [
+            name: "T",
+            attrs: "input"
+        },
         {
-            name: "Wave"
+            name: "Wave",
+            attrs: "output"
         }
     ]
 });

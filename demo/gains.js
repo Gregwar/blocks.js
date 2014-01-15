@@ -2,7 +2,7 @@ blocks.register({
     name: "Gains",
     family: "Math",
     description: "Each <b>output[i]</b> will be <b>gain[i]*input[i]</b>",
-    parameters: [
+    fields: [
         {
             name: "Gains",
             hide: true,
@@ -13,18 +13,17 @@ blocks.register({
                     default: [1]
                 }
             ],
+            attrs: "editable input"
         },
-    ],
-    inputs: [
         {
             name: "Input #",
-            length: "Gains.length"
-        }
-    ],
-    outputs: [
+            length: "Gains.length",
+            attrs: "input"
+        },
         {
             name: "Output #",
-            length: "Gains.length"
+            length: "Gains.length",
+            attrs: "output"
         }
     ],
     check: function(block) {

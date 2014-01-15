@@ -2,17 +2,12 @@ blocks.register({
     name: "Constant",
     family: "Math",
     description: "A simple input constant",
-    parameters: [
+    fields: [
         {
             name: "Value",
-            type: "number",
-            default: 0
-        }
-    ],
-    outputs: [
-        {
-            card: "0-*",
-            name: "Value"
+            type: "Number",
+            default: 0,
+            attrs: "editable output"
         }
     ]
 });

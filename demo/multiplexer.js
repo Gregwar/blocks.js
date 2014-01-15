@@ -2,27 +2,26 @@ blocks.register({
     name: "Multiplexer",
     family: "Math",
     description: "The output is the nth input",
-    parameters: [
+    fields: [
         {
             name: "Inputs",
             type: "integer",
             default: 2,
-            card: 0
+            attrs: "editable"
         },
-    ],
-    inputs: [
         {
             name: "Address",
-            type: "integer"
+            type: "integer",
+            attrs: "input"
         },
         {
             name: "Input #",
-            length: "Inputs.value"
-        }
-    ],
-    outputs: [
+            length: "Inputs.value",
+            attrs: "input"
+        },
         {
-            name: "Output"
+            name: "Output",
+            attrs: "output"
         }
     ]
 });
