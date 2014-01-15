@@ -19,37 +19,33 @@ function ParameterField(parameter)
     // Is this parameter a title ?
     self.asTitle = 'asTitle' in parameter && parameter.asTitle;
 
-    // Default type
+    // Getting type
     if (parameter.type == undefined) {
         parameter.type = 'text';
     } else {
-        var type = parameter.type;
+        var type = parameter.type.toLowerCase();
 
-        if (type == 'check' || type == 'bool') {
+        if (type == 'check' || type == 'bool' || type == 'boolean') {
             type = 'checkbox';
         }
 
         this.type = type;
     }
 
-    // Hide the field ?
-    this.hide = false;
-    if (parameter.hide != undefined) {
-        this.hide = true;
-    }
+    // Is it an array ?
+    this.isArray = (this.type.substr(-2) == '[]');
 
-    this.hideLabel = false;
-    if (parameter.hideLabel != undefined) {
-        this.hideLabel = true;
-    }
+    // Hide the field ?
+    this.hide = 'hide' in parameter && parameter.hide;
+
+    // Hide the label ?
+    this.hideLabel = 'hideLabel' in parameter && parameter.hideLabel;
 
     // Field name
     this.name = parameter.name;
-    this.prettyName = parameter.name;
 
-    if (parameter.prettyName != undefined) {
-        this.prettyName = parameter.prettyName;
-    }
+    this.prettyName = 'prettyName' in parameter ? parameter.prettyName
+        : parameter.name;
 
     // A field row
     this.row = null;
@@ -57,21 +53,20 @@ function ParameterField(parameter)
     // Rows
     this.rows = null;
 
+    // Default value
+    this.default = 'default' in parameter ? parameter.default : null;
+
     /**
      * Append the default value
      */
     this.appendDefault = function(object)
     {
-        if (parameter['default'] != undefined) {
-            object[this.name] = parameter['default'];
-        }
-
-        if (parameter.type instanceof Array) {
-            for (k in parameter.type) {
-                var param = new ParameterField(parameter.type[k]);
-                param.name = this.name + '.' +param.name;
-                param.appendDefault(object);
-            }
+        if (this.default != null) {
+            object[this.name] = this.default;
+        } else if (this.isArray) {
+            object[this.name] = [];
+        } else {
+            object[this.name] = null;
         }
     };
 
@@ -188,6 +183,8 @@ function ParameterField(parameter)
     {
         var value = '';
 
+        // Getting the value from either the parameters, the
+        // default value or '?' as fallback
         if (this.name in parameters) {
             value = parameters[this.name];
         } else if ('default' in parameter) {
@@ -196,7 +193,13 @@ function ParameterField(parameter)
             value = '?';
         }
 
-        if (this.type == 'checkbox' || this.type == 'bool') {
+        // If it's an array, concatenate it with ,
+        if (value instanceof Array) {
+            value = value.join(', ');
+        }
+
+        // Force checkboxes and booleans to be booleans
+        if (this.type == 'checkbox') {
             value = !!value;
         }
 

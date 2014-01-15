@@ -6,13 +6,7 @@ blocks.register({
         {
             name: "Gains",
             hide: true,
-            type: [
-                {
-                    name: "Gain",
-                    type: "number",
-                    default: [1]
-                }
-            ],
+            type: "number[]",
             attrs: "editable input"
         },
         {
