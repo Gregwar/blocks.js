@@ -12,6 +12,7 @@ blocks.register({
             card: "0-*",
             name: "Time",
             type: "number",
+            default: 0,
             attrs: "editable output"
         }
     ]

@@ -172,10 +172,6 @@ function ParameterField(parameter)
     {
         var html = '';
 
-        if (this.type == 'checkbox') {
-            value = !!value;
-        }
-
         if (!this.hideLabel) {
             html += '<b>' + this.name + '</b>: ';
         }
@@ -194,10 +190,14 @@ function ParameterField(parameter)
 
         if (this.name in parameters) {
             value = parameters[this.name];
-        } else if ('default' in this) {
-            value = this['default'];
+        } else if ('default' in parameter) {
+            value = parameter['default'];
         } else {
             value = '?';
+        }
+
+        if (this.type == 'checkbox' || this.type == 'bool') {
+            value = !!value;
         }
 
         return value + ' ' + this.unit;
