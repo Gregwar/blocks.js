@@ -8,7 +8,7 @@ blocks.register({
             hide: true,
             type: "number[]",
             attrs: "editable",
-            default: [1]
+            default: [1, 2]
         },
         {
             name: "Input #",

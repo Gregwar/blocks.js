@@ -20,6 +20,9 @@ function Field(metaField)
         this.unit = metaField.unit;
     }
 
+    // Length
+    self.length = 'length' in metaField ? metaField.length : null;
+
     // Setting attributes
     self.attrs = metaField.attrs;
 
@@ -120,7 +123,7 @@ function Field(metaField)
     /**
      * HTML render for the field
      */
-    this.getFieldHtml = function(justField, parameters)
+    this.getFieldHtml = function(justField)
     {
         if (justField == undefined) {
             justField = false;
@@ -141,7 +144,7 @@ function Field(metaField)
                 }
 
                 head += '<th>'+param.prettyName+'</th>';
-                row += '<td>'+param.getFieldHtml(true, parameters)+'</td>';
+                row += '<td>'+param.getFieldHtml(true)+'</td>';
             }
             this.row = '<tr>'+row+'</tr>';
             var initRows = '';
@@ -159,7 +162,7 @@ function Field(metaField)
             if (this.type == 'textarea') {
                 var field = '<textarea name="'+this.name+'"></textarea>';
             } else {
-                var field = '<input type="'+this.type+'" name="'+this.name+'" />'+this.unit;
+                var field = '<input value="'+this.getPrintableValue()+'" type="'+this.type+'" name="'+this.name+'" />'+this.unit;
             }
 
             if (!justField) {
@@ -173,7 +176,7 @@ function Field(metaField)
     /**
      * Returns the HTML rendering
      */
-    this.getHtml = function(parameters)
+    this.getHtml = function()
     {
         var html = '';
 
@@ -181,7 +184,8 @@ function Field(metaField)
             html += '<b>' + this.name + '</b>: ';
         }
         
-        html += this.getValue(parameters) + '<br/>';
+        console.log('Printable value!!!!!!');
+        html += this.getPrintableValue() + '<br/>';
 
         return html;
     };
@@ -191,16 +195,18 @@ function Field(metaField)
      */
     this.getValue = function()
     {
-        var value = this.value;
+        return this.value;
+    };
 
-        // If it's an array, concatenate it with ,
+    /**
+     * Get printable value
+     */
+    this.getPrintableValue = function()
+    {
+        var value = this.getValue();
+
         if (value instanceof Array) {
-            value = value.join(', ');
-        }
-
-        // Force checkboxes and booleans to be booleans
-        if (this.type == 'checkbox') {
-            value = !!value;
+            value = value.join(',');
         }
 
         return value + ' ' + this.unit;
@@ -211,15 +217,28 @@ function Field(metaField)
      */
     this.setValue = function(value)
     {
+        if (this.isArray && !(value instanceof Array)) {
+            value = value.split(',');
+        }
+
+        if (this.type == 'checkbox') {
+            value = !!value;
+        }
+
         this.value = value;
     };
 
     this.getLength = function()
     {
-        if (metaField.isArray) {
-
+        if (this.isArray) {
+            return this.getValue().length;
         } else {
-
+            return parseInt(this.getValue());
         }
+    };
+
+    this.is = function(attr)
+    {
+        return (attr in this.attrs);
     };
 };

@@ -6,8 +6,8 @@ Block = function(blocks, meta, id)
     this.blocks = blocks;
     this.meta = meta;
 
-    // Appareance parameters
-    this.parametersRatio = 1.3;
+    // Appareance values
+    this.valuesRatio = 1.3;
     this.defaultFont = 12;
     this.defaultInputWidth = 100;
 
@@ -36,8 +36,7 @@ Block = function(blocks, meta, id)
     this.lastScale = null;
 
     // Parameters
-    this.parameters = null;
-    this.fields = null;
+    this.fields = new Fields(this);
 
     // Position
     this.x = 0;
@@ -69,12 +68,35 @@ Block.prototype.setDescription = function(description)
 };
 
 /**
- * Update the block parameters
+ * Update the block values
  */
-Block.prototype.updateParameters = function(parameters)
+Block.prototype.updateValues = function()
 {
     this.blocks.history.save();
-    this.parameters = parameters;
+};
+
+/**
+ * Set the values
+ */
+Block.prototype.setValues = function(values)
+{
+    for (field in values) {
+        this.fields.getField(field).setValue(values[field]);
+    }
+};
+
+/**
+ * Getting the values
+ */
+Block.prototype.getValues = function(values)
+{
+    var values = {};
+    for (k in this.fields.editables) {
+        var field = this.fields.editables[k];
+        values[field.name] = field.getValue();
+    }
+
+    return values;
 };
 
 /**
@@ -147,17 +169,13 @@ Block.prototype.getHtml = function()
 {
     var self = this;
     this.ios = {};
+
+    // Getting the title
     var title = this.meta.name + '<span class="blockId">#' + this.id + '</span>';
-    
-    var parameters = this.fields.fields;
-    for (k in parameters) {
-        var parameter = parameters[k];
-        if (parameter.asTitle) {
-            if (parameter.name in this.parameters) {
-                title = this.parameters[parameter.name];
-            } else {
-                title = '?';
-            }
+    for (k in this.fields.fields) {
+        var field = this.fields.fields[k];
+        if (field.asTitle) {
+            title = field.getPrintableValue();
         }
     }
 
@@ -177,15 +195,11 @@ Block.prototype.getHtml = function()
     html += '<div class="blockicon gear"></div></div>';
     html += '<div class="infos"></div>';
     
-    var parameters = self.fields.fields;
-    for (k in parameters) {
-        var parameter = parameters[k];
-        var parameterHtml = parameter.getHtml(self.parameters);
-        if (!parameter.hide && !parameter.asTitle && (!this.blocks.compactMode)) {
-            if (parameterHtml) {
-                html += '<div class="parameter">';
-                html += parameterHtml+'</div>';
-            }
+    for (k in self.fields.editables) {
+        var field = self.fields.editables[k];
+        var fieldHtml = field.getHtml();
+        if (html && (!field.hide) && (!field.asTitle) && (!this.blocks.compactMode)) {
+            html += '<div class="parameter">'+fieldHtml+'</div>';
         }
     }
 
@@ -216,9 +230,8 @@ Block.prototype.getHtml = function()
 
                 var value = '';
                 var field = self.fields.getField(io.name);
-                if (field) {
-                    console.log(field);
-                    value = ' ('+field.getValue()+')';
+                if (field && field.is('editable')) {
+                    value = ' ('+field.getPrintableValue()+')';
                 }
 
                 // Generating HTML
@@ -259,13 +272,6 @@ Block.prototype.create = function(div)
 
     div.append(html);
     this.div = div.find('#block' + this.id);
-    
-    if (this.fields == undefined) {
-        this.fields = new Fields(this);
-        if (this.parameters == null) {
-            this.parameters = this.fields.getDefaults();
-        }
-    }
 
     this.render();
 };
@@ -312,7 +318,7 @@ Block.prototype.redraw = function(selected)
         }
     }
 
-    // Updating the parameters manager div
+    // Updating the fields manager div
     this.fields.div = this.div.find('.parameters');
 
     // Is selected ?
@@ -329,7 +335,7 @@ Block.prototype.cssParameters = function()
 {
     this.div.find('input').css('font-size', Math.round(this.blocks.scale*this.defaultFont)+'px');
     this.div.find('input').css('width', Math.round(this.blocks.scale*this.defaultInputWidth)+'px');
-    this.div.find('.parameters').css('width', this.parametersRatio*Math.round(this.blocks.scale*this.defaultWidth)+'px');
+    this.div.find('.parameters').css('width', this.valuesRatio*Math.round(this.blocks.scale*this.defaultWidth)+'px');
 };
 
 /**
@@ -554,7 +560,7 @@ Block.prototype.exportData = function()
         y: this.y,
         type: this.meta.name,
         module: this.meta.module,
-        parameters: this.fields.exportData(this.parameters)
+        values: this.getValues()
     };
 };
 
@@ -570,10 +576,10 @@ function BlockImport(blocks, data)
 	    var block = new Block(blocks, meta, data.id);
 	    block.x = data.x;
 	    block.y = data.y;
-	    block.parameters = ParametersImport(data.parameters);
+            block.setValues(data.values);
 	    return block;
 	}
     }
 
     throw 'Unable to create a block of type ' + data.type;
-};
+}

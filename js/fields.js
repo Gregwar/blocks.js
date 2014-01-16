@@ -40,12 +40,12 @@ function Fields(block)
             this.editables.push(field);
         }
         if ('input' in field.attrs) {
-            field.hide = true;
             this.inputs.push(field);
+            field.hide = true;
         }
         if ('output' in field.attrs) {
-            field.hide = true;
             this.outputs.push(field);
+            field.hide = true;
         }
     }
 
@@ -58,36 +58,6 @@ function Fields(block)
     };
 
     /**
-     * Returns the size of a multi-dimension parameter
-     */
-    this.getParameterSize = function(name)
-    {
-        var size = 0;
-        var prefix = name + '.';
-
-        for (var name in block.parameters) {
-            if (name.substr(0, prefix.length) == prefix) {
-                size = Math.max(size, block.parameters[name].length);
-            }
-        }
-
-        return size;
-    };
-
-    // Parameters defaults
-    this.getDefaults = function()
-    {
-        var defaults = {};
-
-        for (k in this.fields) {
-            var field = this.fields[k];
-            field.appendDefault(defaults);
-        }
-
-        return defaults;
-    };
-
-    /**
      * Show the settings window
      */
     this.show = function()
@@ -95,8 +65,8 @@ function Fields(block)
         html = '<h3>Parameters</h3>';
 
         html += '<form>';
-        for (k in this.fields) {
-            html += this.fields[k].getFieldHtml(false, block.parameters);
+        for (k in this.editables) {
+            html += this.editables[k].getFieldHtml(false);
         }
         html += '<input type="submit" style="display:none" width="0" height="0" />';
         html += '</form>';
@@ -109,8 +79,6 @@ function Fields(block)
             self.div.hide();
             self.save();
         });
-
-        this.div.find('form').unserializeForm(block.parameters);
 
         this.div.find('form').submit(function() {
             self.div.hide();
@@ -141,10 +109,10 @@ function Fields(block)
      */
     this.getHtml = function()
     {
-        var html ='';
+        var html = '';
 
-        for (k in this.fields) {
-            html += this.fields[k].getHtml(block.parameters);
+        for (k in this.editables) {
+            html += this.editables[k].getHtml();
         }
 
         return html;
@@ -165,7 +133,7 @@ function Fields(block)
     this.save = function()
     {
         var serialize = this.div.find('form').serializeForm();
-        var parameters = {};
+        var values = {};
 
         for (key in serialize) {
             var newKey = key;
@@ -174,19 +142,13 @@ function Fields(block)
                 newKey = newKey.substr(0, newKey.length-2);
                 isArray = true;
             }
-            if (newKey.indexOf('.') >= 0) {
-                isArray = tuue;
-            }
-            if (serialize[key] == null) {
+            if (serialize[key] == null && isArray) {
                 serialize[key] = [];
             }
-            if ((typeof serialize[key]) != 'object' && isArray) {
-                serialize[key] = [serialize[key]];
-            }
-            parameters[newKey] = serialize[key];
+
+            this.getField(newKey).setValue(serialize[key]);
         }
 
-        block.updateParameters(parameters);
         block.render();
         block.redraw();
     };
@@ -197,8 +159,8 @@ function Fields(block)
     this.toggle = function()
     {
         if (this.meta.parametersEditor != undefined && typeof(this.meta.parametersEditor) == 'function') {
-            this.meta.parametersEditor(block.parameters, function(parameters) {
-                block.parameters = parameters;
+            this.meta.parametersEditor(block.values, function(values) {
+                block.updateValues(values);
                 block.render();
                 block.redraw();
             });

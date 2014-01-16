@@ -46,13 +46,13 @@ function BlocksMenu(blocks)
 
             // Sorting types by family
             var families = {};
-            for (k in blocks.blockTypes) {
-                var type = blocks.blockTypes[k];
+            for (k in blocks.metas) {
+                var meta = blocks.metas[k];
 
-                if (families[type.family] == undefined) {
-                    families[type.family] = [type];
+                if (meta.family in families) {
+                    families[meta.family].push(meta);
                 } else {
-                    families[type.family].push(type);
+                    families[meta.family] = [meta];
                 }
             }
 
