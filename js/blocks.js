@@ -157,20 +157,18 @@ Blocks.prototype.run = function(selector)
         });
 
         // Detect clicks on the canvas
-        self.div.mousedown(function(evt) {
+        self.div.mousedown(function(event) {
             if (self.canvasClicked()) {
                 evt.preventDefault();
-            }
-        });
-
-        self.div.mousedown(function(event) {
-            if (event.which == 2) {
+            } 
+            
+            if (event.which == 2 || (!self.selectedLink && !self.selectedBlock && event.which == 1)) {
                 self.moving = [self.mouseX, self.mouseY];
             }
         });
         
         self.div.mouseup(function(event) {
-            if (event.which == 2) {
+            if (event.which == 2 || event.which == 1) {
                 self.moving = null;
             }
            
