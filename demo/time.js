@@ -3,9 +3,9 @@ blocks.register({
     family: "Time",
     fields: [
         {
-            name: "DeltaT",
+            name: "Factor",
             type: "number",
-            default: 0.02,
+            default: 1.0,
             attrs: "editable input"
         },
         {
