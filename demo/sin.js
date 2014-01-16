@@ -36,7 +36,8 @@ blocks.register({
         },
         {
             name: "Wave",
-            attrs: "output"
+            attrs: "output",
+            type: "number"
         }
     ]
 });

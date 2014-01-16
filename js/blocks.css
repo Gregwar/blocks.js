@@ -229,14 +229,17 @@
     float:left;
 }
 
-.blocks_js_editor .input,
-.blocks_js_editor .output {
+.blocks_js_editor .connector {
     font-size:80%;
     padding-top:2px;
     background-repeat:no-repeat;
     cursor:pointer;
     clear:both;
     width:150px;
+}
+
+.blocks_js_editor .connector.disabled {
+    opacity:0.4;
 }
 
 .blocks_js_editor .output {

@@ -228,7 +228,7 @@ Block.prototype.getHtml = function()
                 }
 
                 // Generating HTML
-                html += '<div class="'+key+' connector '+connectorId+'" rel="'+connectorId+ '"><div class="circle"></div>' + self.htmlentities(label) + value + '</div>';
+                html += '<div class="'+key+' type_'+field.type+' connector '+connectorId+'" rel="'+connectorId+ '"><div class="circle"></div>' + self.htmlentities(label) + value + '</div>';
                 self.connectors.push(connectorId);
             }
         }
@@ -546,6 +546,14 @@ Block.prototype.exportData = function()
         module: this.meta.module,
         values: this.getValues()
     };
+};
+
+/**
+ * Gets the field
+ */
+Block.prototype.getField = function(name)
+{
+    return this.fields.getField(name);
 };
 
 /**

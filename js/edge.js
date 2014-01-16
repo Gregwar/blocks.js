@@ -150,6 +150,15 @@ Edge.prototype.create = function()
 };
 
 /**
+ * Get the types of the blocks
+ */
+Edge.prototype.getTypes = function()
+{
+    return [this.block1.getField(this.connector1.name).type,
+            this.block2.getField(this.connector2.name).type];
+};
+
+/**
  * Erase an edge
  */
 Edge.prototype.erase = function()

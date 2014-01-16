@@ -34,10 +34,7 @@ function Field(metaField)
         this.type = 'text';
     } else {
         var type = metaField.type.toLowerCase();
-
-        if (type == 'check' || type == 'bool' || type == 'boolean') {
-            type = 'checkbox';
-        }
+        type = Types.normalize(type);
 
         this.type = type;
     }
@@ -197,7 +194,7 @@ Field.prototype.setValue = function(value)
         value = value.split(',');
     }
 
-    if (this.type == 'checkbox') {
+    if (this.type == 'bool') {
         value = !!value;
     }
 

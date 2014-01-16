@@ -13,6 +13,9 @@ Blocks = function(options)
         this.options = {};
     }
 
+    // Types checker
+    this.types = new Types;
+
     // View center & scale
     this.center = {};
     this.scale = 1.0;
@@ -287,6 +290,16 @@ Blocks.prototype.register = function(meta)
 Blocks.prototype.beginLink = function(block, connectorId)
 {
     this.linking = [block, connectorId];
+
+    var connector = IdToConnector(connectorId);
+    var type = block.getField(connector.name).type;
+    $('.connector').addClass('disabled');
+
+    var compatibles = this.types.getCompatibles(type);
+    for (k in compatibles) {
+        var compatible = compatibles[k];
+        $('.connector.type_'+compatible).removeClass('disabled');
+    }
 };
 
 /**
@@ -519,6 +532,7 @@ Blocks.prototype.release = function()
         this.tryEndLink();
         this.linking=null;
     }
+    $('.connector').removeClass('disabled');
     this.redraw();
 };
 
@@ -569,6 +583,12 @@ Blocks.prototype.endLink = function(block, connectorId)
 
         this.history.save();
         edge.create();
+
+        var types = edge.getTypes();
+        if (!this.types.isCompatible(types[0], types[1])) {
+            throw 'Types '+types[0]+' and '+types[1]+' are not compatible';
+        }
+
         this.edges.push(edge);
     } catch (error) {
         this.messages.show('Unable to create this edge :' + "\n" + error, {'class': 'error'});

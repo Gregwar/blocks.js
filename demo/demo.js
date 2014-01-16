@@ -17,6 +17,12 @@
     include('spline.js');
     include('multiplexer.js');
 
+    blocks.types.addCompatibility('text', 'number');
+    blocks.types.addCompatibility('text', 'checkbox');
+    blocks.types.addCompatibility('bool', 'number');
+    blocks.types.addCompatibility('bool', 'integer');
+    blocks.types.addCompatibility('bool', 'text');
+
     blocks.run('#blocks');
     blocks.load(scene);
 
