@@ -31,7 +31,7 @@ function Field(metaField)
 
     // Getting type
     if (metaField.type == undefined) {
-        this.type = 'text';
+        this.type = 'string';
     } else {
         var type = metaField.type.toLowerCase();
         type = Types.normalize(type);
@@ -58,11 +58,8 @@ function Field(metaField)
     this.dynamicLabel = 'dynamicLabel' in metaField ? metaField.dynamicLabel
         : null;
 
-    // A field row
-    this.row = null;
-
-    // Rows
-    this.rows = null;
+    // Choices
+    this.choices = 'choices' in metaField ? metaField.choices : [];
     
     // Is it an array ?
     this.isArray = (this.type.substr(-2) == '[]');
@@ -110,8 +107,15 @@ Field.prototype.getFieldHtml = function()
 {
     var field = this.label+': ';
 
-    if (this.type == 'textarea') {
+    if (this.type == 'longtext') {
         field += '<textarea name="'+this.name+'"></textarea>';
+    } else if (this.type == 'choice') {
+        field += '<select name="'+this.name+'">';
+        for (k in this.choices) {
+            var choice = this.choices[k];
+            field += '<option value="'+choice+'">'+choice+'</option>';
+        }
+        field += '</select>';
     } else {
         field += '<input value="'+this.getPrintableValue()+'" type="'+this.type+'" name="'+this.name+'" />'+this.unit;
     }

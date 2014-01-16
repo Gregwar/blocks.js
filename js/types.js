@@ -25,8 +25,16 @@ Types.normalize = function(type)
         type = 'number';
     }
 
-    if (type == 'string') {
-        type = 'text';
+    if (type == 'text') {
+        type = 'string';
+    }
+
+    if (type == 'select' || type == 'choices' || type == 'combobox') {
+        type = 'choice';
+    }
+
+    if (type == 'textarea') {
+        type = 'longtext';
     }
 
     return type;

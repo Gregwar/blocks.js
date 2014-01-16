@@ -10,6 +10,7 @@
     include('const.js');
     include('motor.js');
     include('time.js');
+    include('camera.js');
     include('comment.js');
     include('scene.js');
     include('add.js');
