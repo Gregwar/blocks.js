@@ -16,7 +16,7 @@ blocks.register({
         },
         {
             name: "Input #",
-            length: "Inputs.value",
+            dimension: "Inputs.value",
             attrs: "input"
         },
         {

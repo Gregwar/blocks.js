@@ -46,10 +46,13 @@ Block = function(blocks, meta, id)
     this.ios = {};
 
     // Which IO has focus ?
-    this.focusedIo = null;
+    this.focusedConnector = null;
 
     // Edges
     this.edges = {};
+
+    // Connectors
+    this.connectors = [];
 };
 
 // Can this block be used to break a loop ?
@@ -100,48 +103,20 @@ Block.prototype.getValues = function(values)
 };
 
 /**
- * Parses the cardinality
- */
-Block.prototype.parseCardinality = function(ioCard, isOutput)
-{
-    var card = [0, 1];
-
-    if (isOutput) {
-        card = [0, '*'];
-    }
-
-    if (ioCard != undefined) {
-        if (typeof(ioCard) != 'string') {
-            card = [ioCard, ioCard];
-        } else {
-            tab = ioCard.split('-');
-            if (tab.length == 1) {
-                card = [0, tab[0]];
-            } else {
-                card = tab;
-            }
-        }
-    }
-
-    for (idx in card) {
-        if (card[idx] != '*') {
-            card[idx] = parseInt(card[idx]);
-        }
-    }
-
-    return card;
-};
-
-/**
  * Parses a length
  */
-Block.prototype.parseLength = function(length)
+Block.prototype.parseDimension = function(dimension)
 {
-    if (typeof(length) == 'number') {
-        return length;
+    if (typeof(dimension) == 'number') {
+        return dimension;
     }
 
-    return this.fields.getField(length).getLength();
+    var field = this.fields.getField(dimension);
+    if (!field) {
+        throw 'Unable to find dimension field '+dimension;
+    }
+
+    return field.getDimension();
 };
 
 /**
@@ -168,7 +143,7 @@ Block.prototype.setInfos = function(html)
 Block.prototype.getHtml = function()
 {
     var self = this;
-    this.ios = {};
+    this.connectors = [];
 
     // Getting the title
     var title = this.meta.name + '<span class="blockId">#' + this.id + '</span>';
@@ -208,37 +183,32 @@ Block.prototype.getHtml = function()
         html += '<div class="' + key + 's '+(self.isLoopable() ? 'loopable' : '')+'">';
 
         for (k in fields) {
-            var isVariadic = false;
-            var io = fields[k];
+            var field = fields[k];
 
             var size = 1;
-            if (io.length != undefined) {
-                isVariadic = true;
-                size = self.parseLength(io.length);
+            if (field.variadic) {
+                size = self.parseDimension(field.dimension);
             }
 
             for (x=0; x<size; x++) {
-                var ion = key + '_' + k;
-                var label = io.name.replace('#', x+1);
+                var connectorId = field.name.toLowerCase() + '_' + key;
+                var label = field.getLabel().replace('#', x+1);
 
-                if (io.dynamicLabel) {
-                    label = String(eval(io.dynamicLabel));
+                if (field.dynamicLabel) {
+                    label = field.dynamicLabel(self, x);
                 }
-                if (isVariadic) {
-                    ion += '_' + x;
+                if (field.variadic) {
+                    connectorId += '_' + x;
                 }
 
                 var value = '';
-                var field = self.fields.getField(io.name);
                 if (field && field.is('editable')) {
-                    value = ' ('+field.getPrintableValue()+')';
+                    value = ' ('+field.getPrintableValueWithUnit()+')';
                 }
 
                 // Generating HTML
-                html += '<div class="'+key+' ' + ion + '" rel="' + ion + '"><div class="circle"></div>' + self.htmlentities(label) + value + '</div>';
-
-                // Setting cardinality
-                self.ios[ion] = self.parseCardinality(io.card, (key == 'output'));
+                html += '<div class="'+key+' connector '+connectorId+'" rel="'+connectorId+ '"><div class="circle"></div>' + self.htmlentities(label) + value + '</div>';
+                self.connectors.push(connectorId);
             }
         }
             html += '</div>';
@@ -246,7 +216,6 @@ Block.prototype.getHtml = function()
 
     handle('input', this.fields.inputs);
     handle('output', this.fields.outputs);
-    this.checkEdges();
 
     return html;
 };
@@ -309,12 +278,14 @@ Block.prototype.redraw = function(selected)
     }
 
     // Changing the circle rendering
-    for (k in this.ios) {
-        var circle = this.div.find('.' + k + ' .circle');
+    for (k in this.connectors) {
+        var connectorId = this.connectors[k];
+        var connectorDiv = this.div.find('.' + connectorId);
+        var connectorVisual = connectorDiv.find('.circle');
 
-        circle.removeClass('io_active');
-        if (this.edges[k] != undefined && this.edges[k].length) {
-            circle.addClass('io_active');
+        connectorVisual.removeClass('io_active');
+        if (connectorId in this.edges && this.edges[connectorId].length) {
+            connectorVisual.addClass('io_active');
         }
     }
 
@@ -360,10 +331,10 @@ Block.prototype.initListeners = function()
     });
 
     // Handle focus on the I/Os
-    self.div.find('.input, .output, .parameter').hover(function() {
-        self.focusedIo = $(this).attr('rel');
+    self.div.find('.connector').hover(function() {
+        self.focusedConnector = $(this).attr('rel');
     }, function() {
-        self.focusedIo = null;
+        self.focusedConnector = null;
     });
         
     // Dragging
@@ -385,7 +356,7 @@ Block.prototype.initListeners = function()
     });
 
     // Draw a link
-    self.div.find('.input, .output, .parameter').mousedown(function(event) {
+    self.div.find('.connector').mousedown(function(event) {
         if (event.which == 1) {
             self.blocks.beginLink(self, $(this).attr('rel'));
             event.preventDefault();
@@ -414,15 +385,21 @@ Block.prototype.initListeners = function()
 /**
  * Gets the link position for an input or output
  */
-Block.prototype.linkPositionFor = function(io)
+Block.prototype.linkPositionFor = function(connector)
 {
+    var connectorId = connector;
+
+    if (connector instanceof Object) {
+        connectorId = connector.id();
+    }
+
     try {
-        div = this.div.find('.' + io + ' .circle')
+        div = this.div.find('.' + connectorId + ' .circle')
 
         var x = (div.offset().left-this.blocks.div.offset().left)+div.width()/2;
         var y = (div.offset().top-this.blocks.div.offset().top)+div.height()/2;
     } catch (error) {
-        throw 'Unable to find link position for '+io+' ('+error+')';
+        throw 'Unable to find link position for '+connectorId+' ('+error+')';
     }
 
     return {x: x, y: y};
@@ -431,14 +408,16 @@ Block.prototype.linkPositionFor = function(io)
 /**
  * Can the io be linked ?
  */
-Block.prototype.canLink = function(ion)
+Block.prototype.canLink = function(connector)
 {
     var tab = [];
-    if (this.edges[ion] != undefined) {
-        tab = this.edges[ion];
+    var connectorId = connector.id();
+
+    if (connectorId in this.edges) {
+        tab = this.edges[connectorId];
     }
 
-    var card = this.ios[ion];
+    var card = this.fields.getField(connector.name).card;
 
     if (card[1] != '*') {
         return (tab.length < card[1]);
@@ -450,53 +429,30 @@ Block.prototype.canLink = function(ion)
 /**
  * Add an edge
  */
-Block.prototype.addEdge = function(ion, edge)
+Block.prototype.addEdge = function(connector, edge)
 {
     var tab = [];
-    if (this.edges[ion] != undefined) {
-        tab = this.edges[ion];
+    var connectorId = connector.id();
+
+    if (this.edges[connectorId] != undefined) {
+        tab = this.edges[connectorId];
     }
 
     tab.push(edge);
-    this.edges[ion] = tab;
-};
-
-/**
- * Check that all edges reference a valid I/O
- */
-Block.prototype.checkEdges = function()
-{
-    var toDelete = [];
-    for (ion in this.edges) {
-        var edges = this.edges[ion];
-
-        if (!(ion in this.ios)) {
-            for (k in edges) {
-                toDelete.push(edges[k]);
-            }
-
-            delete this.edges[ion];
-        }
-    }
-
-    for (k in toDelete) {
-        this.blocks.removeEdge(this.blocks.getEdgeId(toDelete[k]));
-    }
-
-    if (toDelete.length) {
-        this.blocks.redraw();
-    }
+    this.edges[connectorId] = tab;
 };
 
 /**
  * Erase an edge
  */
-Block.prototype.eraseEdge = function(ion, edge)
+Block.prototype.eraseEdge = function(connector, edge)
 {
-    if (this.edges[ion] != undefined) {
-        for (k in this.edges[ion]) {
-            if (this.edges[ion][k] == edge) {
-                arrayRemove(this.edges[ion], k);
+    var connectorId = connector.id();
+
+    if (this.edges[connectorId] != undefined) {
+        for (k in this.edges[connectorId]) {
+            if (this.edges[connectorId][k] == edge) {
+                arrayRemove(this.edges[connectorId], k);
                 break;
             }
         }

@@ -1,20 +1,20 @@
 /**
  * An edge linking two blocks
  */
-function Edge(id, block1, io1, block2, io2, blocks)
+function Edge(id, block1, connector1, block2, connector2, blocks)
 {
     this.blocks = blocks;
     this.label = null;
     this.id = parseInt(id);
     this.block1 = block1;
-    this.io1 = io1;
+    this.connector1 = connector1;
     this.block2 = block2;
-    this.io2 = io2;
+    this.connector2 = connector2;
 
     this.defaultSize = 3;
     this.defaultFontSize = 10;
-    this.position1 = block1.linkPositionFor(io1);
-    this.position2 = block2.linkPositionFor(io2);
+    this.position1 = block1.linkPositionFor(connector1);
+    this.position2 = block2.linkPositionFor(connector2);
     this.segment = new Segment(
         this.position1.x, this.position1.y, 
         this.position2.x-this.position1.x, this.position2.y-this.position1.y
@@ -50,8 +50,8 @@ Edge.prototype.setLabel = function(label)
  */
 Edge.prototype.draw = function(svg, selected)
 {
-    this.position1 = this.block1.linkPositionFor(this.io1);
-    this.position2 = this.block2.linkPositionFor(this.io2);
+    this.position1 = this.block1.linkPositionFor(this.connector1);
+    this.position2 = this.block2.linkPositionFor(this.connector2);
     
     this.segment = new Segment(
         this.position1.x, this.position1.y, 
@@ -135,17 +135,17 @@ Edge.prototype.create = function()
     }
 
     // You have to link an input with an output
-    if (!this.blocks.getOption('canLinkInputs', false) && this.io1[0] == this.io2[0]) {
+    if (!this.blocks.getOption('canLinkInputs', false) && this.connector1.type == this.connector2.type) {
         throw 'You have to link an input with an output';
     }
 
     // The cards have to be okay
-    if ((!this.block1.canLink(this.io1)) || (!this.block2.canLink(this.io2))) {
+    if ((!this.block1.canLink(this.connector1)) || (!this.block2.canLink(this.connector2))) {
         throw 'Can\'t create such an edge because of the cardinalities';
     }
 
-    this.block1.addEdge(this.io1, this);
-    this.block2.addEdge(this.io2, this);
+    this.block1.addEdge(this.connector1, this);
+    this.block2.addEdge(this.connector2, this);
 };
 
 /**
@@ -153,8 +153,8 @@ Edge.prototype.create = function()
  */
 Edge.prototype.erase = function()
 {
-    this.block1.eraseEdge(this.io1, this);
-    this.block2.eraseEdge(this.io2, this);
+    this.block1.eraseEdge(this.connector1, this);
+    this.block2.eraseEdge(this.connector2, this);
 };
 
 /**
@@ -163,12 +163,12 @@ Edge.prototype.erase = function()
 Edge.prototype.same = function(other)
 {
     if (this.block1 == other.block1 && this.block2 == other.block2 
-            && this.io1 == other.io1 && this.io2 == other.io2) {
+            && this.connector1.same(this.connector2)) {
         return true;
     }
     
     if (this.block1 == other.block2 && this.block2 == other.block1
-            && this.io1 == other.io2 && this.io2 == other.io1) {
+            && this.connector1.samet(this.connector2)) {
         return true;
     }
 
@@ -183,9 +183,9 @@ Edge.prototype.exportData = function()
     return {
         id: this.id,
         block1: this.block1.id,
-        io1: this.io1,
+        connector1: this.connector1.exportData(),
         block2: this.block2.id,
-        io2: this.io2
+        connector2: this.connector2.exportData()
     };
 };
 
@@ -205,5 +205,6 @@ function EdgeImport(blocks, data)
 	throw "Error while importing an edge, a block did not exists";
     }
 
-    return new Edge(data.id, block1, data.io1, block2, data.io2, blocks);
+    return new Edge(data.id, block1, ConnectorImport(data.connector1), 
+                             block2, ConnectorImport(data.connector2), blocks);
 };

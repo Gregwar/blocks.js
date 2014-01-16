@@ -11,13 +11,15 @@ blocks.register({
             default: [1, 2]
         },
         {
-            name: "Input #",
-            length: "Gains",
+            name: "input",
+            prettyName: "Input #",
+            dimension: "Gains",
             attrs: "input"
         },
         {
-            name: "Output #",
-            length: "Gains",
+            name: "output",
+            prettyName: "Output #",
+            dimension: "Gains",
             attrs: "output"
         }
     ]

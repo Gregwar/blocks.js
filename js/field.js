@@ -20,17 +20,17 @@ function Field(metaField)
         this.unit = metaField.unit;
     }
 
+    // Is variadic?
+    this.variadic = 'dimension' in metaField;
+
     // Length
-    self.length = 'length' in metaField ? metaField.length : null;
+    this.dimension = 'dimension' in metaField ? metaField.dimension : null;
 
     // Setting attributes
-    self.attrs = metaField.attrs;
-
-    // Setting the cardinality
-    self.card = metaField.card;
+    this.attrs = metaField.attrs;
 
     // Is this metaField a title ?
-    self.asTitle = 'asTitle' in metaField && metaField.asTitle;
+    this.asTitle = 'asTitle' in metaField && metaField.asTitle;
 
     // Getting type
     if (metaField.type == undefined) {
@@ -45,6 +45,10 @@ function Field(metaField)
         this.type = type;
     }
 
+    // Cardinalities
+    this.card = 'card' in metaField ? metaField.card : '*';
+    this.card = this.parseCardinality(this.card, this.is('output'));
+
     // Is it an array ?
     this.isArray = (this.type.substr(-2) == '[]');
 
@@ -54,8 +58,8 @@ function Field(metaField)
     // Hide the label ?
     this.hideLabel = 'hideLabel' in metaField && metaField.hideLabel;
 
-    // Field name
-    this.name = metaField.name;
+    // Field iname
+    this.name = metaField.name.toLowerCase();
 
     this.prettyName = 'prettyName' in metaField ? metaField.prettyName
         : metaField.name;
@@ -184,8 +188,7 @@ function Field(metaField)
             html += '<b>' + this.name + '</b>: ';
         }
         
-        console.log('Printable value!!!!!!');
-        html += this.getPrintableValue() + '<br/>';
+        html += this.getPrintableValueWithUnit() + '<br/>';
 
         return html;
     };
@@ -209,7 +212,29 @@ function Field(metaField)
             value = value.join(',');
         }
 
-        return value + ' ' + this.unit;
+        return value;
+    };
+
+    /**
+     * Get printable value with units
+     */
+    this.getPrintableValueWithUnit = function()
+    {
+        var value = this.getPrintableValue();
+
+        if (this.unit) {
+            value += this.unit;
+        }
+
+        return value;
+    };
+
+    /**
+     * Getting the label
+     */
+    this.getLabel = function()
+    {
+        return this.prettyName;
     };
 
     /**
@@ -227,18 +252,57 @@ function Field(metaField)
 
         this.value = value;
     };
+};
 
-    this.getLength = function()
-    {
-        if (this.isArray) {
-            return this.getValue().length;
+/**
+ * Gets the variadic dimension
+ */
+Field.prototype.getDimension = function()
+{
+    if (this.isArray) {
+        return this.getValue().length;
+    } else {
+        return parseInt(this.getValue());
+    }
+};
+
+/**
+ * Checks if the fields has an attribute
+ */
+Field.prototype.is = function(attr)
+{
+    return (attr in this.attrs);
+};
+
+/**
+ * Parses the cardinality
+ */
+Field.prototype.parseCardinality = function(ioCard, isOutput)
+{
+    var card = [0, 1];
+
+    if (isOutput) {
+        card = [0, '*'];
+    }
+
+    if (ioCard != undefined) {
+        if (typeof(ioCard) != 'string') {
+            card = [ioCard, ioCard];
         } else {
-            return parseInt(this.getValue());
+            tab = ioCard.split('-');
+            if (tab.length == 1) {
+                card = [0, tab[0]];
+            } else {
+                card = tab;
+            }
         }
-    };
+    }
 
-    this.is = function(attr)
-    {
-        return (attr in this.attrs);
-    };
+    for (idx in card) {
+        if (card[idx] != '*') {
+            card[idx] = parseInt(card[idx]);
+        }
+    }
+
+    return card;
 };

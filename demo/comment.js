@@ -1,13 +1,14 @@
 blocks.register({
     name: "Comment",
     class: 'commentblock',
-    parameters: [
+    fields: [
         {
             name: "Comment",
             hideLabel: true,
             type: "textarea",
             default: 'Comment text',
-            card: 0
+            card: 0,
+            attrs: 'editable'
         }
     ]
 });

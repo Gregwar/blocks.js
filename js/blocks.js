@@ -283,9 +283,9 @@ Blocks = function(options)
     /**
      * Begin to draw an edge
      */
-    this.beginLink = function(block, io)
+    this.beginLink = function(block, connectorId)
     {
-        this.linking = [block, io];
+        this.linking = [block, connectorId];
     };
 
     /**
@@ -298,9 +298,9 @@ Blocks = function(options)
             if (distance > 15) {
                 var edge = this.edges[this.selectedLink];
                 if (this.selectedSide[0] == 2) {
-                    this.linking = [edge.block1, edge.io1];
+                    this.linking = [edge.block1, edge.connector1.id()];
                 } else {
-                    this.linking = [edge.block2, edge.io2];
+                    this.linking = [edge.block2, edge.connector2.id()];
                 }
 
                 this.removeEdge(this.selectedLink);
@@ -518,8 +518,8 @@ Blocks = function(options)
     {
         for (k in self.blocks) {
             var block = self.blocks[k];
-            if (block.hasFocus && block.focusedIo) {
-                self.endLink(block, block.focusedIo);
+            if (block.hasFocus && block.focusedConnector) {
+                self.endLink(block, block.focusedConnector);
                 break;
             }
         }
@@ -528,15 +528,20 @@ Blocks = function(options)
     /**
      * End drawing an edge
      */
-    this.endLink = function(block, io)
+    this.endLink = function(block, connectorId)
     {
         try {
             var id = this.edgeId++;
 
-            if (this.linking[1].substr(0, 6) == 'output') {
-                var edge = new Edge(id, this.linking[0], this.linking[1], block, io, self);
+            var blockA = this.linking[0];
+            var connectorA = IdToConnector(this.linking[1]);
+            var blockB = block;
+            var connectorB = IdToConnector(connectorId);
+
+            if (connectorA.isOutput()) {
+                var edge = new Edge(id, blockA, connectorA, blockB, connectorB, self);
             } else {
-                var edge = new Edge(id, block, io, this.linking[0], this.linking[1], self);
+                var edge = new Edge(id, blockB, connectorB, blockA, connectorA, self);
             }
 
             for (k in self.edges) {
@@ -555,7 +560,6 @@ Blocks = function(options)
             edge.create();
             this.edges.push(edge);
         } catch (error) {
-            throw error;
             this.messages.show('Unable to create this edge :' + "\n" + error, {'class': 'error'});
         }
         this.linking = null;
@@ -721,4 +725,3 @@ Blocks = function(options)
         }
     }
 };
-

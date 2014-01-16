@@ -26,13 +26,13 @@ blocks.register({
         {
             card: "0-1",
             name: "Input #",
-            length: "Data.Curves",
+            dimension: "Data.Curves",
             attrs: "intput"
         },
         {
             card: "0-1",
             name: "Output #",
-            length: "Data.Curves",
+            dimension: "Data.Curves",
             attrs: "output"
         }
     ],

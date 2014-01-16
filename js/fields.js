@@ -54,6 +54,8 @@ function Fields(block)
      */
     this.getField = function(name)
     {
+        name = name.toLowerCase();
+
         return (name in this.indexedFields ? this.indexedFields[name] : null);
     };
 
