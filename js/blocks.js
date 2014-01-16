@@ -159,7 +159,7 @@ Blocks.prototype.run = function(selector)
         // Detect clicks on the canvas
         self.div.mousedown(function(event) {
             if (self.canvasClicked()) {
-                evt.preventDefault();
+                event.preventDefault();
             } 
             
             if (event.which == 2 || (!self.selectedLink && !self.selectedBlock && event.which == 1)) {
@@ -288,8 +288,16 @@ Blocks.prototype.register = function(meta)
 Blocks.prototype.beginLink = function(block, connectorId)
 {
     this.linking = [block, connectorId];
+    this.highlightTargets();
+};
 
-    var connector = IdToConnector(connectorId);
+/**
+ * Highlight possible targets for a connector ID
+ */
+Blocks.prototype.highlightTargets = function()
+{
+    var block = this.linking[0];
+    var connector = IdToConnector(this.linking[1]);
     var type = block.getField(connector.name).type;
     $('.connector').addClass('disabled');
 
@@ -317,6 +325,7 @@ Blocks.prototype.move = function()
 
             this.removeEdge(this.selectedLink);
             this.selectedSide = null;
+            this.highlightTargets();
             if (this.selectedLink != null) {
                 this.edges[this.selectedLink].selected = false;
             }
