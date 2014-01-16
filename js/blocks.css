@@ -304,8 +304,7 @@
     background-color:white;
 }
 
-.blocks_js_editor .block .parameters input,
-.blocks_js_editor .block .parameters textarea {
+.blocks_js_editor .block .parameters input {
     width:50px;
 }
 

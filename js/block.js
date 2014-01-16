@@ -7,9 +7,9 @@ Block = function(blocks, meta, id)
     this.meta = meta;
 
     // Appareance values
-    this.valuesRatio = 1.3;
+    this.valuesRatio = 1.5;
     this.defaultFont = 10;
-    this.defaultInputWidth = 100;
+    this.defaultInputWidth = 70;
 
     // Custom description
     this.description = null;
