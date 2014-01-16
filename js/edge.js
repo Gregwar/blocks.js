@@ -10,6 +10,7 @@ function Edge(id, block1, connector1, block2, connector2, blocks)
     this.connector1 = connector1;
     this.block2 = block2;
     this.connector2 = connector2;
+    this.selected = false;
 
     this.defaultSize = 3;
     this.defaultFontSize = 10;
@@ -48,7 +49,7 @@ Edge.prototype.setLabel = function(label)
 /**
  * Draws the edge
  */
-Edge.prototype.draw = function(svg, selected)
+Edge.prototype.draw = function(svg)
 {
     this.position1 = this.block1.linkPositionFor(this.connector1);
     this.position2 = this.block2.linkPositionFor(this.connector2);
@@ -60,7 +61,7 @@ Edge.prototype.draw = function(svg, selected)
 
     var lineWidth = this.defaultSize*this.blocks.scale;
 
-    if (selected) {
+    if (this.selected) {
         var strokeStyle = 'rgba(0, 200, 0, 1)';
     } else {
         var strokeStyle = 'rgba(255, 200, 0, 1)';

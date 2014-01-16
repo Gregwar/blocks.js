@@ -306,6 +306,9 @@ Blocks.prototype.move = function()
 
             this.removeEdge(this.selectedLink);
             this.selectedSide = null;
+            if (this.selectedLink != null) {
+                this.edges[this.selectedLink].selected = false;
+            }
             this.selectedLink = null;
             this.redraw();
         }
@@ -330,6 +333,9 @@ Blocks.prototype.canvasClicked = function()
 {
     var prevent = false;
     this.selectedBlock = null;
+    if (this.selectedLink != null) {
+        this.edges[this.selectedLink].selected = false;
+    }
     this.selectedLink = null;
     this.selectedSide = null;
 
@@ -350,6 +356,7 @@ Blocks.prototype.canvasClicked = function()
                     this.selectedSide = [2, this.mouseX, this.mouseY];
                 }
                 this.selectedLink = k;
+                this.edges[k].selected = true;
                 prevent = true;
                 break;
             }
@@ -471,7 +478,7 @@ Blocks.prototype.doRedraw = function()
     svg.clear();
 
     for (k in this.edges) {
-        this.edges[k].draw(svg, this.selectedLink == k);
+        this.edges[k].draw(svg);
     }
 
     if (this.linking) {

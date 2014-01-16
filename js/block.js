@@ -305,8 +305,15 @@ Block.prototype.redraw = function(selected)
         var connectorVisual = connectorDiv.find('.circle');
 
         connectorVisual.removeClass('io_active');
+        connectorVisual.removeClass('io_selected');
         if (connectorId in this.edges && this.edges[connectorId].length) {
             connectorVisual.addClass('io_active');
+
+            for (n in this.edges[connectorId]) {
+                if (this.edges[connectorId][n].selected) {
+                    connectorVisual.addClass('io_selected');
+                }
+            }
         }
     }
 

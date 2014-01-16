@@ -254,6 +254,10 @@
     background-image:url('gfx/circle_full.png');
 }
 
+.blocks_js_editor .circle.io_selected {
+    background-image:url('gfx/circle_selected.png') !important;
+}
+
 .blocks_js_editor input,
 .blocks_js_editor textarea
 {
