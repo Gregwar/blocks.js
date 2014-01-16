@@ -11,8 +11,22 @@ Types = function()
  */
 Types.normalize = function(type)
 {
+    type = type.toLowerCase();
+
     if (type == 'check' || type == 'bool' || type == 'checkbox') {
         type = 'bool';
+    }
+
+    if (type == 'integer') {
+        type = 'int';
+    }
+
+    if (type == 'float' || type == 'double') {
+        type = 'number';
+    }
+
+    if (type == 'string') {
+        type = 'text';
     }
 
     return type;
