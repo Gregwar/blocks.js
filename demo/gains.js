@@ -12,13 +12,17 @@ blocks.register({
         },
         {
             name: "input",
-            prettyName: "Input #",
+            label: "X#",
             dimension: "Gains",
-            attrs: "input"
+            attrs: "input",
+            card: '1'
         },
         {
             name: "output",
-            prettyName: "Output #",
+            label: "Y#",
+            dynamicLabel: function(block, x) {
+                return block.getValue('Gains')[x]+'*X'+(x+1);
+            },
             dimension: "Gains",
             attrs: "output"
         }

@@ -1,16 +1,16 @@
 blocks.register({
     name: "Addition",
     family: "Math",
-    inputs: [
+    fields: [
         {
+            name: "Terms",
             card: "0-*",
-            name: "Terms"
-        }
-    ],
-    outputs: [
+            attrs: "input"
+        },
         {
+            name: "Sum",
             card: "0-*",
-            name: "Sum"
+            attrs: "output"
         }
     ]
 });

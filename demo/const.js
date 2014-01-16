@@ -5,9 +5,12 @@ blocks.register({
     fields: [
         {
             name: "Value",
-            type: "Number",
-            default: 0,
-            attrs: "editable output"
+            type: "number[]",
+            default: [1,2,3],
+            attrs: "editable output",
+            dynamicLabel: function(block, x) {
+                return block.getValue('value')[x];
+            }
         }
     ]
 });

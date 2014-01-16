@@ -103,6 +103,20 @@ Block.prototype.getValues = function(values)
 };
 
 /**
+ * Getting a field value
+ */
+Block.prototype.getValue = function(name)
+{
+    var field = this.fields.getField(name);
+
+    if (field) {
+        return field.getValue();
+    } else {
+        return null;
+    }
+};
+
+/**
  * Parses a length
  */
 Block.prototype.parseDimension = function(dimension)
@@ -194,16 +208,17 @@ Block.prototype.getHtml = function()
                 var connectorId = field.name.toLowerCase() + '_' + key;
                 var label = field.getLabel().replace('#', x+1);
 
-                if (field.dynamicLabel) {
-                    label = field.dynamicLabel(self, x);
-                }
-                if (field.variadic) {
-                    connectorId += '_' + x;
+                var value = '';
+                if (field.dynamicLabel != null) {
+                    label = String(field.dynamicLabel(self, x));
+                } else {
+                    if (field && field.is('editable')) {
+                        value = ' ('+field.getPrintableValueWithUnit(field.variadic ? x : undefined)+')';
+                    }
                 }
 
-                var value = '';
-                if (field && field.is('editable')) {
-                    value = ' ('+field.getPrintableValueWithUnit()+')';
+                if (field.variadic) {
+                    connectorId += '_' + x;
                 }
 
                 // Generating HTML

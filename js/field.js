@@ -20,9 +20,6 @@ function Field(metaField)
         this.unit = metaField.unit;
     }
 
-    // Is variadic?
-    this.variadic = 'dimension' in metaField;
-
     // Length
     this.dimension = 'dimension' in metaField ? metaField.dimension : null;
 
@@ -49,9 +46,6 @@ function Field(metaField)
     this.card = 'card' in metaField ? metaField.card : '*';
     this.card = this.parseCardinality(this.card, this.is('output'));
 
-    // Is it an array ?
-    this.isArray = (this.type.substr(-2) == '[]');
-
     // Hide the field ?
     this.hide = 'hide' in metaField && metaField.hide;
 
@@ -61,14 +55,28 @@ function Field(metaField)
     // Field iname
     this.name = metaField.name.toLowerCase();
 
-    this.prettyName = 'prettyName' in metaField ? metaField.prettyName
+    this.label = 'label' in metaField ? metaField.label
         : metaField.name;
+
+    this.dynamicLabel = 'dynamicLabel' in metaField ? metaField.dynamicLabel
+        : null;
 
     // A field row
     this.row = null;
 
     // Rows
     this.rows = null;
+    
+    // Is it an array ?
+    this.isArray = (this.type.substr(-2) == '[]');
+
+    if (this.isArray) {
+        this.dimension = this.name;
+        this.type = this.type.substr(0, this.type.length-2);
+    }
+
+    // Is variadic?
+    this.variadic = !!this.dimension;
 
     // Default value
     this.default = 'default' in metaField ? metaField.default : null;
@@ -170,7 +178,7 @@ function Field(metaField)
             }
 
             if (!justField) {
-                field = this.prettyName + ':&nbsp;' + field + '<br />';
+                field = this.label + ':&nbsp;' + field + '<br />';
             }
 
             return field;
@@ -185,7 +193,7 @@ function Field(metaField)
         var html = '';
 
         if (!this.hideLabel) {
-            html += '<b>' + this.name + '</b>: ';
+            html += '<b>' + this.label + '</b>: ';
         }
         
         html += this.getPrintableValueWithUnit() + '<br/>';
@@ -204,12 +212,16 @@ function Field(metaField)
     /**
      * Get printable value
      */
-    this.getPrintableValue = function()
+    this.getPrintableValue = function(index)
     {
         var value = this.getValue();
 
         if (value instanceof Array) {
-            value = value.join(',');
+            if (index == undefined) {
+                value = value.join(',');
+            } else {
+                value = value[index];
+            }
         }
 
         return value;
@@ -218,9 +230,9 @@ function Field(metaField)
     /**
      * Get printable value with units
      */
-    this.getPrintableValueWithUnit = function()
+    this.getPrintableValueWithUnit = function(index)
     {
-        var value = this.getPrintableValue();
+        var value = this.getPrintableValue(index);
 
         if (this.unit) {
             value += this.unit;
@@ -234,7 +246,7 @@ function Field(metaField)
      */
     this.getLabel = function()
     {
-        return this.prettyName;
+        return this.label;
     };
 
     /**
