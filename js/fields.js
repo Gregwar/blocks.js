@@ -1,9 +1,13 @@
 /**
  * Parameters managers
  */
-function ParametersManager(blockType, block)
+function Fields(block)
 {
     var self = this;
+
+    // Block & meta
+    this.block = block;
+    this.meta = block.meta;
 
     // Is the form displayed ?
     this.display = false;
@@ -13,15 +17,36 @@ function ParametersManager(blockType, block)
 
     // Fields
     this.fields = [];
-    this.indexedFields = {};
-    for (k in blockType.parameters) {
-        var parameter = blockType.parameters[k];
-        var field = new ParameterField(parameter);
+    for (k in this.meta.fields) {
+        var field = new Field(this.meta.fields[k]);
         field.onUpdate = function() {
             block.cssParameters();
         };
         this.fields.push(field);
+    }
+
+    // Indexed fields
+    this.inputs = [];
+    this.outputs = [];
+    this.editables = [];
+    this.indexedFields = {};
+
+    // Indexing
+    for (k in this.fields) {
+        var field = this.fields[k];
         this.indexedFields[field.name] = field;
+
+        if ('editable' in field.attrs) {
+            this.editables.push(field);
+        }
+        if ('input' in field.attrs) {
+            field.hide = true;
+            this.inputs.push(field);
+        }
+        if ('output' in field.attrs) {
+            field.hide = true;
+            this.outputs.push(field);
+        }
     }
 
     /**
@@ -171,8 +196,8 @@ function ParametersManager(blockType, block)
      */
     this.toggle = function()
     {
-        if (blockType.parametersEditor != undefined && typeof(blockType.parametersEditor) == 'function') {
-            blockType.parametersEditor(block.parameters, function(parameters) {
+        if (this.meta.parametersEditor != undefined && typeof(this.meta.parametersEditor) == 'function') {
+            this.meta.parametersEditor(block.parameters, function(parameters) {
                 block.parameters = parameters;
                 block.render();
                 block.redraw();

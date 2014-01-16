@@ -1,10 +1,10 @@
 /**
  * Creates an instance of a block
  */
-Block = function(blocks, blockType, id)
+Block = function(blocks, meta, id)
 {
     this.blocks = blocks;
-    this.blockType = blockType;
+    this.meta = meta;
 
     // Appareance parameters
     this.parametersRatio = 1.3;
@@ -15,7 +15,7 @@ Block = function(blocks, blockType, id)
     this.description = null;
     
     // Width
-    this.defaultWidth = this.blockType.size == 'small' ? 100 : 135;
+    this.defaultWidth = this.meta.size == 'small' ? 100 : 135;
 
     // History saved before move
     this.historySaved = false;
@@ -37,7 +37,7 @@ Block = function(blocks, blockType, id)
 
     // Parameters
     this.parameters = null;
-    this.parametersManager = null;
+    this.fields = null;
 
     // Position
     this.x = 0;
@@ -56,7 +56,7 @@ Block = function(blocks, blockType, id)
 // Can this block be used to break a loop ?
 Block.prototype.isLoopable = function()
 {
-    return this.blockType.loopable;
+    return this.meta.loopable;
 };
 
 /**
@@ -119,20 +119,7 @@ Block.prototype.parseLength = function(length)
         return length;
     }
 
-    expression = length.split(/\./);
-
-    if (expression.length == 2) {
-        var key = expression[0];
-        var operation = expression[1];
-
-        if (operation == 'length') {
-            return this.parametersManager.getParameterSize(key);
-        }
-
-        if (operation == 'value') {
-            return parseInt(this.parameters[key]);
-        }
-    }
+    return this.fields.getField(length).getLength();
 };
 
 /**
@@ -160,9 +147,9 @@ Block.prototype.getHtml = function()
 {
     var self = this;
     this.ios = {};
-    var title = this.blockType.name + '<span class="blockId">#' + this.id + '</span>';
+    var title = this.meta.name + '<span class="blockId">#' + this.id + '</span>';
     
-    var parameters = this.parametersManager.fields;
+    var parameters = this.fields.fields;
     for (k in parameters) {
         var parameter = parameters[k];
         if (parameter.asTitle) {
@@ -181,8 +168,8 @@ Block.prototype.getHtml = function()
     if (this.description) {
         html += '<div class="description">' + self.description + '</div>';
     } else {
-        if (this.blockType.description) {
-            html += '<div class="description">' + this.blockType.description + '</div>';
+        if (this.meta.description) {
+            html += '<div class="description">' + this.meta.description + '</div>';
         } else {
             html += '<div class="description">No description</div>';
         }
@@ -190,7 +177,7 @@ Block.prototype.getHtml = function()
     html += '<div class="blockicon gear"></div></div>';
     html += '<div class="infos"></div>';
     
-    var parameters = self.parametersManager.fields;
+    var parameters = self.fields.fields;
     for (k in parameters) {
         var parameter = parameters[k];
         var parameterHtml = parameter.getHtml(self.parameters);
@@ -203,12 +190,12 @@ Block.prototype.getHtml = function()
     }
 
     // Handling inputs & outputs
-    handle = function(key) {
+    handle = function(key, fields) {
         html += '<div class="' + key + 's '+(self.isLoopable() ? 'loopable' : '')+'">';
 
-        for (k in self.blockType[key+'s']) {
+        for (k in fields) {
             var isVariadic = false;
-            var io = self.blockType[key+'s'][k];
+            var io = fields[k];
 
             var size = 1;
             if (io.length != undefined) {
@@ -228,9 +215,10 @@ Block.prototype.getHtml = function()
                 }
 
                 var value = '';
-                var field = self.parametersManager.getField(io.name);
+                var field = self.fields.getField(io.name);
                 if (field) {
-                    value = ' ('+field.getValue(self.parameters)+')';
+                    console.log(field);
+                    value = ' ('+field.getValue()+')';
                 }
 
                 // Generating HTML
@@ -243,8 +231,8 @@ Block.prototype.getHtml = function()
             html += '</div>';
     };
 
-    handle('input');
-    handle('output');
+    handle('input', this.fields.inputs);
+    handle('output', this.fields.outputs);
     this.checkEdges();
 
     return html;
@@ -267,15 +255,15 @@ Block.prototype.render = function()
  */
 Block.prototype.create = function(div)
 {
-    html = '<div id="block' + this.id + '" class="block ' + this.blockType['class'] + '"></div>'
+    html = '<div id="block' + this.id + '" class="block ' + this.meta['class'] + '"></div>'
 
     div.append(html);
     this.div = div.find('#block' + this.id);
     
-    if (this.parametersManager == undefined) {
-        this.parametersManager = new ParametersManager(this.blockType, this);
+    if (this.fields == undefined) {
+        this.fields = new Fields(this);
         if (this.parameters == null) {
-            this.parameters = this.parametersManager.getDefaults();
+            this.parameters = this.fields.getDefaults();
         }
     }
 
@@ -325,7 +313,7 @@ Block.prototype.redraw = function(selected)
     }
 
     // Updating the parameters manager div
-    this.parametersManager.div = this.div.find('.parameters');
+    this.fields.div = this.div.find('.parameters');
 
     // Is selected ?
     this.div.removeClass('block_selected');
@@ -400,7 +388,7 @@ Block.prototype.initListeners = function()
 
     // Handle the parameters
     self.div.find('.gear').click(function() {
-        self.parametersManager.toggle();
+        self.fields.toggle();
         self.cssParameters();
     });
 
@@ -564,9 +552,9 @@ Block.prototype.exportData = function()
         id: this.id,
         x: this.x,
         y: this.y,
-        type: this.blockType.name,
-        module: this.blockType.module,
-        parameters: this.parametersManager.exportData(this.parameters)
+        type: this.meta.name,
+        module: this.meta.module,
+        parameters: this.fields.exportData(this.parameters)
     };
 };
 
@@ -575,11 +563,11 @@ Block.prototype.exportData = function()
  */
 function BlockImport(blocks, data)
 {
-    for (t in blocks.blockTypes) {
-	var blockType = blocks.blockTypes[t];
+    for (t in blocks.metas) {
+	var meta = blocks.metas[t];
         var module = ('module' in data) ? data.module : null;
-	if (blockType.name == data.type && blockType.module == module) {
-	    var block = new Block(blocks, blockType, data.id);
+	if (meta.name == data.type && meta.module == module) {
+	    var block = new Block(blocks, meta, data.id);
 	    block.x = data.x;
 	    block.y = data.y;
 	    block.parameters = ParametersImport(data.parameters);

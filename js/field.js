@@ -1,29 +1,39 @@
 /**
- * A parameter field
+ * A metaField field
  */
-function ParameterField(parameter)
+function Field(metaField)
 {
     var self = this;
     this.onUpdate = null;
 
-    // Default unit
-    if (parameter.unit == undefined) {
-        this.unit = '';
-    } else {
-        this.unit = parameter.unit;
+    // Value
+    this.value = null;
+
+    if ('default' in metaField) {
+        this.value = metaField.default;
     }
 
-    // Setting the cardinality
-    self.card = parameter.card
+    // Default unit
+    if (metaField.unit == undefined) {
+        this.unit = '';
+    } else {
+        this.unit = metaField.unit;
+    }
 
-    // Is this parameter a title ?
-    self.asTitle = 'asTitle' in parameter && parameter.asTitle;
+    // Setting attributes
+    self.attrs = metaField.attrs;
+
+    // Setting the cardinality
+    self.card = metaField.card;
+
+    // Is this metaField a title ?
+    self.asTitle = 'asTitle' in metaField && metaField.asTitle;
 
     // Getting type
-    if (parameter.type == undefined) {
-        parameter.type = 'text';
+    if (metaField.type == undefined) {
+        this.type = 'text';
     } else {
-        var type = parameter.type.toLowerCase();
+        var type = metaField.type.toLowerCase();
 
         if (type == 'check' || type == 'bool' || type == 'boolean') {
             type = 'checkbox';
@@ -36,16 +46,16 @@ function ParameterField(parameter)
     this.isArray = (this.type.substr(-2) == '[]');
 
     // Hide the field ?
-    this.hide = 'hide' in parameter && parameter.hide;
+    this.hide = 'hide' in metaField && metaField.hide;
 
     // Hide the label ?
-    this.hideLabel = 'hideLabel' in parameter && parameter.hideLabel;
+    this.hideLabel = 'hideLabel' in metaField && metaField.hideLabel;
 
     // Field name
-    this.name = parameter.name;
+    this.name = metaField.name;
 
-    this.prettyName = 'prettyName' in parameter ? parameter.prettyName
-        : parameter.name;
+    this.prettyName = 'prettyName' in metaField ? metaField.prettyName
+        : metaField.name;
 
     // A field row
     this.row = null;
@@ -54,7 +64,7 @@ function ParameterField(parameter)
     this.rows = null;
 
     // Default value
-    this.default = 'default' in parameter ? parameter.default : null;
+    this.default = 'default' in metaField ? metaField.default : null;
 
     /**
      * Append the default value
@@ -75,7 +85,7 @@ function ParameterField(parameter)
      */
     this.setListeners = function(div)
     {
-        if (parameter.type instanceof Array) {
+        if (metaField.type instanceof Array) {
             var updateNumbers = function() {
                 div.find('table').each(function() {
                     var number = 1;
@@ -116,13 +126,13 @@ function ParameterField(parameter)
             justField = false;
         }
 
-        if (parameter.type instanceof Array) {
+        if (metaField.type instanceof Array) {
             var head = '<th></th>';
             var row = '<td class="number"></td>';
             var nb = 1;
 
-            for (k in parameter.type) {
-                var type = parameter.type[k];
+            for (k in metaField.type) {
+                var type = metaField.type[k];
                 var param = new ParameterField(type);
                 param.name = this.name + '.' +param.name;
 
@@ -179,19 +189,9 @@ function ParameterField(parameter)
     /**
      * Return the (value) HTML rendering
      */
-    this.getValue = function(parameters)
+    this.getValue = function()
     {
-        var value = '';
-
-        // Getting the value from either the parameters, the
-        // default value or '?' as fallback
-        if (this.name in parameters) {
-            value = parameters[this.name];
-        } else if ('default' in parameter) {
-            value = parameter['default'];
-        } else {
-            value = '?';
-        }
+        var value = this.value;
 
         // If it's an array, concatenate it with ,
         if (value instanceof Array) {
@@ -204,5 +204,22 @@ function ParameterField(parameter)
         }
 
         return value + ' ' + this.unit;
+    };
+
+    /**
+     * Setting the value of the field
+     */
+    this.setValue = function(value)
+    {
+        this.value = value;
+    };
+
+    this.getLength = function()
+    {
+        if (metaField.isArray) {
+
+        } else {
+
+        }
     };
 };

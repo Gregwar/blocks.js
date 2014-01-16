@@ -54,7 +54,7 @@ Blocks = function(options)
     this.context = null;
 
     // Blocks types
-    this.blockTypes = [];
+    this.metas = [];
 
     // Instances
     this.blocks = [];
@@ -257,11 +257,11 @@ Blocks = function(options)
      */
     this.addBlock = function(name, x, y)
     {
-        for (k in self.blockTypes) {
-            var type = self.blockTypes[k];
+        for (k in self.metas) {
+            var type = self.metas[k];
 
             if (type.name == name) {
-                var block = new Block(self, self.blockTypes[k], this.id);
+                var block = new Block(self, self.metas[k], this.id);
                 block.x = x;
                 block.y = y;
                 block.create(self.div.find('.blocks'));
@@ -275,9 +275,9 @@ Blocks = function(options)
     /**
      * Registers a new block type
      */
-    this.register = function(type)
+    this.register = function(meta)
     {
-        self.blockTypes.push(new BlockType(type));
+        self.metas.push(new Meta(meta));
     };
 
     /**
