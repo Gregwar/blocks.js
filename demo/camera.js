@@ -1,6 +1,6 @@
 blocks.register({
     name: "Camera",
-    family: "Devices",
+    family: "Image",
     description: "A camera",
     fields: [
         {

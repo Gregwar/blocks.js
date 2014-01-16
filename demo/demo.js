@@ -11,6 +11,7 @@
     include('motor.js');
     include('time.js');
     include('camera.js');
+    include('blobdetect.js');
     include('comment.js');
     include('scene.js');
     include('add.js');
