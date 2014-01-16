@@ -372,6 +372,7 @@ Blocks.prototype.canvasClicked = function()
  */
 Blocks.prototype.removeEdge = function(edge)
 {
+    this.history.save();
     this.edges[edge].erase();
     arrayRemove(this.edges, edge);
 };
