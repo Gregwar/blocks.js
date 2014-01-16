@@ -7,20 +7,26 @@ blocks.register({
             name: "Inputs",
             type: "integer",
             default: 2,
+            hide: true,
             attrs: "editable"
         },
         {
             name: "Address",
             type: "integer",
+            attrs: "input",
+            dynamicLabel: function(block) {
+                return 'Address (1 to '+block.getValue('inputs')+')';
+            }
+        },
+        {
+            name: "input",
+            label: "Input #",
+            dimension: "Inputs",
             attrs: "input"
         },
         {
-            name: "Input #",
-            dimension: "Inputs.value",
-            attrs: "input"
-        },
-        {
-            name: "Output",
+            name: "output",
+            label: "Output",
             attrs: "output"
         }
     ]

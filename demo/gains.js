@@ -2,6 +2,7 @@ blocks.register({
     name: "Gains",
     family: "Math",
     description: "Each <b>output[i]</b> will be <b>gain[i]*input[i]</b>",
+    size: 'small',
     fields: [
         {
             name: "Gains",

@@ -2,6 +2,7 @@ blocks.register({
     name: "Constant",
     family: "Math",
     description: "A simple input constant",
+    size: 'small',
     fields: [
         {
             name: "Value",
