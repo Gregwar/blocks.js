@@ -168,7 +168,7 @@ Edge.prototype.same = function(other)
     }
     
     if (this.block1 == other.block2 && this.block2 == other.block1
-            && this.connector1.samet(this.connector2)) {
+            && this.connector2.same(this.connector1)) {
         return true;
     }
 
