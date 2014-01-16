@@ -68,7 +68,7 @@ function Fields(block)
 
         html += '<form>';
         for (k in this.editables) {
-            html += this.editables[k].getFieldHtml(false);
+            html += this.editables[k].getFieldHtml();
         }
         html += '<input type="submit" style="display:none" width="0" height="0" />';
         html += '</form>';
@@ -87,10 +87,6 @@ function Fields(block)
             self.save();
             return false;
         });
-
-        for (k in this.fields) {
-            this.fields[k].setListeners(this.div);
-        }
 
         this.div.find('input').click(function() {
             var val = $(this).val();

@@ -80,190 +80,128 @@ function Field(metaField)
 
     // Default value
     this.default = 'default' in metaField ? metaField.default : null;
+};
 
-    /**
-     * Append the default value
-     */
-    this.appendDefault = function(object)
-    {
-        if (this.default != null) {
-            object[this.name] = this.default;
-        } else if (this.isArray) {
-            object[this.name] = [];
+/**
+ * Append the default value
+ */
+Field.prototype.appendDefault = function(object)
+{
+    if (this.default != null) {
+        object[this.name] = this.default;
+    } else if (this.isArray) {
+        object[this.name] = [];
+    } else {
+        object[this.name] = null;
+    }
+};
+
+/**
+ * The render was updated
+ */
+Field.prototype.updated = function()
+{
+    if (this.onUpdate) {
+        this.onUpdate();
+    }
+};
+
+/**
+ * HTML render for the field
+ */
+Field.prototype.getFieldHtml = function()
+{
+    var field = this.label+': ';
+
+    if (this.type == 'textarea') {
+        field += '<textarea name="'+this.name+'"></textarea>';
+    } else {
+        field += '<input value="'+this.getPrintableValue()+'" type="'+this.type+'" name="'+this.name+'" />'+this.unit;
+    }
+
+    field += '<br/>';
+
+    return field;
+};
+
+/**
+ * Returns the HTML rendering
+ */
+Field.prototype.getHtml = function()
+{
+    var html = '';
+
+    if (!this.hideLabel) {
+        html += '<b>' + this.label + '</b>: ';
+    }
+    
+    html += this.getPrintableValueWithUnit() + '<br/>';
+
+    return html;
+};
+
+/**
+ * Return the (value) HTML rendering
+ */
+Field.prototype.getValue = function()
+{
+    return this.value;
+};
+
+/**
+ * Get printable value
+ */
+Field.prototype.getPrintableValue = function(index)
+{
+    var value = this.getValue();
+
+    if (value instanceof Array) {
+        if (index == undefined) {
+            value = value.join(',');
         } else {
-            object[this.name] = null;
+            value = value[index];
         }
-    };
+    }
 
-    /**
-     * Setup the listeners on the div
-     */
-    this.setListeners = function(div)
-    {
-        if (metaField.type instanceof Array) {
-            var updateNumbers = function() {
-                div.find('table').each(function() {
-                    var number = 1;
-                    $(this).find('.number').each(function() {
-                        $(this).text(number++);
-                    });
-                });
-            }
-            updateNumbers();
-            this.rows = div.find('.' + this.name + '_rows');
-            div.find('.' + this.name + '_add').click(function() {
-                self.rows.append(self.row);
-                self.updated();
-                updateNumbers();
-            });
-            div.find('.' + this.name + '_remove').click(function() {
-                self.rows.find('tr').last().remove();
-            });
-        }
-    };
+    return value;
+};
 
-    /**
-     * The render was updated
-     */
-    this.updated = function()
-    {
-        if (this.onUpdate) {
-            this.onUpdate();
-        }
-    };
+/**
+ * Get printable value with units
+ */
+Field.prototype.getPrintableValueWithUnit = function(index)
+{
+    var value = this.getPrintableValue(index);
 
-    /**
-     * HTML render for the field
-     */
-    this.getFieldHtml = function(justField)
-    {
-        if (justField == undefined) {
-            justField = false;
-        }
+    if (this.unit) {
+        value += this.unit;
+    }
 
-        if (metaField.type instanceof Array) {
-            var head = '<th></th>';
-            var row = '<td class="number"></td>';
-            var nb = 1;
+    return value;
+};
 
-            for (k in metaField.type) {
-                var type = metaField.type[k];
-                var param = new ParameterField(type);
-                param.name = this.name + '.' +param.name;
+/**
+ * Getting the label
+ */
+Field.prototype.getLabel = function()
+{
+    return this.label;
+};
 
-                if (parameters[param.name] != undefined) {
-                    nb = Math.max(nb, parameters[param.name].length);
-                }
+/**
+ * Setting the value of the field
+ */
+Field.prototype.setValue = function(value)
+{
+    if (this.isArray && !(value instanceof Array)) {
+        value = value.split(',');
+    }
 
-                head += '<th>'+param.prettyName+'</th>';
-                row += '<td>'+param.getFieldHtml(true)+'</td>';
-            }
-            this.row = '<tr>'+row+'</tr>';
-            var initRows = '';
+    if (this.type == 'checkbox') {
+        value = !!value;
+    }
 
-            for (k=0; k<nb; k++) {
-                initRows += this.row;
-            }
-
-            var html = '<table class="fields"><tr>'+head+'</tr><tbody class="'+this.name+'_rows">'+initRows+'</tbody></table>';
-            html += '<a href="javascript:void(0);" class="'+this.name+'_add">Add</a> ';
-            html += '<a href="javascript:void(0);" class="'+this.name+'_remove">Remove</a>';
-
-            return html;
-        } else { 
-            if (this.type == 'textarea') {
-                var field = '<textarea name="'+this.name+'"></textarea>';
-            } else {
-                var field = '<input value="'+this.getPrintableValue()+'" type="'+this.type+'" name="'+this.name+'" />'+this.unit;
-            }
-
-            if (!justField) {
-                field = this.label + ':&nbsp;' + field + '<br />';
-            }
-
-            return field;
-        }
-    };
-
-    /**
-     * Returns the HTML rendering
-     */
-    this.getHtml = function()
-    {
-        var html = '';
-
-        if (!this.hideLabel) {
-            html += '<b>' + this.label + '</b>: ';
-        }
-        
-        html += this.getPrintableValueWithUnit() + '<br/>';
-
-        return html;
-    };
-
-    /**
-     * Return the (value) HTML rendering
-     */
-    this.getValue = function()
-    {
-        return this.value;
-    };
-
-    /**
-     * Get printable value
-     */
-    this.getPrintableValue = function(index)
-    {
-        var value = this.getValue();
-
-        if (value instanceof Array) {
-            if (index == undefined) {
-                value = value.join(',');
-            } else {
-                value = value[index];
-            }
-        }
-
-        return value;
-    };
-
-    /**
-     * Get printable value with units
-     */
-    this.getPrintableValueWithUnit = function(index)
-    {
-        var value = this.getPrintableValue(index);
-
-        if (this.unit) {
-            value += this.unit;
-        }
-
-        return value;
-    };
-
-    /**
-     * Getting the label
-     */
-    this.getLabel = function()
-    {
-        return this.label;
-    };
-
-    /**
-     * Setting the value of the field
-     */
-    this.setValue = function(value)
-    {
-        if (this.isArray && !(value instanceof Array)) {
-            value = value.split(',');
-        }
-
-        if (this.type == 'checkbox') {
-            value = !!value;
-        }
-
-        this.value = value;
-    };
+    this.value = value;
 };
 
 /**
