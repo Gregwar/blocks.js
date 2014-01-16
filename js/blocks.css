@@ -130,7 +130,6 @@
     position:absolute;
     background-image:url('gfx/blockFade.png');
     background-repeat:repeat-x;
-    width: auto;
     border:2px solid #fafafa;
     box-shadow:5px 5px 10px #aaa;
     padding:1px;
@@ -237,6 +236,11 @@
     background-repeat:no-repeat;
     cursor:pointer;
     clear:both;
+    width:200px;
+}
+
+.blocks_js_editor .output {
+    text-align:right;
 }
 
 .blocks_js_editor .circle {

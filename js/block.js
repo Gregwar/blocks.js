@@ -8,14 +8,20 @@ Block = function(blocks, meta, id)
 
     // Appareance values
     this.valuesRatio = 1.3;
-    this.defaultFont = 12;
+    this.defaultFont = 10;
     this.defaultInputWidth = 100;
 
     // Custom description
     this.description = null;
     
     // Width
-    this.defaultWidth = this.meta.size == 'small' ? 100 : 135;
+    if (this.meta.size == 'normal') {
+        this.defaultWidth = 150;
+    } else if (this.meta.size == 'small') {
+        this.defaultWidth = 100;
+    } else {
+        this.defaultWidth = this.meta.size;
+    }
 
     // History saved before move
     this.historySaved = false;
