@@ -24,13 +24,13 @@ a:hover {
  * Extra CSS
  */
 .blocks_js_editor .commentblock {
-    background-color:#ffe6aa;
-    color:#571b00;
+    background-color:#feffc4;
+    color:#6f4e07;
     font-style:italic;
 }
 
 .blocks_js_editor .commentblock .blockTitle {
-    background-color:#f4c659;
+    background-color:#e8d92f;
 }
 
 .blocks_js_editor .menu_icon_type_Comment {
