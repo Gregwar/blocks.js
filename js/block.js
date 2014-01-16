@@ -447,11 +447,11 @@ Block.prototype.canLink = function(connector)
 
     var card = this.fields.getField(connector.name).card;
 
-    if (card[1] != '*') {
-        return (tab.length < card[1]);
+    if (card[1] == '*') {
+        return true;
     }
 
-    return true;
+    return (tab.length < card[1]);
 };
 
 /**
