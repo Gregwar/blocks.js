@@ -8,6 +8,9 @@ Connector = function(name, type, index)
     this.type = type;
 };
 
+/**
+ * Gets the connector identifier
+ */
 Connector.prototype.id = function()
 {
     var id = this.name + '_' + this.type;
@@ -19,21 +22,34 @@ Connector.prototype.id = function()
     return id;
 };
 
+/**
+ * Is this connector an input?
+ */
 Connector.prototype.isInput = function()
 {
     return this.type == 'input';
 };
 
+/**
+ * Is this connector an output?
+ */
 Connector.prototype.isOutput = function()
 {
     return this.type == 'output';
 };
 
+/**
+ * Is this connector the same as another?
+ */
 Connector.prototype.same = function(other)
 {
-    return (this.name == other.name && this.index == other.index && this.type == other.type);
+    return (this.name == other.name && 
+            this.index == other.index && this.type == other.type);
 };
 
+/**
+ * Export the connector
+ */
 Connector.prototype.exportData = function()
 {
     var data = [this.name, this.type];
@@ -45,6 +61,9 @@ Connector.prototype.exportData = function()
     return data;
 }
 
+/**
+ * Import a connector
+ */
 function ConnectorImport(data)
 {
     if (!(data instanceof Array) || data.length<2 || data.length>3) {
@@ -58,6 +77,9 @@ function ConnectorImport(data)
     return new Connector(data[0], data[1], data[2]);
 }
 
+/**
+ * Creates a connector from its id
+ */
 function IdToConnector(connectorId)
 {
     var parts = connectorId.split('_');
