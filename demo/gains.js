@@ -16,7 +16,8 @@ blocks.register({
             label: "X#",
             dimension: "Gains",
             attrs: "input",
-            card: '1'
+            card: '1',
+            type: "number"
         },
         {
             name: "output",
@@ -25,7 +26,8 @@ blocks.register({
                 return block.getValue('Gains')[x]+'*X'+(x+1);
             },
             dimension: "Gains",
-            attrs: "output"
+            attrs: "output",
+            type: "number"
         }
     ]
 });

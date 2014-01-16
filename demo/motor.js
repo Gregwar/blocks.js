@@ -15,12 +15,14 @@ blocks.register({
         {
             card: "0-1",
             name: "Angle",
-            attrs: "input"
+            attrs: "input",
+            type: "number"
         },
         {
             card: "0-1",
             name: "Torque",
-            attrs: "input"
+            attrs: "input",
+            type: "number"
         }
     ]
 });
