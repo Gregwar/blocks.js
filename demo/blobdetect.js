@@ -12,7 +12,8 @@ blocks.register({
         {
             name: "Image",
             type: "image",
-            attrs: "input"
+            attrs: "input",
+            card: "1"
         },
         {
             name: "X",

@@ -173,12 +173,14 @@ Edge.prototype.erase = function()
 Edge.prototype.same = function(other)
 {
     if (this.block1 == other.block1 && this.block2 == other.block2 
-            && this.connector1.same(this.connector2)) {
+            && this.connector1.same(other.connector1)
+            && this.connector2.same(other.connector2)) {
         return true;
     }
     
-    if (this.block1 == other.block2 && this.block2 == other.block1
-            && this.connector2.same(this.connector1)) {
+    if (this.block1 == other.block1 && this.block2 == other.block2 
+            && this.connector1.same(other.connector2)
+            && this.connector2.same(other.connector1)) {
         return true;
     }
 
