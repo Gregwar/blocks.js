@@ -368,9 +368,11 @@
 }
 
 .blocks_js_modal input, 
+.blocks_js_modal select,
 .blocks_js_modal textarea {
     width:250px;
     padding:2px;
     border:1px solid #aaa;
     border-radius:2px;
+    background-color:#fafafa;
 }
