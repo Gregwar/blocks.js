@@ -165,6 +165,8 @@ Edge.prototype.erase = function()
 {
     this.block1.eraseEdge(this.connector1, this);
     this.block2.eraseEdge(this.connector2, this);
+    this.block1.render();
+    this.block2.render();
 };
 
 /**

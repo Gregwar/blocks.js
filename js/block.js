@@ -265,9 +265,11 @@ Block.prototype.maxEntry = function(name)
     var max = 0;
 
     for (connectorId in this.edges) {
-        var connector = IdToConnector(connectorId);
-        if (connector.name == name) {
-            max = Math.max(parseInt(connector.index)+1, max);
+        if (this.edges[connectorId].length) {
+            var connector = IdToConnector(connectorId);
+            if (connector.name == name) {
+                max = Math.max(parseInt(connector.index)+1, max);
+            }
         }
     }
 
