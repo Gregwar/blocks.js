@@ -34,7 +34,7 @@ Blocks = function(options)
     this.compactMode = false;
 
     // Context menu
-    this.menu;
+    this.menu = null;
 
     // Mouse
     this.mouseX = 0;
