@@ -59,7 +59,7 @@ function Field(metaField)
         : null;
 
     // Choices
-    this.choices = 'choices' in metaField ? metaField.choices : [];
+    this.choices = 'choices' in metaField ? metaField.choices : null;
 
     // Is this field auto-extensible?
     this.extensible = 'extensible' in metaField && metaField.extensible;
@@ -113,7 +113,7 @@ Field.prototype.getFieldHtml = function()
 
     if (this.type == 'longtext') {
         field += '<textarea name="'+this.name+'"></textarea>';
-    } else if (this.type == 'choice') {
+    } else if (this.type == 'choice' || this.choices) {
         field += '<select name="'+this.name+'">';
         for (k in this.choices) {
             var choice = this.choices[k];

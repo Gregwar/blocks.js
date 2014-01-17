@@ -5,7 +5,7 @@ blocks.register({
     fields: [
         {
             name: "Resolution",
-            type: "select",
+            type: "resolution",
             choices: ["640x480","320x240"],
             default: "640x480",
             attrs: "editable"
