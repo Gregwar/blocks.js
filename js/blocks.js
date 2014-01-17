@@ -590,13 +590,13 @@ Blocks.prototype.endLink = function(block, connectorId)
 
         this.history.save();
         edge.create();
+        var edgeIndex = this.edges.push(edge)-1;
 
         var types = edge.getTypes();
         if (!this.types.isCompatible(types[0], types[1])) {
+            this.removeEdge(edgeIndex);
             throw 'Types '+types[0]+' and '+types[1]+' are not compatible';
         }
-
-        this.edges.push(edge);
     } catch (error) {
         this.messages.show('Unable to create this edge :' + "\n" + error, {'class': 'error'});
     }
