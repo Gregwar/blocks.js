@@ -730,16 +730,12 @@ Blocks.prototype.perfectScale = function()
             xMin = xMax = block.x;
             yMin = yMax = block.y;
         } else {
-            xMin = Math.min(xMin, block.x);
-            xMax = Math.max(xMax, block.x);
-            yMin = Math.min(yMin, block.y);
-            yMax = Math.max(yMax, block.y);
+            xMin = Math.min(xMin, block.x-15);
+            xMax = Math.max(xMax, block.x+block.width+18);
+            yMin = Math.min(yMin, block.y-15);
+            yMax = Math.max(yMax, block.y+115);
         }
     }
-    xMin -= 15;
-    yMin -= 15;
-    xMax += 200;
-    yMax += 150;
     var scaleA = this.div.width()/(xMax-xMin);
     var scaleB = this.div.height()/(yMax-yMin);
     var scale = Math.min(scaleA, scaleB);

@@ -16,11 +16,11 @@ Block = function(blocks, meta, id)
     
     // Width
     if (this.meta.size == 'normal') {
-        this.defaultWidth = 150;
+        this.width = 150;
     } else if (this.meta.size == 'small') {
-        this.defaultWidth = 100;
+        this.width = 100;
     } else {
-        this.defaultWidth = this.meta.size;
+        this.width = this.meta.size;
     }
 
     // History saved before move
@@ -285,7 +285,7 @@ Block.prototype.redraw = function(selected)
     // Rescaling
     if (this.lastScale != this.blocks.scale) {
         this.div.css('font-size', Math.round(this.blocks.scale*this.defaultFont)+'px');
-        this.div.css('width', Math.round(this.blocks.scale*this.defaultWidth)+'px');
+        this.div.css('width', Math.round(this.blocks.scale*this.width)+'px');
     
         var size = Math.round(12*this.blocks.scale);
         this.div.find('.circle').css('width', size+'px');
@@ -334,7 +334,7 @@ Block.prototype.cssParameters = function()
 {
     this.div.find('input').css('font-size', Math.round(this.blocks.scale*this.defaultFont)+'px');
     this.div.find('input').css('width', Math.round(this.blocks.scale*this.defaultInputWidth)+'px');
-    this.div.find('.parameters').css('width', this.valuesRatio*Math.round(this.blocks.scale*this.defaultWidth)+'px');
+    this.div.find('.parameters').css('width', this.valuesRatio*Math.round(this.blocks.scale*this.width)+'px');
 };
 
 /**
