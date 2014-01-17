@@ -6,7 +6,7 @@ blocks.register({
         {
             name: "Threshold",
             type: "number",
-            default: 0.2,
+            defaultValue: 0.2,
             attrs: "editable"
         },
         {

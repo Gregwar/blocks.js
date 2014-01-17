@@ -6,7 +6,7 @@ blocks.register({
             name: "Comment",
             hideLabel: true,
             type: "textarea",
-            default: 'Comment text',
+            defaultValue: 'Comment text',
             card: 0,
             attrs: 'editable'
         }

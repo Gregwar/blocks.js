@@ -9,7 +9,7 @@ blocks.register({
             hide: true,
             type: "number[]",
             attrs: "editable",
-            default: [1, 2]
+            defaultValue: [1, 2]
         },
         {
             name: "input",

@@ -10,7 +10,7 @@ blocks.register({
             hideLabel: true,
             card: "0",
             attrs: "editable",
-            default: "Motor"
+            defaultValue: "Motor"
         },
         {
             card: "0-1",

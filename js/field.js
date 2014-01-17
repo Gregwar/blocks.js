@@ -9,8 +9,8 @@ function Field(metaField)
     // Value
     this.value = null;
 
-    if ('default' in metaField) {
-        this.value = metaField.default;
+    if ('defaultValue' in metaField) {
+        this.value = metaField.defaultValue;
     }
 
     // Default unit
@@ -77,21 +77,7 @@ function Field(metaField)
     this.variadic = !!this.dimension;
 
     // Default value
-    this.default = 'default' in metaField ? metaField.default : null;
-};
-
-/**
- * Append the default value
- */
-Field.prototype.appendDefault = function(object)
-{
-    if (this.default != null) {
-        object[this.name] = this.default;
-    } else if (this.isArray) {
-        object[this.name] = [];
-    } else {
-        object[this.name] = null;
-    }
+    this.defaultValue = 'defaultValue' in metaField ? metaField.defaultValue : null;
 };
 
 /**

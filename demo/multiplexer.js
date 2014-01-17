@@ -6,7 +6,7 @@ blocks.register({
         {
             name: "Inputs",
             type: "integer",
-            default: 2,
+            defaultValue: 2,
             hide: true,
             attrs: "editable"
         },

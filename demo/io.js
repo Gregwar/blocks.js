@@ -6,7 +6,7 @@ blocks.register({
         {
             name: "Index",
             type: "number",
-            default: 0,
+            defaultValue: 0,
             attrs: "editable inpût"
         },
         {

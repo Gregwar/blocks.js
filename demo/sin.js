@@ -6,27 +6,27 @@ blocks.register({
         {
             name: "Amplitude",
             type: "number",
-            default: 1,
+            defaultValue: 1,
             attrs: "editable input"
         },
         {
             name: "Frequency",
             type: "number",
             unit: "Hz",
-            default: 10,
+            defaultValue: 10,
             attrs: "editable input"
         },
         {
             name: "Phase",
             type: "number",
             unit: "°",
-            default: 0,
+            defaultValue: 0,
             attrs: "editable input"
         },
         {
             name: "Invert",
             type: "bool",
-            default: false,
+            defaultValue: false,
             attrs: "editable input"
         },
         {

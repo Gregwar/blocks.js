@@ -18,7 +18,7 @@ blocks.register({
             type: [
                 {
                     name: "Curves",
-                    default: [1,2,3]
+                    defaultValue: [1,2,3]
                 }
             ],
             attrs: "editable"
