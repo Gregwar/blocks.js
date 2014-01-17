@@ -60,6 +60,10 @@ function Field(metaField)
 
     // Choices
     this.choices = 'choices' in metaField ? metaField.choices : [];
+
+    // Is this field auto-extensible?
+    this.extensible = 'extensible' in metaField && metaField.extensible;
+    this.size = 1;
     
     // Is it an array ?
     this.isArray = (this.type.substr(-2) == '[]');
@@ -210,7 +214,9 @@ Field.prototype.setValue = function(value)
  */
 Field.prototype.getDimension = function()
 {
-    if (this.isArray) {
+    if (this.extensible) {
+        return this.size+1;
+    } else if (this.isArray) {
         return this.getValue().length;
     } else {
         return parseInt(this.getValue());

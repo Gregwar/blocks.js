@@ -5,12 +5,16 @@ blocks.register({
         {
             name: "Terms",
             card: "0-*",
-            attrs: "input"
+            attrs: "input",
+            type: "number[]",
+            extensible: true,
+            card: "1"
         },
         {
             name: "Sum",
             card: "0-*",
-            attrs: "output"
+            attrs: "output",
+            type: "number"
         }
     ]
 });

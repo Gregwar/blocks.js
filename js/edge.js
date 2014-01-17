@@ -14,12 +14,10 @@ function Edge(id, block1, connector1, block2, connector2, blocks)
 
     this.defaultSize = 3;
     this.defaultFontSize = 10;
-    this.position1 = block1.linkPositionFor(connector1);
-    this.position2 = block2.linkPositionFor(connector2);
-    this.segment = new Segment(
-        this.position1.x, this.position1.y, 
-        this.position2.x-this.position1.x, this.position2.y-this.position1.y
-    );
+
+    this.position1 = null;
+    this.position2 = null;
+    this.segment = null;
 };
 
 /**
@@ -147,6 +145,8 @@ Edge.prototype.create = function()
 
     this.block1.addEdge(this.connector1, this);
     this.block2.addEdge(this.connector2, this);
+    this.block1.render();
+    this.block2.render();
 };
 
 /**

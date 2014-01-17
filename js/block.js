@@ -205,6 +205,10 @@ Block.prototype.getHtml = function()
         for (k in fields) {
             var field = fields[k];
 
+            if (field.extensible) {
+                field.size = self.maxEntry(field.name);
+            }
+
             var size = 1;
             if (field.variadic) {
                 size = self.parseDimension(field.dimension);
@@ -251,6 +255,23 @@ Block.prototype.render = function()
     this.div.html(this.getHtml());
     this.initListeners();
     this.redraw();
+};
+
+/**
+ * Returns the maximum index of entry for input field name
+ */
+Block.prototype.maxEntry = function(name)
+{
+    var max = 0;
+
+    for (connectorId in this.edges) {
+        var connector = IdToConnector(connectorId);
+        if (connector.name == name) {
+            max = Math.max(parseInt(connector.index)+1, max);
+        }
+    }
+
+    return max;
 };
 
 /**
