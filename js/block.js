@@ -187,7 +187,7 @@ Block.prototype.getHtml = function()
             html += '<div class="description">No description</div>';
         }
     }
-    html += '<div class="blockicon gear"></div></div>';
+    html += '<div class="blockicon settings"></div></div>';
     html += '<div class="infos"></div>';
     
     for (k in self.fields.editables) {
@@ -276,7 +276,7 @@ Block.prototype.redraw = function(selected)
     this.div.css('margin-top', this.blocks.center.y+this.y*this.blocks.scale+'px');
 
     // Showing/hiding icons
-    if (this.blocks.showIcons) {
+    if (this.blocks.showIcons && this.blocks.scale > 0.8) {
         this.div.find('.blockicon').show();
     } else {
         this.div.find('.blockicon').hide();
@@ -392,7 +392,7 @@ Block.prototype.initListeners = function()
     });
 
     // Handle the parameters
-    self.div.find('.gear').click(function() {
+    self.div.find('.settings').click(function() {
         self.fields.toggle();
         self.cssParameters();
     });
