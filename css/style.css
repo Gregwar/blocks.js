@@ -8,7 +8,19 @@ body {
     width:100%;
     height:600px;
     margin:5px;
-    border:1px solid #aaa;
+    border:2px solid #eee;
+}
+
+h1 {
+    font-family:Serif;
+    text-align:center;
+    font-style:italic;
+    display:block;
+}
+
+h1:after, h1:before {
+    content:'~';
+    color:#eee;
 }
 
 a {
@@ -55,4 +67,13 @@ a:hover {
 
 .blocks_js_editor .menu_icon_family_Image {
     background-image:url('gfx/image.png');
+}
+
+button {
+    background-color:#eee;
+    border:0;
+    padding:5px;
+    color:#333;
+    border-radius:2px;
+    cursor:pointer;
 }

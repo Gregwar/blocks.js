@@ -34,13 +34,10 @@
 	}, 'export');
 
         $('.setLabel').click(function() {
-            labels = {}
-            
             for (k in blocks.edges) {
-                labels[k] = "Edge #"+k;
+                var edge = blocks.edges[k];
+                edge.setLabel('Edge #'+edge.id);
             }
-
-            blocks.setLabels(labels);
         });
 
         $('.setInfos').click(function() {
