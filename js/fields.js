@@ -66,7 +66,7 @@ Fields.prototype.getField = function(name)
 Fields.prototype.show = function()
 {
     var self = this;
-    var html = '<h3>Parameters</h3>';
+    var html = '<h3>'+this.block.meta.name+'#'+this.block.id+'</h3>';
 
     html += '<form class="form">';
     for (k in this.editables) {
