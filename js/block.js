@@ -7,9 +7,7 @@ Block = function(blocks, meta, id)
     this.meta = meta;
 
     // Appareance values
-    this.valuesRatio = 1.5;
     this.defaultFont = 10;
-    this.defaultInputWidth = 70;
 
     // Custom description
     this.description = null;
@@ -356,8 +354,6 @@ Block.prototype.redraw = function(selected)
 Block.prototype.cssParameters = function()
 {
     this.div.find('input').css('font-size', Math.round(this.blocks.scale*this.defaultFont)+'px');
-    this.div.find('input').css('width', Math.round(this.blocks.scale*this.defaultInputWidth)+'px');
-    this.div.find('.parameters').css('width', this.valuesRatio*Math.round(this.blocks.scale*this.width)+'px');
 };
 
 /**

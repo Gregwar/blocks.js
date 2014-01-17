@@ -95,7 +95,7 @@ Field.prototype.updated = function()
  */
 Field.prototype.getFieldHtml = function()
 {
-    var field = this.label+': ';
+    var field = this.label+':<br/>';
 
     if (this.type == 'longtext') {
         field += '<textarea name="'+this.name+'"></textarea>';
@@ -107,7 +107,8 @@ Field.prototype.getFieldHtml = function()
         }
         field += '</select>';
     } else {
-        field += '<input value="'+this.getPrintableValue()+'" type="'+this.type+'" name="'+this.name+'" />'+this.unit;
+        var type = this.type == 'bool' ? 'checkbox' : 'text';
+        field += '<input value="'+this.getPrintableValue()+'" type="'+type+'" name="'+this.name+'" />'+this.unit;
     }
 
     field += '<br/>';

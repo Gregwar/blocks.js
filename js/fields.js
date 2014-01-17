@@ -68,39 +68,40 @@ Fields.prototype.show = function()
     var self = this;
     var html = '<h3>Parameters</h3>';
 
-    html += '<form>';
+    html += '<form class="form">';
     for (k in this.editables) {
         html += this.editables[k].getFieldHtml();
     }
     html += '<input type="submit" style="display:none" width="0" height="0" />';
     html += '</form>';
     
-    html += '<a class="close" href="javascript:void(0);">Close</a>';
+    html += '<button class="save" href="javascript:void(0);">Save</button>';
+    html += '<button class="close" href="javascript:void(0);">Close</button>';
 
     this.div.html(html);
 
     this.div.find('.close').click(function() {
-        self.div.hide();
-        self.save();
+        $.fancybox.close();
+    });
+
+    var form = this.div.find('form');
+    
+    this.div.find('.save').click(function() {
+        self.save(form.serializeForm());
+        $.fancybox.close();
     });
 
     this.div.find('form').submit(function() {
-        self.div.hide();
-        self.save();
+        self.save($(this).serializeForm());
+        $.fancybox.close();
         return false;
-    });
-
-    this.div.find('input').click(function() {
-        var val = $(this).val();
-        $(this).val('');
-        $(this).val(val);
     });
 
     this.div.find('input').dblclick(function() {
         $(this).select();
     });
 
-    this.div.show();
+    $.fancybox.open(this.div, {wrapCSS: 'blocks_js_modal'});
     this.display = true;
 };
 
@@ -130,9 +131,8 @@ Fields.prototype.hide = function()
 /**
  * Saves the form
  */
-Fields.prototype.save = function()
+Fields.prototype.save = function(serialize)
 {
-    var serialize = this.div.find('form').serializeForm();
     var values = {};
 
     for (key in serialize) {
