@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * Manage the blocks
  *
@@ -5,7 +7,7 @@
  * - canLinkInputs (default false): can inputs be linked together?
  * - orientatiion (default true): is the graph oriented?
  */
-Blocks = function(options)
+var Blocks = function(options)
 {
     if (typeof options != 'undefined') {
         this.options = options;
@@ -219,7 +221,7 @@ Blocks.prototype.postReady = function()
 {
     this.isReady = true;
     if (this.readyQueue != undefined) {
-        for (k in this.readyQueue) {
+        for (var k in this.readyQueue) {
             this.readyQueue[k]();
         }
     }
@@ -259,7 +261,7 @@ Blocks.prototype.getPosition = function()
  */
 Blocks.prototype.addBlock = function(name, x, y)
 {
-    for (k in this.metas) {
+    for (var k in this.metas) {
         var type = this.metas[k];
 
         if (type.name == name) {
@@ -302,7 +304,7 @@ Blocks.prototype.highlightTargets = function()
     $('.connector').addClass('disabled');
 
     var compatibles = this.types.getCompatibles(type);
-    for (k in compatibles) {
+    for (var k in compatibles) {
         var compatible = compatibles[k];
         $('.connector.type_'+compatible).removeClass('disabled');
     }
@@ -359,7 +361,7 @@ Blocks.prototype.canvasClicked = function()
     this.selectedLink = null;
     this.selectedSide = null;
 
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         var block = this.blocks[k];
         if (block.hasFocus) {
             this.selectedBlock = k;
@@ -367,7 +369,7 @@ Blocks.prototype.canvasClicked = function()
     }
 
     if (!this.selectedBlock) {
-        for (k in this.edges) {
+        for (var k in this.edges) {
             var collide = this.edges[k].collide(this.mouseX, this.mouseY);
             if (collide != false) {
                 if (collide < 0.2) {
@@ -402,7 +404,7 @@ Blocks.prototype.removeEdge = function(edge)
  */
 Blocks.prototype.getEdgeId = function(edge)
 {
-    for (k in this.edges) {
+    for (var k in this.edges) {
         if (edge == this.edges[k]) {
             return k;
         }
@@ -419,7 +421,7 @@ Blocks.prototype.removeBlock = function(key)
     var block = this.blocks[key];
 
     var newEdges = [];
-    for (k in this.edges) {
+    for (var k in this.edges) {
         var edge = this.edges[k];
         if (edge.block1 == block || edge.block2 == block) {
             edge.erase();
@@ -440,7 +442,7 @@ Blocks.prototype.removeBlock = function(key)
  */
 Blocks.prototype.getBlockId = function(block)
 {
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         if (this.blocks[k] == block) {
             return k;
         }
@@ -454,7 +456,7 @@ Blocks.prototype.getBlockId = function(block)
  */
 Blocks.prototype.getBlockById = function(blockId)
 {
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         if (this.blocks[k].id == blockId) {
             return this.blocks[k];
         }
@@ -490,7 +492,7 @@ Blocks.prototype.deleteEvent = function()
 Blocks.prototype.doRedraw = function()
 {
     // Set the position for blocks
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         this.blocks[k].redraw(this.selectedBlock == k);
     }
 
@@ -498,7 +500,7 @@ Blocks.prototype.doRedraw = function()
     var svg = this.context.svg('get');
     svg.clear();
 
-    for (k in this.edges) {
+    for (var k in this.edges) {
         this.edges[k].draw(svg);
     }
 
@@ -548,7 +550,7 @@ Blocks.prototype.release = function()
  */
 Blocks.prototype.tryEndLink = function()
 {
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         var block = this.blocks[k];
         if (block.hasFocus && block.focusedConnector) {
             this.endLink(block, block.focusedConnector);
@@ -576,7 +578,7 @@ Blocks.prototype.endLink = function(block, connectorId)
             var edge = new Edge(id, blockB, connectorB, blockA, connectorA, this);
         }
 
-        for (k in this.edges) {
+        for (var k in this.edges) {
             var other = this.edges[k];
             if (other.same(edge)) {
                 throw 'This edge already exists';
@@ -611,7 +613,7 @@ Blocks.prototype.endLink = function(block, connectorId)
 Blocks.prototype.toggleCompact = function()
 {
     this.compactMode = !this.compactMode;
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         this.blocks[k].render();
     }
     this.redraw();
@@ -625,11 +627,11 @@ Blocks.prototype.exportData = function()
     var blocks = [];
     var edges = [];
 
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         blocks.push(this.blocks[k].exportData());
     }
 
-    for (k in this.edges) {
+    for (var k in this.edges) {
         edges.push(this.edges[k].exportData());
     }
 
@@ -668,7 +670,7 @@ Blocks.prototype.doLoad = function(scene, init)
             self.id = 1;
             self.edgeId = 1;
 
-            for (k in scene.blocks) {
+            for (var k in scene.blocks) {
                 try {
                     var data = scene.blocks[k];
                     var block = BlockImport(self, data);
@@ -680,7 +682,7 @@ Blocks.prototype.doLoad = function(scene, init)
                 }
             }
 
-            for (k in scene.edges) {
+            for (var k in scene.edges) {
                 try {
                     var data = scene.edges[k];
                     var edge = EdgeImport(self, data);
@@ -697,7 +699,7 @@ Blocks.prototype.doLoad = function(scene, init)
             if (errors.length) {
                 var text = errors.length + " loading errors :<br/>";
                 text += '<ul>';
-                for (k in errors) {
+                for (var k in errors) {
                     text += '<li>' + errors[k] + '</li>';
                 }
                 text += '</ul>';
@@ -724,7 +726,7 @@ Blocks.prototype.perfectScale = function()
     var xMin = null, xMax = null;
     var yMin = null, yMax = null;
 
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         var block = this.blocks[k];
         if (xMin == null) {
             xMin = xMax = block.x;
@@ -752,7 +754,7 @@ Blocks.prototype.perfectScale = function()
  */
 Blocks.prototype.setLabels = function(labels)
 {
-    for (k in this.edges) {
+    for (var k in this.edges) {
         var edge = this.edges[k];
 
         if (edge.id in labels) {

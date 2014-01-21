@@ -1,4 +1,6 @@
-function Segment(x, y, dx, dy)
+"use strict";
+
+var Segment = function(x, y, dx, dy)
 {
     this.x = x;
     this.y = y;
@@ -52,8 +54,8 @@ Segment.prototype.intersection = function(other)
         return null;
     }
 
-    r1 = (d*b0 - b*b1)/det;
-    r2 = (-c*b0 + a*b1)/det;
+    var r1 = (d*b0 - b*b1)/det;
+    var r2 = (-c*b0 + a*b1)/det;
 
     return [r1, r2];
 };

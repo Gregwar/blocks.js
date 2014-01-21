@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * An edge linking two blocks
  */
-function Edge(id, block1, connector1, block2, connector2, blocks)
+var Edge = function(id, block1, connector1, block2, connector2, blocks)
 {
     this.blocks = blocks;
     this.label = null;

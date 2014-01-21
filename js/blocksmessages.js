@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * Draw messages on the screen
  */
-function BlocksMessages(messages, width)
+var BlocksMessages = function(messages, width)
 {
     var self = this;
 
@@ -36,7 +38,7 @@ BlocksMessages.prototype.show = function(text, options)
         classes += ' '+options['class'];
     }
 
-    html = '<div class="'+classes+'">'+text+'</div>';
+    var html = '<div class="'+classes+'">'+text+'</div>';
 
     this.messages.html(html);
     this.messages.fadeIn();

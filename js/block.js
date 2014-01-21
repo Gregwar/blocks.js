@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * Creates an instance of a block
  */
-Block = function(blocks, meta, id)
+var Block = function(blocks, meta, id)
 {
     this.blocks = blocks;
     this.meta = meta;
@@ -87,7 +89,7 @@ Block.prototype.updateValues = function()
  */
 Block.prototype.setValues = function(values)
 {
-    for (field in values) {
+    for (var field in values) {
         this.fields.getField(field).setValue(values[field]);
     }
 };
@@ -98,7 +100,7 @@ Block.prototype.setValues = function(values)
 Block.prototype.getValues = function(values)
 {
     var values = {};
-    for (k in this.fields.editables) {
+    for (var k in this.fields.editables) {
         var field = this.fields.editables[k];
         values[field.name] = field.getValue();
     }
@@ -165,14 +167,14 @@ Block.prototype.getHtml = function()
 
     // Getting the title
     var title = this.meta.name + '<span class="blockId">#' + this.id + '</span>';
-    for (k in this.fields.fields) {
+    for (var k in this.fields.fields) {
         var field = this.fields.fields[k];
         if (field.asTitle) {
             title = field.getPrintableValue();
         }
     }
 
-    html = '<div class="parameters"></div>';
+    var html = '<div class="parameters"></div>';
     html += '<div class="blockTitle"><span class="titleText">'+title+'</span><div class="blockicon delete"></div>';
     html += '<div class="blockicon info"></div>';
 
@@ -188,7 +190,7 @@ Block.prototype.getHtml = function()
     html += '<div class="blockicon settings"></div></div>';
     html += '<div class="infos"></div>';
     
-    for (k in self.fields.editables) {
+    for (var k in self.fields.editables) {
         var field = self.fields.editables[k];
         var fieldHtml = field.getHtml();
         if (html && (!field.hide) && (!field.asTitle) && (!this.blocks.compactMode)) {
@@ -197,10 +199,10 @@ Block.prototype.getHtml = function()
     }
 
     // Handling inputs & outputs
-    handle = function(key, fields) {
+    var handle = function(key, fields) {
         html += '<div class="' + key + 's '+(self.isLoopable() ? 'loopable' : '')+'">';
 
-        for (k in fields) {
+        for (var k in fields) {
             var field = fields[k];
 
             if (field.extensible) {
@@ -212,7 +214,7 @@ Block.prototype.getHtml = function()
                 size = self.parseDimension(field.dimension);
             }
 
-            for (x=0; x<size; x++) {
+            for (var x=0; x<size; x++) {
                 var connectorId = field.name.toLowerCase() + '_' + key;
                 var label = field.getLabel().replace('#', x+1);
 
@@ -262,7 +264,7 @@ Block.prototype.maxEntry = function(name)
 {
     var max = 0;
 
-    for (connectorId in this.edges) {
+    for (var connectorId in this.edges) {
         if (this.edges[connectorId].length) {
             var connector = IdToConnector(connectorId);
             if (connector.name == name) {
@@ -279,7 +281,7 @@ Block.prototype.maxEntry = function(name)
  */
 Block.prototype.create = function(div)
 {
-    html = '<div id="block' + this.id + '" class="block ' + this.meta['class'] + '"></div>'
+    var html = '<div id="block' + this.id + '" class="block ' + this.meta['class'] + '"></div>'
 
     div.append(html);
     this.div = div.find('#block' + this.id);
@@ -320,7 +322,7 @@ Block.prototype.redraw = function(selected)
     }
 
     // Changing the circle rendering
-    for (k in this.connectors) {
+    for (var k in this.connectors) {
         var connectorId = this.connectors[k];
         var connectorDiv = this.div.find('.' + connectorId);
         var connectorVisual = connectorDiv.find('.circle');
@@ -330,7 +332,7 @@ Block.prototype.redraw = function(selected)
         if (connectorId in this.edges && this.edges[connectorId].length) {
             connectorVisual.addClass('io_active');
 
-            for (n in this.edges[connectorId]) {
+            for (var n in this.edges[connectorId]) {
                 if (this.edges[connectorId][n].selected) {
                     connectorVisual.addClass('io_selected');
                 }
@@ -441,7 +443,7 @@ Block.prototype.linkPositionFor = function(connector)
     }
 
     try {
-        div = this.div.find('.' + connectorId + ' .circle')
+        var div = this.div.find('.' + connectorId + ' .circle')
 
         var x = (div.offset().left-this.blocks.div.offset().left)+div.width()/2;
         var y = (div.offset().top-this.blocks.div.offset().top)+div.height()/2;
@@ -497,7 +499,7 @@ Block.prototype.eraseEdge = function(connector, edge)
     var connectorId = connector.id();
 
     if (this.edges[connectorId] != undefined) {
-        for (k in this.edges[connectorId]) {
+        for (var k in this.edges[connectorId]) {
             if (this.edges[connectorId][k] == edge) {
                 arrayRemove(this.edges[connectorId], k);
                 break;
@@ -528,16 +530,16 @@ Block.prototype.allSuccessors = function()
     while (exploreList.length > 0) {
         var currentBlock = exploreList.pop();
 
-        for (key in currentBlock.edges) {
-            for (i in currentBlock.edges[key]) {
+        for (var key in currentBlock.edges) {
+            for (var i in currentBlock.edges[key]) {
                 var edge = currentBlock.edges[key][i];
                 if (edge.isLoopable()) {
                     continue;
                 }
-                fromTo = edge.fromTo();
+                var fromTo = edge.fromTo();
 
                 if (fromTo[0] == currentBlock) {
-                    target = fromTo[1];
+                    var target = fromTo[1];
                     
                     if (!(target.id in explored)) {
                         explored[target.id] = true;
@@ -580,7 +582,7 @@ Block.prototype.getField = function(name)
  */
 function BlockImport(blocks, data)
 {
-    for (t in blocks.metas) {
+    for (var t in blocks.metas) {
 	var meta = blocks.metas[t];
         var module = ('module' in data) ? data.module : null;
 	if (meta.name == data.type && meta.module == module) {
