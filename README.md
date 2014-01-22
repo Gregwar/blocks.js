@@ -1,5 +1,7 @@
 # blocks.js
 
+![blocks](doc/blocks.png)
+
 ## JavaScript dataflow graph editor
 
 *blocks.js* is a JavaScript visual editor for editing dataflow graph, it can 
