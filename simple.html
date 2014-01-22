@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <!-- Third party libraries -->
+	<script type="text/javascript" src="build/jquery.js"></script>
+        <script type="text/javascript" src="build/jquery.json.min.js"></script>
+        <script type="text/javascript" src="build/jquery.mousewheel.min.js"></script>
+        <script type="text/javascript" src="build/jquery.svg.min.js"></script>
+        <script type="text/javascript" src="build/jquery.formserialize.min.js"></script>
+        <script type="text/javascript" src="build/jquery.fancybox.min.js"></script> 
+        <link rel="stylesheet" type="text/css" href="build/fancybox/jquery.fancybox.css" />
+
+        <!-- blocks.js -->
+	<script type="text/javascript" src="build/blocks.js"></script> 
+        <link rel="stylesheet" type="text/css" href="build/blocks.css" />
+
+        <!-- Demo script -->
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <script type="text/javascript">
+            var blocks = new Blocks();
+
+            blocks.register({
+                name: "Test",
+                fields: [
+                    {
+                        name: "Input",
+                        attrs: "input"
+                    },
+                    {
+                        name: "Output",
+                        attrs: "output"
+                    }
+                ]
+            });
+
+            blocks.run("#blocks");
+        </script>
+    </head>
+    <body>
+        <h1>blocks.js</h1>
+        <div id="blocks"></div>
+        <button class="setLabel">Set the edges label</button>
+        <button class="setInfos">Set the block infos</button>
+        <button class="setDescriptions">Set the block descriptions</button>
+        <button class="resize">Resize the div</button>
+        <button class="hideIcons">Hide icons</button>
+        <button class="stressTest">Stress Test!</button>
+    </body>
+</html>
