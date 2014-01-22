@@ -108,7 +108,7 @@ Field.prototype.getFieldHtml = function()
         field += '</div>';
         field += '<div class="fields">';
         var value = this.getValue();
-        for (k in value) {
+        for (var k in value) {
             field += '<div class="field">';
             field += this.getSingleFieldHtml(value[k]);
             field += '</div>';
