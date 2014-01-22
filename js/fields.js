@@ -87,11 +87,13 @@ Fields.prototype.show = function()
     var form = this.div.find('form');
     
     this.div.find('.save').click(function() {
+        form.find('.pattern').remove();
         self.save(form.serializeForm());
         $.fancybox.close();
     });
 
     this.div.find('form').submit(function() {
+        form.find('.pattern').remove();
         self.save($(this).serializeForm());
         $.fancybox.close();
         return false;
@@ -101,8 +103,35 @@ Fields.prototype.show = function()
         $(this).select();
     });
 
+    this.handleArrays();
+
     $.fancybox.open(this.div, {wrapCSS: 'blocks_js_modal'});
     this.display = true;
+};
+
+/**
+ * Handle Add & Remove buttons on fields array
+ */
+Fields.prototype.handleArrays = function()
+{
+    this.div.find('.fieldsArray').each(function() {
+        var pattern = $(this).find('.pattern').html();
+        var fields = $(this).find('.fields');
+
+        var buttons = '<div class="buttons">';
+        buttons += '<a class="add" href="#">Add</a> ';
+        buttons += '<a class="remove" href="#">Remove</a>';
+        buttons += '</div>';
+        $(this).append(buttons);
+
+        $(this).find('.add').click(function() {
+            fields.append('<div class="field">'+pattern+'</div>');
+        });
+
+        $(this).find('.remove').click(function() {
+            fields.find('.field').last().remove();
+        });
+    });
 };
 
 /**

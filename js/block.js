@@ -121,23 +121,6 @@ Block.prototype.getValue = function(name)
 };
 
 /**
- * Parses a length
- */
-Block.prototype.parseDimension = function(dimension)
-{
-    if (typeof(dimension) == 'number') {
-        return dimension;
-    }
-
-    var field = this.fields.getField(dimension);
-    if (!field) {
-        throw 'Unable to find dimension field '+dimension;
-    }
-
-    return field.getDimension();
-};
-
-/**
  * Html entities on a string
  */
 Block.prototype.htmlentities = function(str)
@@ -209,7 +192,7 @@ Block.prototype.getHtml = function()
 
             var size = 1;
             if (field.variadic) {
-                size = self.parseDimension(field.dimension);
+                size = field.getDimension(self.fields);
             }
 
             for (x=0; x<size; x++) {
@@ -573,6 +556,25 @@ Block.prototype.exportData = function()
 Block.prototype.getField = function(name)
 {
     return this.fields.getField(name);
+};
+
+/**
+ * Does the block has the given connector ?
+ */
+Block.prototype.hasConnector = function(connector)
+{
+    var field = this.getField(connector.name);
+
+    if (!field) {
+        return false;
+    }
+
+    if (field.variadic) {
+        return (connector.index != null) && 
+            (field.getDimension(this.fields) >= connector.index);
+    } else {
+        return (connector.index == null);
+    }
 };
 
 /**

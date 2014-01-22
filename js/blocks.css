@@ -375,4 +375,16 @@
     border:1px solid #aaa;
     border-radius:2px;
     background-color:#fafafa;
+    margin:2px;
 }
+
+.blocks_js_modal textarea {
+    width:400px;
+    height:110px;
+}
+
+.blocks_js_modal .fieldsArray .pattern {
+    display:none;
+}
+
+

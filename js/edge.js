@@ -18,6 +18,10 @@ function Edge(id, block1, connector1, block2, connector2, blocks)
     this.position1 = null;
     this.position2 = null;
     this.segment = null;
+
+    if (!block1.hasConnector(connector1) || !block2.hasConnector(connector2)) {
+        throw "Can't create edge because a connector don't exist";
+    }
 };
 
 /**
