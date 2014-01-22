@@ -320,7 +320,7 @@ Field.prototype.parseCardinality = function(ioCard, isOutput)
 
     if (ioCard != undefined) {
         if (typeof(ioCard) != 'string') {
-            card = [ioCard, ioCard];
+            card = [0, ioCard];
         } else {
             var tab = ioCard.split('-');
             if (tab.length == 1) {
