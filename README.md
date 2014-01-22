@@ -102,8 +102,8 @@ The blocks is an object containing:
 * `description`: a description of what the block does, to help the user
 * `size`: the size of the block, can be ̀`small`, `normal` or a certain
   number of pixels
-* `fields`: listing of the block [fields](#fields), see below
 * `class`: additionals CSS classes that will be added to the block
+* `fields`: an array listing of the block [fields](#fields), see below
 
 ### Fields
 
@@ -166,11 +166,54 @@ A connector is an array containing 2 or 3 elements:
 
 ## Typing
 
-Doc soon
+Each field can be typed. Basic types (`string`, `choice`, `longtext`, `bool`, `int`)
+are rendered as form inputs, all other unknown types are rendered as a simple text
+input. (Note: for `choice` type, you can define choices adding a ̀`choices` entry in
+the block field).
+
+If the type ends with `[]`, it is considered as an array, the Add & Remove buttons
+will be added when editing.
+
+By default, the different types are not compatibles, and thus can't be linked together.
+You can however tell blocks.js that some types are compatible using:
+
+```js
+// Tells blocks.js that string and number are compatible and can be linked
+blocks.types.addCompatibility('string', 'number');
+
+// Tells blocks.js that an image can be converted to a string, however, the
+// string can't be converted to an image
+blocks.types.addCompatibilityOneWay('image', 'string');
+```
 
 ## Variadic I/Os
 
-Doc soon
+Some I/Os can be variadic, think of a block that would output the n first users of
+a database, you could define it this way:
+
+```js
+blocks.register({
+    name: "TopUsers",
+    description: "Outputs the n first users of the database",
+    fields: [
+        {
+            name: "n",
+            type: "int",
+            hide: true,
+            defaultValue: 3,
+            attrs: "editable"
+        },
+        {
+            name: "User #",
+            dimension: "n",
+            attrs: "output"
+        }
+    ]
+});
+```
+
+Here, the number of outputed users will be editable, using the `n` editable
+field. Note that the `#` will be replaced by the number of the output.
 
 ## Contributing & hacking
 
