@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * Parameters managers
  */
-function Fields(block)
+var Fields = function(block)
 {
     var self = this;
 
@@ -17,7 +19,7 @@ function Fields(block)
 
     // Fields
     this.fields = [];
-    for (k in this.meta.fields) {
+    for (var k in this.meta.fields) {
         var field = new Field(this.meta.fields[k]);
         field.onUpdate = function() {
             self.block.cssParameters();
@@ -32,7 +34,7 @@ function Fields(block)
     this.indexedFields = {};
 
     // Indexing
-    for (k in this.fields) {
+    for (var k in this.fields) {
         var field = this.fields[k];
         this.indexedFields[field.name] = field;
 
@@ -69,7 +71,7 @@ Fields.prototype.show = function()
     var html = '<h3>'+this.block.meta.name+'#'+this.block.id+'</h3>';
 
     html += '<form class="form">';
-    for (k in this.editables) {
+    for (var k in this.editables) {
         html += this.editables[k].getFieldHtml();
     }
     html += '<input type="submit" style="display:none" width="0" height="0" />';
@@ -141,7 +143,7 @@ Fields.prototype.getHtml = function()
 {
     var html = '';
 
-    for (k in this.editables) {
+    for (var k in this.editables) {
         html += this.editables[k].getHtml();
     }
 
@@ -164,7 +166,7 @@ Fields.prototype.save = function(serialize)
 {
     var values = {};
 
-    for (key in serialize) {
+    for (var key in serialize) {
         var newKey = key;
         var isArray = false;
         if (newKey.substr(newKey.length-2, 2) == '[]') {

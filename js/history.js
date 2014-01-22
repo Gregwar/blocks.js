@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * Handles the history
  */
-function History(blocks)
+var History = function(blocks)
 {
     var self = this;
     this.historySize = 30;

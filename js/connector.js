@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * A connector
  */
-Connector = function(name, type, index)
+var Connector = function(name, type, index)
 {
     this.name = name;
     this.type = type;

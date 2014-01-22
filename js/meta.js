@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * Manage one block meta
  */
-Meta = function(meta)
+var Meta = function(meta)
 {
     var self = this;
 
@@ -12,11 +14,11 @@ Meta = function(meta)
 
     // Importing fields meta data
     if ('fields' in meta) {
-        for (k in meta.fields) {
+        for (var k in meta.fields) {
             var field = meta.fields[k];
             var attributes = ('attrs' in field ? field.attrs.split(' ') : []);
             field.attrs = {};
-            for (i in attributes) {
+            for (var i in attributes) {
                 field.attrs[attributes[i]] = true;
             }
             this.fields.push(field);
@@ -24,7 +26,7 @@ Meta = function(meta)
     }
 
     // Checking for parameters editor
-    for (k in meta.parametersEditor) {
+    for (var k in meta.parametersEditor) {
         var key = keys[k];
         if (meta[key] != undefined) {
             this[key] = meta[key];

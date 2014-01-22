@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * Handles the menu for creating blocks
  */
-function BlocksMenu(blocks)
+var BlocksMenu = function(blocks)
 {
     var self = this;
 
@@ -46,7 +48,7 @@ function BlocksMenu(blocks)
 
             // Sorting types by family
             var families = {};
-            for (k in blocks.metas) {
+            for (var k in blocks.metas) {
                 var meta = blocks.metas[k];
 
                 if (meta.family in families) {
@@ -56,9 +58,9 @@ function BlocksMenu(blocks)
                 }
             }
 
-            html = '';
+            var html = '';
 
-	    for (action in self.actions) {
+	    for (var action in self.actions) {
                 var icon = 'none';
                 if ('icon' in self.actions[action]) {
                     icon = self.actions[action].icon;
@@ -66,14 +68,14 @@ function BlocksMenu(blocks)
 		html += '<div rel="'+action+'" class="menuentry menu_action_'+action+'"><div class="menu_icon menu_icon_'+icon+'"></div>'+self.actions[action].label+'</div>';
 	    }
 
-            for (family in families) {
+            for (var family in families) {
                 if (family) {
                     var className = family.replace(/[^a-zA-Z]/g,'');
                     html += '<div class="family">';
                     html += '<div class="familyName family_'+family+'"><div class="menu_icon menu_icon_family_'+className+'"></div>'+family+' <span>&raquo;</span></div>';
                     html += '<div class="childs">';
                 }
-                for (k in families[family]) {
+                for (var k in families[family]) {
                     var type = families[family][k];
                     html += '<div class="type type_'+type.name+'" rel="'+type.name+'">'+type.name+'</div>';
                 }
@@ -99,7 +101,7 @@ function BlocksMenu(blocks)
                 });
             });
 
-	    for (k in self.actions) {
+	    for (var k in self.actions) {
 		self.menu.find('.menu_action_'+k).click(function() {
 		    var action = self.actions[$(this).attr('rel')];
 		    action.action(blocks);

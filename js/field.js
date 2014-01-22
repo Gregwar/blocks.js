@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * A metaField field
  */
-function Field(metaField)
+var Field = function(metaField)
 {
     var self = this;
     this.onUpdate = null;
@@ -152,7 +154,7 @@ Field.prototype.getSingleFieldHtml = function(value)
         field += '<textarea name="'+this.getFieldName()+'"></textarea>';
     } else if (this.type == 'choice' || this.choices) {
         field += '<select name="'+this.getFieldName()+'">';
-        for (k in this.choices) {
+        for (var k in this.choices) {
             var choice = this.choices[k];
             var selected = (choice == value) ? 'selected' : '';
             field += '<option '+selected+' value="'+choice+'">'+choice+'</option>';
@@ -307,7 +309,7 @@ Field.prototype.parseCardinality = function(ioCard, isOutput)
         if (typeof(ioCard) != 'string') {
             card = [ioCard, ioCard];
         } else {
-            tab = ioCard.split('-');
+            var tab = ioCard.split('-');
             if (tab.length == 1) {
                 card = [0, tab[0]];
             } else {
@@ -316,7 +318,7 @@ Field.prototype.parseCardinality = function(ioCard, isOutput)
         }
     }
 
-    for (idx in card) {
+    for (var idx in card) {
         if (card[idx] != '*') {
             card[idx] = parseInt(card[idx]);
         }

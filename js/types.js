@@ -1,7 +1,9 @@
+"use strict";
+
 /**
  * Manage the types compatibility
  */
-Types = function()
+var Types = function()
 {
     this.compatibles = {};
 };
@@ -53,7 +55,7 @@ Types.prototype.isCompatible = function(typeA, typeB)
     }
 
     if (typeA in this.compatibles) {
-        for (k in this.compatibles[typeA]) {
+        for (var k in this.compatibles[typeA]) {
             if (typeB == this.compatibles[typeA][k]) {
                 return true;
             }
@@ -72,7 +74,7 @@ Types.prototype.getCompatibles = function(type)
     var compatibles = [type];
 
     if (type in this.compatibles) {
-        for (k in this.compatibles[type]) {
+        for (var k in this.compatibles[type]) {
             compatibles.push(this.compatibles[type][k]);
         }
     }
