@@ -132,10 +132,10 @@ Do not hesitate to have a look at the repository demo, in the `demo/̀  director
 
 The scene is an easy-to-parse object containing:
 
-* `blocks`: the scene blocks
-* `edges`: the scene edges
+* `blocks`: the [scene blocks](#scene-blocks)
+* `edges`: the [scene edges](#scene-edges)
 
-## Scene blocks
+### Scene blocks
 
 All scene block is represented with:
 
@@ -145,17 +145,17 @@ All scene block is represented with:
 * `module`: the block type module name
 * `values`: an array containing the values of all its editable fields
 
-## Scene edges
+### Scene edges
 
 A scene edge is represented with:
 
 * `id`: its numeric ID
 * `block1`: the ID of the block where the edge starts
-* `connector1`: the connector of the block where the edge starts
+* `connector1`: the [connector](#scene-connectors) of the block where the edge starts
 * `block2`: the ID of the block where the edge ends
-* `connector2`: the connector of the block where the edge ends
+* `connector2`: the [connector](#scene-connectors) of the block where the edge ends
 
-## Scene connectors
+### Scene connectors
 
 A connector is an array containing 2 or 3 elements:
 
