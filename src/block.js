@@ -540,7 +540,7 @@ Block.prototype.allSuccessors = function()
 /**
  * Exports the block to JSON
  */
-Block.prototype.exportData = function()
+Block.prototype.export = function()
 {
     return {
         id: this.id,

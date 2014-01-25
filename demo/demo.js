@@ -30,7 +30,7 @@
 
     blocks.ready(function() {
 	blocks.menu.addAction('Export', function(blocks) {
-	    alert($.toJSON(blocks.exportData()));
+	    alert($.toJSON(blocks.export()));
 	}, 'export');
 
         $('.setLabel').click(function() {

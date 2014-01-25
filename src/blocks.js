@@ -622,17 +622,17 @@ Blocks.prototype.toggleCompact = function()
 /**
  * Export the scene
  */
-Blocks.prototype.exportData = function()
+Blocks.prototype.export = function()
 {
     var blocks = [];
     var edges = [];
 
     for (var k in this.blocks) {
-        blocks.push(this.blocks[k].exportData());
+        blocks.push(this.blocks[k].export());
     }
 
     for (var k in this.edges) {
-        edges.push(this.edges[k].exportData());
+        edges.push(this.edges[k].export());
     }
 
     return {

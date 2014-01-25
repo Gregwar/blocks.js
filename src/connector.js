@@ -52,7 +52,7 @@ Connector.prototype.same = function(other)
 /**
  * Export the connector
  */
-Connector.prototype.exportData = function()
+Connector.prototype.export = function()
 {
     var data = [this.name, this.type];
 

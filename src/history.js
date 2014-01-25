@@ -36,7 +36,7 @@ var History = function(blocks)
  */
 History.prototype.save = function()
 {
-    this.history.push(this.blocks.exportData());
+    this.history.push(this.blocks.export());
 
     if (this.history.length > this.historySize) {
         this.history.shift();

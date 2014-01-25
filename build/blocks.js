@@ -781,7 +781,7 @@ Connector.prototype.same = function(other)
 /**
  * Export the connector
  */
-Connector.prototype.exportData = function()
+Connector.prototype.export = function()
 {
     var data = [this.name, this.type];
 
@@ -1024,14 +1024,14 @@ Edge.prototype.same = function(other)
 /**
  * Exports the edge to JSON
  */
-Edge.prototype.exportData = function()
+Edge.prototype.export = function()
 {
     return {
         id: this.id,
         block1: this.block1.id,
-        connector1: this.connector1.exportData(),
+        connector1: this.connector1.export(),
         block2: this.block2.id,
-        connector2: this.connector2.exportData()
+        connector2: this.connector2.export()
     };
 };
 
@@ -1363,7 +1363,7 @@ var History = function(blocks)
  */
 History.prototype.save = function()
 {
-    this.history.push(this.blocks.exportData());
+    this.history.push(this.blocks.export());
 
     if (this.history.length > this.historySize) {
         this.history.shift();
@@ -1924,7 +1924,7 @@ Block.prototype.allSuccessors = function()
 /**
  * Exports the block to JSON
  */
-Block.prototype.exportData = function()
+Block.prototype.export = function()
 {
     return {
         id: this.id,
@@ -2606,17 +2606,17 @@ Blocks.prototype.toggleCompact = function()
 /**
  * Export the scene
  */
-Blocks.prototype.exportData = function()
+Blocks.prototype.export = function()
 {
     var blocks = [];
     var edges = [];
 
     for (var k in this.blocks) {
-        blocks.push(this.blocks[k].exportData());
+        blocks.push(this.blocks[k].export());
     }
 
     for (var k in this.edges) {
-        edges.push(this.edges[k].exportData());
+        edges.push(this.edges[k].export());
     }
 
     return {

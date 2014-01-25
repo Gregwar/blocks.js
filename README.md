@@ -18,7 +18,7 @@ explaining its fields, name and behaviour.
 
 It allow the user to edit the blocks scene.
 
-Then, thanks for instance to the `exportData()`, method, you can get back 
+Then, thanks for instance to the `export()`, method, you can get back 
 the edited [scene](#scene). When you load the blocks, you can also load back a scene.
 
 ## Using blocks.js

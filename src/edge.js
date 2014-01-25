@@ -198,14 +198,14 @@ Edge.prototype.same = function(other)
 /**
  * Exports the edge to JSON
  */
-Edge.prototype.exportData = function()
+Edge.prototype.export = function()
 {
     return {
         id: this.id,
         block1: this.block1.id,
-        connector1: this.connector1.exportData(),
+        connector1: this.connector1.export(),
         block2: this.block2.id,
-        connector2: this.connector2.exportData()
+        connector2: this.connector2.export()
     };
 };
 
