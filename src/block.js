@@ -298,7 +298,7 @@ Block.prototype.redraw = function(selected)
         this.div.find('.circle').css('height', size+'px');
         this.div.find('.circle').css('background-size', size+'px '+size+'px');
 
-        this.div.find('.inputs, .outputs').width(this.div.width()/2-10);
+        // this.div.find('.inputs, .outputs').width(this.div.width()/2-5);
 
         this.cssParameters();
         this.lastScale = this.blocks.scale

@@ -211,7 +211,6 @@
 
 .blocks_js_editor .inputs,
 .blocks_js_editor .outputs {
-    width:80px;
 }
 
 .blocks_js_editor .outputs {
@@ -272,6 +271,7 @@
 .blocks_js_editor .loopable .output
 {
     float:left;
+    width:auto;
 }
 
 .blocks_js_editor .input .circle,
@@ -290,6 +290,7 @@
 
 .blocks_js_editor .output,
 .blocks_js_editor .loopable .input {
+    width:auto;
     float:right;
 }
 
