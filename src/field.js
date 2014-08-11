@@ -71,7 +71,9 @@ var Field = function(metaField)
     this.isArray = (this.type.substr(-2) == '[]');
 
     if (this.isArray) {
-        this.dimension = this.name;
+        if (this.dimension == null) {
+            this.dimension = this.name;
+        }
         this.type = this.type.substr(0, this.type.length-2);
     }
 
@@ -99,21 +101,69 @@ Field.prototype.getFieldHtml = function()
 {
     var field = this.label+':<br/>';
 
+    if (this.isArray) {
+        field += '<div class="fieldsArray">';
+        field += '<div class="pattern">';
+        field += this.getSingleFieldHtml('');
+        field += '</div>';
+        field += '<div class="fields">';
+        var value = this.getValue();
+        for (var k in value) {
+            field += '<div class="field">';
+            field += this.getSingleFieldHtml(value[k]);
+            field += '</div>';
+        }
+        field += '</div>';
+        field += '</div>';
+    } else {
+        field += this.getSingleFieldHtml();
+    }
+
+    field += '<br/>';
+
+    return field;
+};
+
+/**
+ * Return the (field) name, which is the name suffixed with []
+ * if it's an array
+ */
+Field.prototype.getFieldName = function()
+{
+    var name = this.name;
+
+    if (this.isArray) {
+        name += '[]';
+    }
+
+    return name;
+};
+
+/**
+ * Gets the HTML code for a single field
+ */
+Field.prototype.getSingleFieldHtml = function(value)
+{
+    var field = '';
+
+    if (value == undefined) {
+        value = this.getPrintableValue();
+    }
+
     if (this.type == 'longtext') {
-        field += '<textarea name="'+this.name+'"></textarea>';
+        field += '<textarea name="'+this.getFieldName()+'"></textarea>';
     } else if (this.type == 'choice' || this.choices) {
-        field += '<select name="'+this.name+'">';
+        field += '<select name="'+this.getFieldName()+'">';
         for (var k in this.choices) {
             var choice = this.choices[k];
-            field += '<option value="'+choice+'">'+choice+'</option>';
+            var selected = (choice == value) ? 'selected' : '';
+            field += '<option '+selected+' value="'+choice+'">'+choice+'</option>';
         }
         field += '</select>';
     } else {
         var type = this.type == 'bool' ? 'checkbox' : 'text';
-        field += '<input value="'+this.getPrintableValue()+'" type="'+type+'" name="'+this.name+'" />'+this.unit;
+        field += '<input value="'+value+'" type="'+type+'" name="'+this.getFieldName()+'" />'+this.unit;
     }
-
-    field += '<br/>';
 
     return field;
 };
@@ -151,7 +201,7 @@ Field.prototype.getPrintableValue = function(index)
 
     if (value instanceof Array) {
         if (index == undefined) {
-            value = value.join(',');
+            value = value.join(', ');
         } else {
             value = value[index];
         }
@@ -188,7 +238,7 @@ Field.prototype.getLabel = function()
 Field.prototype.setValue = function(value)
 {
     if (this.isArray && !(value instanceof Array)) {
-        value = value.split(',');
+        value = value.split(', ');
     }
 
     if (this.type == 'bool') {
@@ -199,18 +249,42 @@ Field.prototype.setValue = function(value)
 };
 
 /**
- * Gets the variadic dimension
+ * Gets as variadic dimension
  */
-Field.prototype.getDimension = function()
+Field.prototype.asDimension = function()
 {
     if (this.extensible) {
         return this.size+1;
     } else if (this.isArray) {
-        return this.getValue().length;
+        var value = this.getValue();
+
+        if (value instanceof Array) {
+            return this.getValue().length;
+        } else {
+            throw "Unable to get the dimension of field "+this.name;
+        }
     } else {
         return parseInt(this.getValue());
     }
 };
+
+/**
+ * Gets the variadic dimension
+ */
+Field.prototype.getDimension = function(fields)
+{
+    if (typeof(this.dimension) == 'number') {
+        return this.dimension;
+    }
+
+    var field = fields.getField(this.dimension);
+    if (!field) {
+        throw 'Unable to find dimension field '+this.dimension;
+    }
+
+    return field.asDimension();
+};
+
 
 /**
  * Checks if the fields has an attribute
@@ -233,7 +307,7 @@ Field.prototype.parseCardinality = function(ioCard, isOutput)
 
     if (ioCard != undefined) {
         if (typeof(ioCard) != 'string') {
-            card = [ioCard, ioCard];
+            card = [0, ioCard];
         } else {
             var tab = ioCard.split('-');
             if (tab.length == 1) {

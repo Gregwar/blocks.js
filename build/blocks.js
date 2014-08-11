@@ -1,15 +1,2748 @@
+"use strict";
+
 /**
- * jQuery JSON plugin 2.4.0
+ * Remove an item from an array
+ */
+function arrayRemove(array, index)
+{
+    index = parseInt(index);
+    var last = array[array.length-1];
+    array[array.length-1] = array[index];
+    array[index] = last;
+    array.pop();
+};
+"use strict";
+
+/**
+ * A metaField field
+ */
+var Field = function(metaField)
+{
+    var self = this;
+    this.onUpdate = null;
+
+    // Value
+    this.value = null;
+
+    if ('defaultValue' in metaField) {
+        this.value = metaField.defaultValue;
+    }
+
+    // Default unit
+    if (metaField.unit == undefined) {
+        this.unit = '';
+    } else {
+        this.unit = metaField.unit;
+    }
+
+    // Length
+    this.dimension = 'dimension' in metaField ? metaField.dimension : null;
+
+    // Setting attributes
+    this.attrs = metaField.attrs;
+
+    // Is this metaField a title ?
+    this.asTitle = 'asTitle' in metaField && metaField.asTitle;
+
+    // Getting type
+    if (metaField.type == undefined) {
+        this.type = 'string';
+    } else {
+        var type = metaField.type.toLowerCase();
+        type = Types.normalize(type);
+
+        this.type = type;
+    }
+
+    // Cardinalities
+    this.card = 'card' in metaField ? metaField.card : '*';
+    this.card = this.parseCardinality(this.card, this.is('output'));
+
+    // Hide the field ?
+    this.hide = 'hide' in metaField && metaField.hide;
+
+    // Hide the label ?
+    this.hideLabel = 'hideLabel' in metaField && metaField.hideLabel;
+
+    // Field iname
+    this.name = metaField.name.toLowerCase();
+
+    this.label = 'label' in metaField ? metaField.label
+        : metaField.name;
+
+    this.dynamicLabel = 'dynamicLabel' in metaField ? metaField.dynamicLabel
+        : null;
+
+    // Choices
+    this.choices = 'choices' in metaField ? metaField.choices : null;
+
+    // Is this field auto-extensible?
+    this.extensible = 'extensible' in metaField && metaField.extensible;
+    this.size = 1;
+    
+    // Is it an array ?
+    this.isArray = (this.type.substr(-2) == '[]');
+
+    if (this.isArray) {
+        if (this.dimension == null) {
+            this.dimension = this.name;
+        }
+        this.type = this.type.substr(0, this.type.length-2);
+    }
+
+    // Is variadic?
+    this.variadic = !!this.dimension;
+
+    // Default value
+    this.defaultValue = 'defaultValue' in metaField ? metaField.defaultValue : null;
+};
+
+/**
+ * The render was updated
+ */
+Field.prototype.updated = function()
+{
+    if (this.onUpdate) {
+        this.onUpdate();
+    }
+};
+
+/**
+ * HTML render for the field
+ */
+Field.prototype.getFieldHtml = function()
+{
+    var field = this.label+':<br/>';
+
+    if (this.isArray) {
+        field += '<div class="fieldsArray">';
+        field += '<div class="pattern">';
+        field += this.getSingleFieldHtml('');
+        field += '</div>';
+        field += '<div class="fields">';
+        var value = this.getValue();
+        for (var k in value) {
+            field += '<div class="field">';
+            field += this.getSingleFieldHtml(value[k]);
+            field += '</div>';
+        }
+        field += '</div>';
+        field += '</div>';
+    } else {
+        field += this.getSingleFieldHtml();
+    }
+
+    field += '<br/>';
+
+    return field;
+};
+
+/**
+ * Return the (field) name, which is the name suffixed with []
+ * if it's an array
+ */
+Field.prototype.getFieldName = function()
+{
+    var name = this.name;
+
+    if (this.isArray) {
+        name += '[]';
+    }
+
+    return name;
+};
+
+/**
+ * Gets the HTML code for a single field
+ */
+Field.prototype.getSingleFieldHtml = function(value)
+{
+    var field = '';
+
+    if (value == undefined) {
+        value = this.getPrintableValue();
+    }
+
+    if (this.type == 'longtext') {
+        field += '<textarea name="'+this.getFieldName()+'"></textarea>';
+    } else if (this.type == 'choice' || this.choices) {
+        field += '<select name="'+this.getFieldName()+'">';
+        for (var k in this.choices) {
+            var choice = this.choices[k];
+            var selected = (choice == value) ? 'selected' : '';
+            field += '<option '+selected+' value="'+choice+'">'+choice+'</option>';
+        }
+        field += '</select>';
+    } else {
+        var type = this.type == 'bool' ? 'checkbox' : 'text';
+        field += '<input value="'+value+'" type="'+type+'" name="'+this.getFieldName()+'" />'+this.unit;
+    }
+
+    return field;
+};
+
+/**
+ * Returns the HTML rendering
+ */
+Field.prototype.getHtml = function()
+{
+    var html = '';
+
+    if (!this.hideLabel) {
+        html += '<b>' + this.label + '</b>: ';
+    }
+    
+    html += this.getPrintableValueWithUnit() + '<br/>';
+
+    return html;
+};
+
+/**
+ * Return the (value) HTML rendering
+ */
+Field.prototype.getValue = function()
+{
+    return this.value;
+};
+
+/**
+ * Get printable value
+ */
+Field.prototype.getPrintableValue = function(index)
+{
+    var value = this.getValue();
+
+    if (value instanceof Array) {
+        if (index == undefined) {
+            value = value.join(', ');
+        } else {
+            value = value[index];
+        }
+    }
+
+    return value;
+};
+
+/**
+ * Get printable value with units
+ */
+Field.prototype.getPrintableValueWithUnit = function(index)
+{
+    var value = this.getPrintableValue(index);
+
+    if (this.unit) {
+        value += this.unit;
+    }
+
+    return value;
+};
+
+/**
+ * Getting the label
+ */
+Field.prototype.getLabel = function()
+{
+    return this.label;
+};
+
+/**
+ * Setting the value of the field
+ */
+Field.prototype.setValue = function(value)
+{
+    if (this.isArray && !(value instanceof Array)) {
+        value = value.split(', ');
+    }
+
+    if (this.type == 'bool') {
+        value = !!value;
+    }
+
+    this.value = value;
+};
+
+/**
+ * Gets as variadic dimension
+ */
+Field.prototype.asDimension = function()
+{
+    if (this.extensible) {
+        return this.size+1;
+    } else if (this.isArray) {
+        var value = this.getValue();
+
+        if (value instanceof Array) {
+            return this.getValue().length;
+        } else {
+            throw "Unable to get the dimension of field "+this.name;
+        }
+    } else {
+        return parseInt(this.getValue());
+    }
+};
+
+/**
+ * Gets the variadic dimension
+ */
+Field.prototype.getDimension = function(fields)
+{
+    if (typeof(this.dimension) == 'number') {
+        return this.dimension;
+    }
+
+    var field = fields.getField(this.dimension);
+    if (!field) {
+        throw 'Unable to find dimension field '+this.dimension;
+    }
+
+    return field.asDimension();
+};
+
+
+/**
+ * Checks if the fields has an attribute
+ */
+Field.prototype.is = function(attr)
+{
+    return (attr in this.attrs);
+};
+
+/**
+ * Parses the cardinality
+ */
+Field.prototype.parseCardinality = function(ioCard, isOutput)
+{
+    var card = [0, 1];
+
+    if (isOutput) {
+        card = [0, '*'];
+    }
+
+    if (ioCard != undefined) {
+        if (typeof(ioCard) != 'string') {
+            card = [ioCard, ioCard];
+        } else {
+            var tab = ioCard.split('-');
+            if (tab.length == 1) {
+                card = [0, tab[0]];
+            } else {
+                card = tab;
+            }
+        }
+    }
+
+    for (var idx in card) {
+        if (card[idx] != '*') {
+            card[idx] = parseInt(card[idx]);
+        }
+    }
+
+    return card;
+};
+"use strict";
+
+/**
+ * Parameters managers
+ */
+var Fields = function(block)
+{
+    var self = this;
+
+    // Block & meta
+    this.block = block;
+    this.meta = this.block.meta;
+
+    // Is the form displayed ?
+    this.display = false;
+
+    // Div
+    this.div = null;
+
+    // Fields
+    this.fields = [];
+    for (var k in this.meta.fields) {
+        var field = new Field(this.meta.fields[k]);
+        field.onUpdate = function() {
+            self.block.cssParameters();
+        };
+        this.fields.push(field);
+    }
+
+    // Indexed fields
+    this.inputs = [];
+    this.outputs = [];
+    this.editables = [];
+    this.indexedFields = {};
+
+    // Indexing
+    for (var k in this.fields) {
+        var field = this.fields[k];
+        this.indexedFields[field.name] = field;
+
+        if ('editable' in field.attrs) {
+            this.editables.push(field);
+        }
+        if ('input' in field.attrs) {
+            this.inputs.push(field);
+            field.hide = true;
+        }
+        if ('output' in field.attrs) {
+            this.outputs.push(field);
+            field.hide = true;
+        }
+    }
+};
+
+/**
+ * Getting a field by name
+ */
+Fields.prototype.getField = function(name)
+{
+    name = name.toLowerCase();
+
+    return (name in this.indexedFields ? this.indexedFields[name] : null);
+};
+
+/**
+ * Show the settings window
+ */
+Fields.prototype.show = function()
+{
+    var self = this;
+    var html = '<h3>'+this.block.meta.name+'#'+this.block.id+'</h3>';
+
+    html += '<form class="form">';
+    for (var k in this.editables) {
+        html += this.editables[k].getFieldHtml();
+    }
+    html += '<input type="submit" style="display:none" width="0" height="0" />';
+    html += '</form>';
+    
+    html += '<button class="save" href="javascript:void(0);">Save</button>';
+    html += '<button class="close" href="javascript:void(0);">Close</button>';
+
+    this.div.html(html);
+
+    this.div.find('.close').click(function() {
+        $.fancybox.close();
+    });
+
+    var form = this.div.find('form');
+    
+    this.div.find('.save').click(function() {
+        form.find('.pattern').remove();
+        self.save(form.serializeForm());
+        $.fancybox.close();
+    });
+
+    this.div.find('form').submit(function() {
+        form.find('.pattern').remove();
+        self.save($(this).serializeForm());
+        $.fancybox.close();
+        return false;
+    });
+
+    this.div.find('input').dblclick(function() {
+        $(this).select();
+    });
+
+    this.handleArrays();
+
+    $.fancybox.open(this.div, {wrapCSS: 'blocks_js_modal'});
+    this.display = true;
+};
+
+/**
+ * Handle Add & Remove buttons on fields array
+ */
+Fields.prototype.handleArrays = function()
+{
+    this.div.find('.fieldsArray').each(function() {
+        var pattern = $(this).find('.pattern').html();
+        var fields = $(this).find('.fields');
+
+        var buttons = '<div class="buttons">';
+        buttons += '<a class="add" href="#">Add</a> ';
+        buttons += '<a class="remove" href="#">Remove</a>';
+        buttons += '</div>';
+        $(this).append(buttons);
+
+        $(this).find('.add').click(function() {
+            fields.append('<div class="field">'+pattern+'</div>');
+        });
+
+        $(this).find('.remove').click(function() {
+            fields.find('.field').last().remove();
+        });
+    });
+};
+
+/**
+ * Show the fields
+ */
+Fields.prototype.getHtml = function()
+{
+    var html = '';
+
+    for (var k in this.editables) {
+        html += this.editables[k].getHtml();
+    }
+
+    return html;
+};
+
+/**
+ * Hide the form
+ */
+Fields.prototype.hide = function()
+{
+    this.div.hide();
+    this.display = false;
+};
+
+/**
+ * Saves the form
+ */
+Fields.prototype.save = function(serialize)
+{
+    var values = {};
+
+    for (var key in serialize) {
+        var newKey = key;
+        var isArray = false;
+        if (newKey.substr(newKey.length-2, 2) == '[]') {
+            newKey = newKey.substr(0, newKey.length-2);
+            isArray = true;
+        }
+        if (serialize[key] == null && isArray) {
+            serialize[key] = [];
+        }
+
+        this.getField(newKey).setValue(serialize[key]);
+    }
+
+    this.block.render();
+    this.block.redraw();
+};
+
+/**
+ * Show or hide the config
+ */
+Fields.prototype.toggle = function()
+{
+    if (this.meta.parametersEditor != undefined && typeof(this.meta.parametersEditor) == 'function') {
+        this.meta.parametersEditor(this.block.values, function(values) {
+            this.block.updateValues(values);
+            this.block.render();
+            this.block.redraw();
+        });
+    } else {
+        if (this.display) {
+            this.hide();
+        } else {
+            this.show();
+        }
+    }
+};
+"use strict";
+
+var Segment = function(x, y, dx, dy)
+{
+    this.x = x;
+    this.y = y;
+    this.dx = dx;
+    this.dy = dy;
+};
+
+/**
+ * Distance
+ */
+Segment.prototype.distance = function(point1, point2)
+{
+    return Math.sqrt(Math.pow(point2.x-point1.x,2) + Math.pow(point2.y-point1.y,2));
+}
+
+/**
+ * Distance with a point
+ */
+Segment.prototype.distanceP = function(point)
+{
+    var normal = this.normal();
+    normal.x = point.x;
+    normal.y = point.y;
+    var intersection = this.intersection(normal);
+
+    return [intersection[0], this.distance(normal.alpha(intersection[1]), point)];
+};
+
+/**
+ * Normal
+ */
+Segment.prototype.normal = function()
+{
+    return new Segment(this.x, this.y, this.dy, -this.dx);
+};
+
+/**
+ * Gets the intersection alpha with another 
+ */
+Segment.prototype.intersection = function(other)
+{
+    var a = this.dx;
+    var b = -other.dx;
+    var c = this.dy;
+    var d = -other.dy;
+    var b0 = other.x-this.x;
+    var b1 = other.y-this.y;
+    var det = a*d - b*c;
+
+    if (det == 0) {
+        return null;
+    }
+
+    var r1 = (d*b0 - b*b1)/det;
+    var r2 = (-c*b0 + a*b1)/det;
+
+    return [r1, r2];
+};
+
+/**
+ * Gets the alpha point
+ */
+Segment.prototype.alpha = function(a)
+{
+    var point = {};
+    point.x = this.x+this.dx*a;
+    point.y = this.y+this.dy*a;
+
+    return point;
+};
+"use strict";
+
+/**
+ * Manage the types compatibility
+ */
+var Types = function()
+{
+    this.compatibles = {};
+};
+
+/**
+ * Normalize types
+ */
+Types.normalize = function(type)
+{
+    type = type.toLowerCase();
+
+    if (type == 'check' || type == 'bool' || type == 'checkbox') {
+        type = 'bool';
+    }
+
+    if (type == 'integer') {
+        type = 'int';
+    }
+
+    if (type == 'float' || type == 'double') {
+        type = 'number';
+    }
+
+    if (type == 'text') {
+        type = 'string';
+    }
+
+    if (type == 'select' || type == 'choices' || type == 'combobox') {
+        type = 'choice';
+    }
+
+    if (type == 'textarea') {
+        type = 'longtext';
+    }
+
+    return type;
+}
+
+/**
+ * Checks if a type is compatible with another
+ */
+Types.prototype.isCompatible = function(typeA, typeB)
+{
+    typeA = Types.normalize(typeA);
+    typeB = Types.normalize(typeB);
+
+    if (typeA == typeB) {
+        return true;
+    }
+
+    if (typeA in this.compatibles) {
+        for (var k in this.compatibles[typeA]) {
+            if (typeB == this.compatibles[typeA][k]) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+};
+
+/**
+ * Get all the compatible types
+ */
+Types.prototype.getCompatibles = function(type)
+{
+    type = Types.normalize(type);
+    var compatibles = [type];
+
+    if (type in this.compatibles) {
+        for (var k in this.compatibles[type]) {
+            compatibles.push(this.compatibles[type][k]);
+        }
+    }
+
+    return compatibles;
+};
+
+/**
+ * Add compatibility (one way)
+ */
+Types.prototype.addCompatibilityOneWay = function(typeA, typeB)
+{
+    typeA = Types.normalize(typeA);
+    typeB = Types.normalize(typeB);
+
+    if (!(typeA in this.compatibles)) {
+        this.compatibles[typeA] = [];
+    }
+
+    this.compatibles[typeA].push(typeB);
+};
+
+/**
+ * Add a types compatibility
+ */
+Types.prototype.addCompatibility = function(typeA, typeB)
+{
+    typeA = Types.normalize(typeA);
+    typeB = Types.normalize(typeB);
+
+    this.addCompatibilityOneWay(typeA, typeB);
+    this.addCompatibilityOneWay(typeB, typeA);
+};
+"use strict";
+
+/**
+ * A connector
+ */
+var Connector = function(name, type, index)
+{
+    this.name = name;
+    this.type = type;
+    this.index = (index == null) ? null : parseInt(index);
+};
+
+/**
+ * Gets the connector identifier
+ */
+Connector.prototype.id = function()
+{
+    var id = this.name + '_' + this.type;
+
+    if (this.index != null) {
+        id += '_' + this.index;
+    }
+
+    return id;
+};
+
+/**
+ * Is this connector an input?
+ */
+Connector.prototype.isInput = function()
+{
+    return this.type == 'input';
+};
+
+/**
+ * Is this connector an output?
+ */
+Connector.prototype.isOutput = function()
+{
+    return this.type == 'output';
+};
+
+/**
+ * Is this connector the same as another?
+ */
+Connector.prototype.same = function(other)
+{
+    return (this.name == other.name && 
+            this.index == other.index && this.type == other.type);
+};
+
+/**
+ * Export the connector
+ */
+Connector.prototype.exportData = function()
+{
+    var data = [this.name, this.type];
+
+    if (this.index !== null) {
+        data.push(this.index);
+    }
+
+    return data;
+}
+
+/**
+ * Import a connector
+ */
+function ConnectorImport(data)
+{
+    if (!(data instanceof Array) || data.length<2 || data.length>3) {
+        throw 'Unable to import a connector';
+    }
+
+    if (data.length == 2) {
+        data.push(null);
+    }
+
+    return new Connector(data[0], data[1], data[2]);
+}
+
+/**
+ * Creates a connector from its id
+ */
+function IdToConnector(connectorId)
+{
+    var parts = connectorId.split('_');
+
+    var name = parts[0];
+    var type = parts[1];
+    var index = null;
+    if (parts.length == 3) {
+        index = parts[2];
+    }
+
+    return new Connector(name, type, index);
+}
+"use strict";
+
+/**
+ * An edge linking two blocks
+ */
+var Edge = function(id, block1, connector1, block2, connector2, blocks)
+{
+    this.blocks = blocks;
+    this.label = null;
+    this.id = parseInt(id);
+    this.block1 = block1;
+    this.connector1 = connector1;
+    this.block2 = block2;
+    this.connector2 = connector2;
+    this.selected = false;
+
+    this.defaultSize = 3;
+    this.defaultFontSize = 10;
+
+    this.position1 = null;
+    this.position2 = null;
+    this.segment = null;
+
+    if (!block1.hasConnector(connector1) || !block2.hasConnector(connector2)) {
+        throw "Can't create edge because a connector don't exist";
+    }
+};
+
+/**
+ * Should this edge be ignored in loop analysis ?
+ */
+Edge.prototype.isLoopable = function()
+{
+    return (this.block1.isLoopable() || this.block2.isLoopable());
+}
+
+/**
+ * Returns an array with the blocks ordered
+ */
+Edge.prototype.fromTo = function()
+{
+    return [this.block1, this.block2];
+};
+
+/**
+ * Sets the label of the edge
+ */
+Edge.prototype.setLabel = function(label)
+{
+    this.label = label;
+};
+
+/**
+ * Draws the edge
+ */
+Edge.prototype.draw = function(svg)
+{
+    this.position1 = this.block1.linkPositionFor(this.connector1);
+    this.position2 = this.block2.linkPositionFor(this.connector2);
+    
+    this.segment = new Segment(
+        this.position1.x, this.position1.y, 
+        this.position2.x-this.position1.x, this.position2.y-this.position1.y
+    );
+
+    var lineWidth = this.defaultSize*this.blocks.scale;
+
+    if (this.selected) {
+        var strokeStyle = 'rgba(0, 200, 0, 1)';
+    } else {
+        var strokeStyle = 'rgba(255, 200, 0, 1)';
+    }
+    svg.line(this.position1.x, this.position1.y, this.position2.x, this.position2.y, {
+        stroke: strokeStyle, strokeWidth: lineWidth
+    });
+    
+    var xM = ((this.position1.x+this.position2.x)/2.0);
+    var yM = ((this.position1.y+this.position2.y)/2.0);
+    var norm = Math.sqrt(Math.pow(this.position1.x-this.position2.x,2)+Math.pow(this.position1.y-this.position2.y,2));
+    var alpha = 30;
+    alpha = (alpha*Math.PI/180.0);
+    var cos = Math.cos(alpha);
+    var sin = Math.sin(alpha);
+    var cosB = Math.cos(-alpha);
+    var sinB = Math.sin(-alpha);
+
+    // Drawing the arrow
+    if (this.blocks.getOption('orientation', true)) {
+        var xA = (this.position1.x-xM)*this.blocks.scale*10/(norm/2);
+        var yA = (this.position1.y-yM)*this.blocks.scale*10/(norm/2);
+        var lineWidth = this.defaultSize*this.blocks.scale/3.0;
+        svg.line(xM, yM, xM+(xA*cos-yA*sin), yM+(yA*cos+xA*sin), {
+            stroke: strokeStyle, strokeWidth: lineWidth
+        });
+        svg.line(xM, yM, xM+(xA*cosB-yA*sinB), yM+(yA*cosB+xA*sinB), {
+            stroke: strokeStyle, strokeWidth: lineWidth
+        });
+    }
+
+    if (this.label != null) {
+        var fontSize = Math.round(this.defaultFontSize*this.blocks.scale);
+
+        svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
+            fontSize: fontSize+'px',
+            fill: '#3a3b01',
+            stroke: '#fff',
+            strokeWidth: 2
+        });
+        svg.text(xM-2*fontSize, yM+fontSize/3, this.label, {
+            fontSize: fontSize+'px',
+            fill: '#3a3b01',
+        });
+    }
+    };
+
+/**
+ * Does the position collide the line ?
+ */
+Edge.prototype.collide = function(x, y)
+{
+    var dp = this.segment.distanceP({x: x, y: y});
+
+    if (dp[0] >= 0 && dp[0] <= 1) {
+        if (dp[1] < (this.defaultSize*blocks.scale)*2) {
+            return dp[0];
+        }
+    }
+
+    return false;
+};
+
+/**
+ * Initializes the edge and do some tests
+ */ 
+Edge.prototype.create = function()
+{
+    // You can't link a block to itself
+    if (this.block1 == this.block2) {
+        throw 'You can\'t link a block to itself';
+    }
+
+    // You have to link an input with an output
+    if (!this.blocks.getOption('canLinkInputs', false) && this.connector1.type == this.connector2.type) {
+        throw 'You have to link an input with an output';
+    }
+
+    // The cards have to be okay
+    if ((!this.block1.canLink(this.connector1)) || (!this.block2.canLink(this.connector2))) {
+        throw 'Can\'t create such an edge because of the cardinalities';
+    }
+
+    this.block1.addEdge(this.connector1, this);
+    this.block2.addEdge(this.connector2, this);
+    this.block1.render();
+    this.block2.render();
+};
+
+/**
+ * Get the types of the blocks
+ */
+Edge.prototype.getTypes = function()
+{
+    return [this.block1.getField(this.connector1.name).type,
+            this.block2.getField(this.connector2.name).type];
+};
+
+/**
+ * Erase an edge
+ */
+Edge.prototype.erase = function()
+{
+    this.block1.eraseEdge(this.connector1, this);
+    this.block2.eraseEdge(this.connector2, this);
+    this.block1.render();
+    this.block2.render();
+};
+
+/**
+ * Test if this edge is the same than another
+ */
+Edge.prototype.same = function(other)
+{
+    if (this.block1 == other.block1 && this.block2 == other.block2 
+            && this.connector1.same(other.connector1)
+            && this.connector2.same(other.connector2)) {
+        return true;
+    }
+    
+    if (this.block1 == other.block1 && this.block2 == other.block2 
+            && this.connector1.same(other.connector2)
+            && this.connector2.same(other.connector1)) {
+        return true;
+    }
+
+    return false;
+};
+
+/**
+ * Exports the edge to JSON
+ */
+Edge.prototype.exportData = function()
+{
+    return {
+        id: this.id,
+        block1: this.block1.id,
+        connector1: this.connector1.exportData(),
+        block2: this.block2.id,
+        connector2: this.connector2.exportData()
+    };
+};
+
+/**
+ * Imports JSON data into an edge
+ */
+function EdgeImport(blocks, data)
+{
+    if (!'id' in data) {
+        throw "An edge does not have id";
+    }
+
+    var block1 = blocks.getBlockById(data.block1);
+    var block2 = blocks.getBlockById(data.block2);
+
+    if (!block1 || !block2) {
+	throw "Error while importing an edge, a block did not exists";
+    }
+
+    return new Edge(data.id, block1, ConnectorImport(data.connector1), 
+                             block2, ConnectorImport(data.connector2), blocks);
+};
+"use strict";
+
+/**
+ * Draw messages on the screen
+ */
+var BlocksMessages = function(messages, width)
+{
+    var self = this;
+
+    // Timer to hide
+    this.hideTimer = null;
+
+    // Messages
+    this.messages = messages;
+
+    // Width
+    this.width = width;
+
+    messages.click(function() {
+	self.hide();
+    });
+};
+
+/**
+ * Show a message
+ */
+BlocksMessages.prototype.show = function(text, options)
+{
+    var self = this;
+
+    if (this.hideTimer != null) {
+        clearTimeout(this.hideTimer);
+    }
+
+    var classes = 'message';
+
+    if (options['class'] != undefined) {
+        classes += ' '+options['class'];
+    }
+
+    var html = '<div class="'+classes+'">'+text+'</div>';
+
+    this.messages.html(html);
+    this.messages.fadeIn();
+    this.messages.css('margin-left', Math.round((this.width-350)/2.0)+'px');
+    this.messages.css('margin-top', '20px');
+
+    this.hideTimer = setTimeout(function() { self.hide(); }, 5000);
+};
+
+/**
+ * Hide the message
+ */
+BlocksMessages.prototype.hide = function()
+{
+    this.messages.fadeOut();
+    this.hideTimer = null;
+};
+"use strict";
+
+/**
+ * Handles the menu for creating blocks
+ */
+var BlocksMenu = function(blocks)
+{
+    var self = this;
+
+    // Is the menu visible ?
+    this.visible = false;
+
+    // Position on the scene
+    this.position = {};
+
+    // Blocks
+    this.blocks = blocks;
+
+    // Menu div
+    this.menu = blocks.div.find('.contextmenu');
+
+    // Menu items
+    this.actions = [
+	{
+	    label: 'Compact',
+	    action: function(blocks) {
+		blocks.toggleCompact();
+	    },
+            icon: 'compact'
+	},
+	{
+	    label: 'Scale',
+	    action: function(blocks) {
+		blocks.perfectScale();
+	    },
+            icon: 'scale'
+	}
+    ];
+
+    /**
+     * Initialisation
+     */
+    blocks.div.bind('contextmenu', function() {
+        if (self.visible) {
+            self.hide();
+        } else {
+            self.position = blocks.getPosition();
+
+            // Sorting types by family
+            var families = {};
+            for (var k in blocks.metas) {
+                var meta = blocks.metas[k];
+
+                if (meta.family in families) {
+                    families[meta.family].push(meta);
+                } else {
+                    families[meta.family] = [meta];
+                }
+            }
+
+            var html = '';
+
+	    for (var action in self.actions) {
+                var icon = 'none';
+                if ('icon' in self.actions[action]) {
+                    icon = self.actions[action].icon;
+                }
+		html += '<div rel="'+action+'" class="menuentry menu_action_'+action+'"><div class="menu_icon menu_icon_'+icon+'"></div>'+self.actions[action].label+'</div>';
+	    }
+
+            for (var family in families) {
+                if (family) {
+                    var className = family.replace(/[^a-zA-Z]/g,'');
+                    html += '<div class="family">';
+                    html += '<div class="familyName family_'+family+'"><div class="menu_icon menu_icon_family_'+className+'"></div>'+family+' <span>&raquo;</span></div>';
+                    html += '<div class="childs">';
+                }
+                for (var k in families[family]) {
+                    var type = families[family][k];
+                    html += '<div class="type type_'+type.name+'" rel="'+type.name+'">'+type.name+'</div>';
+                }
+                if (family) {
+                    html += '</div>';
+                    html += '</div>';
+                }
+            }
+
+            self.menu.find('.types').html(html);
+            self.show();
+
+            self.menu.find('.type').click(function() {
+                blocks.addBlock($(this).attr('rel'), self.position.x, self.position.y);
+                self.hide();
+            });
+
+            self.menu.find('.family').each(function() {
+                var family = $(this);
+                $(this).find('.familyName').hover(function() {
+                    self.menu.find('.childs').hide();
+                    family.find('.childs').show();
+                });
+            });
+
+	    for (var k in self.actions) {
+		self.menu.find('.menu_action_'+k).click(function() {
+		    var action = self.actions[$(this).attr('rel')];
+		    action.action(blocks);
+		    self.hide();
+		});
+	    }
+
+            $(this).find('.types > .type').hover(function() {
+                self.menu.find('.childs').hide();
+            });
+        }
+        
+        return false;
+    });
+}
+
+/**
+ * Adds an action
+ */
+BlocksMenu.prototype.addAction = function(name, action, icon)
+{
+    this.actions.push({label: name, action: action, icon: icon});
+};
+
+/**
+ * Hide the menu
+ */
+BlocksMenu.prototype.hide = function()
+{
+    this.menu.hide();
+    this.visible = false;
+};
+
+/**
+ * Show the menu
+ */
+BlocksMenu.prototype.show = function()
+{
+    this.menu.css('margin-left', (5+this.blocks.mouseX)+'px');
+    this.menu.css('margin-top', (5+this.blocks.mouseY)+'px');
+    this.menu.show();
+    this.visible = true;
+};
+
+"use strict";
+
+/**
+ * Manage one block meta
+ */
+var Meta = function(meta)
+{
+    var self = this;
+
+    this.name = meta.name;
+    this.loopable = ('loopable' in meta && meta['loopable']);
+    this.size = ('size' in meta ? meta.size : 'normal');
+    this.fields = [];
+
+    // Importing fields meta data
+    if ('fields' in meta) {
+        for (var k in meta.fields) {
+            var field = meta.fields[k];
+            var attributes = ('attrs' in field ? field.attrs.split(' ') : []);
+            field.attrs = {};
+            for (var i in attributes) {
+                field.attrs[attributes[i]] = true;
+            }
+            this.fields.push(field);
+        }
+    }
+
+    // Checking for parameters editor
+    for (var k in meta.parametersEditor) {
+        var key = keys[k];
+        if (meta[key] != undefined) {
+            this[key] = meta[key];
+        } else {
+            this[key] = [];
+        }
+    }
+
+    // Adding module
+    if ('module' in meta) {
+        this.module = meta.module;
+    } else {
+        this.module = null;
+    }
+
+    // Checking the family
+    if (meta.family == undefined) {
+        this.family = ''; // Root family
+    } else {
+        this.family = meta.family;
+    }
+
+    // Style
+    if (meta['class'] != undefined) {
+        this['class'] = meta['class'];
+    } else {
+        this['class'] = '';
+    }
+
+    // Description
+    this.description = null;
+    if (meta.description != undefined) {
+        this.description = meta.description;
+    }
+}
+
+"use strict";
+
+/**
+ * Handles the history
+ */
+var History = function(blocks)
+{
+    var self = this;
+    this.historySize = 30;
+
+    this.blocks = blocks;
+    this.history = [];
+    this.historyPos = 0;
+    this.ctrlDown = false;
+    
+    $(document).keydown(function(evt) {
+        if (evt.keyCode == 17) {
+            self.ctrlDown = true;
+        } 
+
+        // Ctrl+Z
+        if (evt.keyCode == 90 && self.ctrlDown) {
+            self.restoreLast();
+        }
+    });
+
+    $(document).keyup(function(evt) {
+        if (evt.keyCode == 17) {
+            self.ctrlDown = false;
+        }
+    });
+};
+
+/**
+ * Save the current situation to the history
+ */
+History.prototype.save = function()
+{
+    this.history.push(this.blocks.exportData());
+
+    if (this.history.length > this.historySize) {
+        this.history.shift();
+    }
+};
+
+/**
+ * Restores the last saved situation
+ */
+History.prototype.restoreLast = function()
+{
+    if (this.history.length) {
+        var last = this.history.pop();
+        this.blocks.importData(last);
+    } else {
+        alert('Nothing to get');
+    }
+};
+"use strict";
+
+/**
+ * Creates an instance of a block
+ */
+var Block = function(blocks, meta, id)
+{
+    this.blocks = blocks;
+    this.meta = meta;
+
+    // Appareance values
+    this.defaultFont = 10;
+
+    // Custom description
+    this.description = null;
+    
+    // Width
+    if (this.meta.size == 'normal') {
+        this.width = 150;
+    } else if (this.meta.size == 'small') {
+        this.width = 100;
+    } else {
+        this.width = this.meta.size;
+    }
+
+    // History saved before move
+    this.historySaved = false;
+
+    // Id
+    this.id = id;
+
+    // Do I have focus ?
+    this.hasFocus = false;
+
+    // Division (object)
+    this.div = null;
+
+    // Is the user dragging ?
+    this.drag = null;
+
+    // Last scale
+    this.lastScale = null;
+
+    // Parameters
+    this.fields = new Fields(this);
+
+    // Position
+    this.x = 0;
+    this.y = 0;
+
+    // I/Os cardinality
+    this.ios = {};
+
+    // Which IO has focus ?
+    this.focusedConnector = null;
+
+    // Edges
+    this.edges = {};
+
+    // Connectors
+    this.connectors = [];
+};
+
+// Can this block be used to break a loop ?
+Block.prototype.isLoopable = function()
+{
+    return this.meta.loopable;
+};
+
+/**
+ * Sets the block description to something custom
+ */
+Block.prototype.setDescription = function(description)
+{
+    this.description = description;
+    this.div.find('.description').html(description);
+};
+
+/**
+ * Update the block values
+ */
+Block.prototype.updateValues = function()
+{
+    this.blocks.history.save();
+};
+
+/**
+ * Set the values
+ */
+Block.prototype.setValues = function(values)
+{
+    for (var field in values) {
+        this.fields.getField(field).setValue(values[field]);
+    }
+};
+
+/**
+ * Getting the values
+ */
+Block.prototype.getValues = function(values)
+{
+    var values = {};
+    for (var k in this.fields.editables) {
+        var field = this.fields.editables[k];
+        values[field.name] = field.getValue();
+    }
+
+    return values;
+};
+
+/**
+ * Getting a field value
+ */
+Block.prototype.getValue = function(name)
+{
+    var field = this.fields.getField(name);
+
+    if (field) {
+        return field.getValue();
+    } else {
+        return null;
+    }
+};
+
+/**
+ * Html entities on a string
+ */
+Block.prototype.htmlentities = function(str)
+{
+    str = str.replace(/</, '&lt;');
+    str = str.replace(/>/, '&gt;');
+    return str;
+}
+
+/**
+ * Set the infos of the block
+ */
+Block.prototype.setInfos = function(html)
+{
+    this.div.find('.infos').html(html);
+};
+
+/**
+ * Returns the render of the block
+ */
+Block.prototype.getHtml = function()
+{
+    var self = this;
+    this.connectors = [];
+
+    // Getting the title
+    var title = this.meta.name + '<span class="blockId">#' + this.id + '</span>';
+    for (var k in this.fields.fields) {
+        var field = this.fields.fields[k];
+        if (field.asTitle) {
+            title = field.getPrintableValue();
+        }
+    }
+
+    var html = '<div class="parameters"></div>';
+    html += '<div class="blockTitle"><span class="titleText">'+title+'</span><div class="blockicon delete"></div>';
+    html += '<div class="blockicon info"></div>';
+
+    if (this.description) {
+        html += '<div class="description">' + self.description + '</div>';
+    } else {
+        if (this.meta.description) {
+            html += '<div class="description">' + this.meta.description + '</div>';
+        } else {
+            html += '<div class="description">No description</div>';
+        }
+    }
+    html += '<div class="blockicon settings"></div></div>';
+    html += '<div class="infos"></div>';
+    
+    for (var k in self.fields.editables) {
+        var field = self.fields.editables[k];
+        var fieldHtml = field.getHtml();
+        if (html && (!field.hide) && (!field.asTitle) && (!this.blocks.compactMode)) {
+            html += '<div class="parameter">'+fieldHtml+'</div>';
+        }
+    }
+
+    // Handling inputs & outputs
+    var handle = function(key, fields) {
+        html += '<div class="' + key + 's '+(self.isLoopable() ? 'loopable' : '')+'">';
+
+        for (var k in fields) {
+            var field = fields[k];
+
+            if (field.extensible) {
+                field.size = self.maxEntry(field.name);
+            }
+
+            var size = 1;
+            if (field.variadic) {
+                size = field.getDimension(self.fields);
+            }
+
+            for (var x=0; x<size; x++) {
+                var connectorId = field.name.toLowerCase() + '_' + key;
+                var label = field.getLabel().replace('#', x+1);
+
+                var value = '';
+                if (field.dynamicLabel != null) {
+                    label = String(field.dynamicLabel(self, x));
+                } else {
+                    if (field && field.is('editable')) {
+                        value = ' ('+field.getPrintableValueWithUnit(field.variadic ? x : undefined)+')';
+                    }
+                }
+
+                if (field.variadic) {
+                    connectorId += '_' + x;
+                }
+
+                // Generating HTML
+                html += '<div class="'+key+' type_'+field.type+' connector '+connectorId+'" rel="'+connectorId+ '"><div class="circle"></div>' + self.htmlentities(label) + value + '</div>';
+                self.connectors.push(connectorId);
+            }
+        }
+            html += '</div>';
+    };
+
+    handle('input', this.fields.inputs);
+    handle('output', this.fields.outputs);
+
+    return html;
+};
+
+/**
+ * Render the block
+ */
+Block.prototype.render = function()
+{
+    this.lastScale = null;
+    this.hasFocus = false;
+    this.div.html(this.getHtml());
+    this.initListeners();
+    this.redraw();
+};
+
+/**
+ * Returns the maximum index of entry for input field name
+ */
+Block.prototype.maxEntry = function(name)
+{
+    var max = 0;
+
+    for (var connectorId in this.edges) {
+        if (this.edges[connectorId].length) {
+            var connector = IdToConnector(connectorId);
+            if (connector.name == name) {
+                max = Math.max(parseInt(connector.index)+1, max);
+            }
+        }
+    }
+
+    return max;
+};
+
+/**
+ * Creates and inject the div
+ */
+Block.prototype.create = function(div)
+{
+    var html = '<div id="block' + this.id + '" class="block ' + this.meta['class'] + '"></div>'
+
+    div.append(html);
+    this.div = div.find('#block' + this.id);
+
+    this.render();
+};
+
+/**
+ * Sets the position and the scale of the block
+ */
+Block.prototype.redraw = function(selected)
+{
+    // Setting the position
+    this.div.css('margin-left', this.blocks.center.x+this.x*this.blocks.scale+'px');
+    this.div.css('margin-top', this.blocks.center.y+this.y*this.blocks.scale+'px');
+
+    // Showing/hiding icons
+    if (this.blocks.showIcons && this.blocks.scale > 0.8) {
+        this.div.find('.blockicon').show();
+    } else {
+        this.div.find('.blockicon').hide();
+    }
+
+    // Rescaling
+    if (this.lastScale != this.blocks.scale) {
+        this.div.css('font-size', Math.round(this.blocks.scale*this.defaultFont)+'px');
+        this.div.css('width', Math.round(this.blocks.scale*this.width)+'px');
+    
+        var size = Math.round(12*this.blocks.scale);
+        this.div.find('.circle').css('width', size+'px');
+        this.div.find('.circle').css('height', size+'px');
+        this.div.find('.circle').css('background-size', size+'px '+size+'px');
+
+        this.div.find('.inputs, .outputs').width(this.div.width()/2-10);
+
+        this.cssParameters();
+        this.lastScale = this.blocks.scale
+    }
+
+    // Changing the circle rendering
+    for (var k in this.connectors) {
+        var connectorId = this.connectors[k];
+        var connectorDiv = this.div.find('.' + connectorId);
+        var connectorVisual = connectorDiv.find('.circle');
+
+        connectorVisual.removeClass('io_active');
+        connectorVisual.removeClass('io_selected');
+        if (connectorId in this.edges && this.edges[connectorId].length) {
+            connectorVisual.addClass('io_active');
+
+            for (var n in this.edges[connectorId]) {
+                if (this.edges[connectorId][n].selected) {
+                    connectorVisual.addClass('io_selected');
+                }
+            }
+        }
+    }
+
+    // Updating the fields manager div
+    this.fields.div = this.div.find('.parameters');
+
+    // Is selected ?
+    this.div.removeClass('block_selected');
+    if (selected) {
+        this.div.addClass('block_selected');
+    }
+};
+
+/**
+ * Sets the css for the inputs
+ */
+Block.prototype.cssParameters = function()
+{
+    this.div.find('input').css('font-size', Math.round(this.blocks.scale*this.defaultFont)+'px');
+};
+
+/**
+ * Init the function listeners
+ */
+Block.prototype.initListeners = function()
+{
+    var self = this;
+    // Drag & drop the block
+    self.div.find('.blockTitle').mousedown(function(event) {
+        if (event.which == 1) {
+            self.historySaved = false;
+            self.drag = [self.blocks.mouseX/self.blocks.scale-self.x, self.blocks.mouseY/self.blocks.scale-self.y];
+        }
+    });
+
+    // Handle focus
+    self.div.hover(function() {
+        self.hasFocus = true;
+    }, function() {
+        self.hasFocus = false;
+    });
+
+    // Handle focus on the I/Os
+    self.div.find('.connector').hover(function() {
+        self.focusedConnector = $(this).attr('rel');
+    }, function() {
+        self.focusedConnector = null;
+    });
+        
+    // Dragging
+    $('html').mousemove(function(evt) {
+        if (self.drag) {
+            if (!self.historySaved) {
+                self.blocks.history.save();
+                self.historySaved = true;
+            }
+            self.x = (self.blocks.mouseX/self.blocks.scale-self.drag[0]);
+            self.y = (self.blocks.mouseY/self.blocks.scale-self.drag[1]);
+            self.blocks.redraw();
+        }
+    });
+
+    // Drag the block
+    $('html').mouseup(function() {
+        self.drag = null;
+    });
+
+    // Draw a link
+    self.div.find('.connector').mousedown(function(event) {
+        if (event.which == 1) {
+            self.blocks.beginLink(self, $(this).attr('rel'));
+            event.preventDefault();
+        }
+    });
+
+    // Handle the parameters
+    self.div.find('.settings').click(function() {
+        self.fields.toggle();
+        self.cssParameters();
+    });
+
+    // Handle the deletion
+    self.div.find('.delete').click(function() {
+        self.blocks.removeBlock(self.blocks.getBlockId(self));
+    });
+
+    // Show the description
+    self.div.find('.info').hover(function() {
+        self.div.find('.description').show();
+    }, function() {
+        self.div.find('.description').hide();
+    });
+};
+
+/**
+ * Gets the link position for an input or output
+ */
+Block.prototype.linkPositionFor = function(connector)
+{
+    var connectorId = connector;
+
+    if (connector instanceof Object) {
+        connectorId = connector.id();
+    }
+
+    try {
+        var div = this.div.find('.' + connectorId + ' .circle')
+
+        var x = (div.offset().left-this.blocks.div.offset().left)+div.width()/2;
+        var y = (div.offset().top-this.blocks.div.offset().top)+div.height()/2;
+    } catch (error) {
+        throw 'Unable to find link position for '+connectorId+' ('+error+')';
+    }
+
+    return {x: x, y: y};
+};
+
+/**
+ * Can the io be linked ?
+ */
+Block.prototype.canLink = function(connector)
+{
+    var tab = [];
+    var connectorId = connector.id();
+
+    if (connectorId in this.edges) {
+        tab = this.edges[connectorId];
+    }
+
+    var card = this.fields.getField(connector.name).card;
+
+    if (card[1] == '*') {
+        return true;
+    }
+
+    return (tab.length < card[1]);
+};
+
+/**
+ * Add an edge
+ */
+Block.prototype.addEdge = function(connector, edge)
+{
+    var tab = [];
+    var connectorId = connector.id();
+
+    if (this.edges[connectorId] != undefined) {
+        tab = this.edges[connectorId];
+    }
+
+    tab.push(edge);
+    this.edges[connectorId] = tab;
+};
+
+/**
+ * Erase an edge
+ */
+Block.prototype.eraseEdge = function(connector, edge)
+{
+    var connectorId = connector.id();
+
+    if (this.edges[connectorId] != undefined) {
+        for (var k in this.edges[connectorId]) {
+            if (this.edges[connectorId][k] == edge) {
+                arrayRemove(this.edges[connectorId], k);
+                break;
+            }
+        }
+    }
+};
+
+/**
+ * Erase the block
+ */
+Block.prototype.erase = function()
+{
+    this.div.remove();
+};
+
+/**
+ * Find all successors of a block, and their successors
+ */
+Block.prototype.allSuccessors = function()
+{
+    // Blocks already explored
+    var explored = {};
+    var exploreList = [this];
+    var ids = [this.id];
+    explored[this.id] = true;
+
+    while (exploreList.length > 0) {
+        var currentBlock = exploreList.pop();
+
+        for (var key in currentBlock.edges) {
+            for (var i in currentBlock.edges[key]) {
+                var edge = currentBlock.edges[key][i];
+                if (edge.isLoopable()) {
+                    continue;
+                }
+                var fromTo = edge.fromTo();
+
+                if (fromTo[0] == currentBlock) {
+                    var target = fromTo[1];
+                    
+                    if (!(target.id in explored)) {
+                        explored[target.id] = true;
+                        exploreList.push(target);
+                        ids.push(target.id);
+                    }
+                }
+            }
+        }
+    }
+
+    return ids;
+};
+
+/**
+ * Exports the block to JSON
+ */
+Block.prototype.exportData = function()
+{
+    return {
+        id: this.id,
+        x: this.x,
+        y: this.y,
+        type: this.meta.name,
+        module: this.meta.module,
+        values: this.getValues()
+    };
+};
+
+/**
+ * Gets the field
+ */
+Block.prototype.getField = function(name)
+{
+    return this.fields.getField(name);
+};
+
+/**
+ * Does the block has the given connector ?
+ */
+Block.prototype.hasConnector = function(connector)
+{
+    var field = this.getField(connector.name);
+
+    if (!field) {
+        return false;
+    }
+
+    if (field.variadic) {
+        return (connector.index != null) && 
+            (field.getDimension(this.fields) >= connector.index);
+    } else {
+        return (connector.index == null);
+    }
+};
+
+/**
+ * Imports a block from its data
+ */
+function BlockImport(blocks, data)
+{
+    for (var t in blocks.metas) {
+	var meta = blocks.metas[t];
+        var module = ('module' in data) ? data.module : null;
+	if (meta.name == data.type && meta.module == module) {
+	    var block = new Block(blocks, meta, data.id);
+	    block.x = data.x;
+	    block.y = data.y;
+            block.setValues(data.values);
+	    return block;
+	}
+    }
+
+    throw 'Unable to create a block of type ' + data.type;
+}
+"use strict";
+
+/**
+ * Manage the blocks
  *
- * @author Brantley Harris, 2009-2011
- * @author Timo Tijhof, 2011-2012
- * @source This plugin is heavily influenced by MochiKit's serializeJSON, which is
- *         copyrighted 2005 by Bob Ippolito.
- * @source Brantley Harris wrote this plugin. It is based somewhat on the JSON.org
- *         website's http://www.json.org/json2.js, which proclaims:
- *         "NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.", a sentiment that
- *         I uphold.
- * @license MIT License <http://www.opensource.org/licenses/mit-license.php>
- */function arrayRemove(a,b){b=parseInt(b);var c=a[a.length-1];a[a.length-1]=a[b],a[b]=c,a.pop()}function Field(a){var b=this;this.onUpdate=null,this.value=null,"defaultValue"in a&&(this.value=a.defaultValue),a.unit==undefined?this.unit="":this.unit=a.unit,this.dimension="dimension"in a?a.dimension:null,this.attrs=a.attrs,this.asTitle="asTitle"in a&&a.asTitle;if(a.type==undefined)this.type="string";else{var c=a.type.toLowerCase();c=Types.normalize(c),this.type=c}this.card="card"in a?a.card:"*",this.card=this.parseCardinality(this.card,this.is("output")),this.hide="hide"in a&&a.hide,this.hideLabel="hideLabel"in a&&a.hideLabel,this.name=a.name.toLowerCase(),this.label="label"in a?a.label:a.name,this.dynamicLabel="dynamicLabel"in a?a.dynamicLabel:null,this.choices="choices"in a?a.choices:null,this.extensible="extensible"in a&&a.extensible,this.size=1,this.isArray=this.type.substr(-2)=="[]",this.isArray&&(this.dimension=this.name,this.type=this.type.substr(0,this.type.length-2)),this.variadic=!!this.dimension,this.defaultValue="defaultValue"in a?a.defaultValue:null}function Fields(a){var b=this;this.block=a,this.meta=this.block.meta,this.display=!1,this.div=null,this.fields=[];for(k in this.meta.fields){var c=new Field(this.meta.fields[k]);c.onUpdate=function(){b.block.cssParameters()},this.fields.push(c)}this.inputs=[],this.outputs=[],this.editables=[],this.indexedFields={};for(k in this.fields){var c=this.fields[k];this.indexedFields[c.name]=c,"editable"in c.attrs&&this.editables.push(c),"input"in c.attrs&&(this.inputs.push(c),c.hide=!0),"output"in c.attrs&&(this.outputs.push(c),c.hide=!0)}}function Segment(a,b,c,d){this.x=a,this.y=b,this.dx=c,this.dy=d}function ConnectorImport(a){if(!(a instanceof Array)||a.length<2||a.length>3)throw"Unable to import a connector";return a.length==2&&a.push(null),new Connector(a[0],a[1],a[2])}function IdToConnector(a){var b=a.split("_"),c=b[0],d=b[1],e=null;return b.length==3&&(e=b[2]),new Connector(c,d,e)}function Edge(a,b,c,d,e,f){this.blocks=f,this.label=null,this.id=parseInt(a),this.block1=b,this.connector1=c,this.block2=d,this.connector2=e,this.selected=!1,this.defaultSize=3,this.defaultFontSize=10,this.position1=null,this.position2=null,this.segment=null}function EdgeImport(a,b){if(!1 in b)throw"An edge does not have id";var c=a.getBlockById(b.block1),d=a.getBlockById(b.block2);if(!c||!d)throw"Error while importing an edge, a block did not exists";return new Edge(b.id,c,ConnectorImport(b.connector1),d,ConnectorImport(b.connector2),a)}function BlocksMessages(a,b){var c=this;this.hideTimer=null,this.messages=a,this.width=b,a.click(function(){c.hide()})}function BlocksMenu(a){var b=this;this.visible=!1,this.position={},this.blocks=a,this.menu=a.div.find(".contextmenu"),this.actions=[{label:"Compact",action:function(a){a.toggleCompact()},icon:"compact"},{label:"Scale",action:function(a){a.perfectScale()},icon:"scale"}],a.div.bind("contextmenu",function(){if(b.visible)b.hide();else{b.position=a.getPosition();var c={};for(k in a.metas){var d=a.metas[k];d.family in c?c[d.family].push(d):c[d.family]=[d]}html="";for(action in b.actions){var e="none";"icon"in b.actions[action]&&(e=b.actions[action].icon),html+='<div rel="'+action+'" class="menuentry menu_action_'+action+'"><div class="menu_icon menu_icon_'+e+'"></div>'+b.actions[action].label+"</div>"}for(family in c){if(family){var f=family.replace(/[^a-zA-Z]/g,"");html+='<div class="family">',html+='<div class="familyName family_'+family+'"><div class="menu_icon menu_icon_family_'+f+'"></div>'+family+" <span>&raquo;</span></div>",html+='<div class="childs">'}for(k in c[family]){var g=c[family][k];html+='<div class="type type_'+g.name+'" rel="'+g.name+'">'+g.name+"</div>"}family&&(html+="</div>",html+="</div>")}b.menu.find(".types").html(html),b.show(),b.menu.find(".type").click(function(){a.addBlock($(this).attr("rel"),b.position.x,b.position.y),b.hide()}),b.menu.find(".family").each(function(){var a=$(this);$(this).find(".familyName").hover(function(){b.menu.find(".childs").hide(),a.find(".childs").show()})});for(k in b.actions)b.menu.find(".menu_action_"+k).click(function(){var c=b.actions[$(this).attr("rel")];c.action(a),b.hide()});$(this).find(".types > .type").hover(function(){b.menu.find(".childs").hide()})}return!1})}function History(a){var b=this;this.historySize=30,this.blocks=a,this.history=[],this.historyPos=0,this.ctrlDown=!1,$(document).keydown(function(a){a.keyCode==17&&(b.ctrlDown=!0),a.keyCode==90&&b.ctrlDown&&b.restoreLast()}),$(document).keyup(function(a){a.keyCode==17&&(b.ctrlDown=!1)})}function BlockImport(a,b){for(t in a.metas){var c=a.metas[t],d="module"in b?b.module:null;if(c.name==b.type&&c.module==d){var e=new Block(a,c,b.id);return e.x=b.x,e.y=b.y,e.setValues(b.values),e}}throw"Unable to create a block of type "+b.type}(function($){"use strict";var escape=/["\\\x00-\x1f\x7f-\x9f]/g,meta={"\b":"\\b","\t":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"},hasOwn=Object.prototype.hasOwnProperty;$.toJSON=typeof JSON=="object"&&JSON.stringify?JSON.stringify:function(a){if(a===null)return"null";var b,c,d,e,f=$.type(a);if(f==="undefined")return undefined;if(f==="number"||f==="boolean")return String(a);if(f==="string")return $.quoteString(a);if(typeof a.toJSON=="function")return $.toJSON(a.toJSON());if(f==="date"){var g=a.getUTCMonth()+1,h=a.getUTCDate(),i=a.getUTCFullYear(),j=a.getUTCHours(),k=a.getUTCMinutes(),l=a.getUTCSeconds(),m=a.getUTCMilliseconds();return g<10&&(g="0"+g),h<10&&(h="0"+h),j<10&&(j="0"+j),k<10&&(k="0"+k),l<10&&(l="0"+l),m<100&&(m="0"+m),m<10&&(m="0"+m),'"'+i+"-"+g+"-"+h+"T"+j+":"+k+":"+l+"."+m+'Z"'}b=[];if($.isArray(a)){for(c=0;c<a.length;c++)b.push($.toJSON(a[c])||"null");return"["+b.join(",")+"]"}if(typeof a=="object"){for(c in a)if(hasOwn.call(a,c)){f=typeof c;if(f==="number")d='"'+c+'"';else if(f==="string")d=$.quoteString(c);else continue;f=typeof a[c],f!=="function"&&f!=="undefined"&&(e=$.toJSON(a[c]),b.push(d+":"+e))}return"{"+b.join(",")+"}"}},$.evalJSON=typeof JSON=="object"&&JSON.parse?JSON.parse:function(str){return eval("("+str+")")},$.secureEvalJSON=typeof JSON=="object"&&JSON.parse?JSON.parse:function(str){var filtered=str.replace(/\\["\\\/bfnrtu]/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,"");if(/^[\],:{}\s]*$/.test(filtered))return eval("("+str+")");throw new SyntaxError("Error parsing JSON, source is not valid.")},$.quoteString=function(a){return a.match(escape)?'"'+a.replace(escape,function(a){var b=meta[a];return typeof b=="string"?b:(b=a.charCodeAt(),"\\u00"+Math.floor(b/16).toString(16)+(b%16).toString(16))})+'"':'"'+a+'"'}})(jQuery),function(a){function d(b){var c=b||window.event,d=[].slice.call(arguments,1),e=0,f=!0,g=0,h=0;return b=a.event.fix(c),b.type="mousewheel",c.wheelDelta&&(e=c.wheelDelta/120),c.detail&&(e=-c.detail/3),h=e,c.axis!==undefined&&c.axis===c.HORIZONTAL_AXIS&&(h=0,g=-1*e),c.wheelDeltaY!==undefined&&(h=c.wheelDeltaY/120),c.wheelDeltaX!==undefined&&(g=-1*c.wheelDeltaX/120),d.unshift(b,e,g,h),(a.event.dispatch||a.event.handle).apply(this,d)}var b=["DOMMouseScroll","mousewheel"];if(a.event.fixHooks)for(var c=b.length;c;)a.event.fixHooks[b[--c]]=a.event.mouseHooks;a.event.special.mousewheel={setup:function(){if(this.addEventListener)for(var a=b.length;a;)this.addEventListener(b[--a],d,!1);else this.onmousewheel=d},teardown:function(){if(this.removeEventListener)for(var a=b.length;a;)this.removeEventListener(b[--a],d,!1);else this.onmousewheel=null}},a.fn.extend({mousewheel:function(a){return a?this.bind("mousewheel",a):this.trigger("mousewheel")},unmousewheel:function(a){return this.unbind("mousewheel",a)}})}(jQuery),$.fn.serializeForm=function(){var a={},b=this.serializeArray();return $.each(b,function(){a[this.name]?(a[this.name].push||(a[this.name]=[a[this.name]]),a[this.name].push(this.value||"")):a[this.name]=this.value||""}),a},$.fn.unserializeForm=function(a){var b=function(a,b){a.attr("type")=="checkbox"?(b=!!b,a.attr("checked",b)):a.val(b)};for(key in a){var c=a[key],d=$('*[name="'+key+'"]');if(c instanceof Array)for(k in c)b($(d[k]),c[k]);else b(d,c)}},function(a){function b(){this._settings=[],this._extensions=[],this.regional=[],this.regional[""]={errorLoadingText:"Error loading",notSupportedText:"This browser does not support SVG"},this.local=this.regional[""],this._uuid=(new Date).getTime(),this._renesis=c("RenesisX.RenesisCtrl")}function c(a){try{return!!(window.ActiveXObject&&new ActiveXObject(a))}catch(b){return!1}}function e(b,c){this._svg=b,this._container=c;for(var d=0;d<a.svg._extensions.length;d++){var e=a.svg._extensions[d];this[e[0]]=new e[1](this)}}function f(){this._path=""}function g(){this._parts=[]}function h(a){return a&&a.constructor==Array}var d="svgwrapper";a.extend(b.prototype,{markerClassName:"hasSVG",svgNS:"http://www.w3.org/2000/svg",xlinkNS:"http://www.w3.org/1999/xlink",_wrapperClass:e,_attrNames:{class_:"class",in_:"in",alignmentBaseline:"alignment-baseline",baselineShift:"baseline-shift",clipPath:"clip-path",clipRule:"clip-rule",colorInterpolation:"color-interpolation",colorInterpolationFilters:"color-interpolation-filters",colorRendering:"color-rendering",dominantBaseline:"dominant-baseline",enableBackground:"enable-background",fillOpacity:"fill-opacity",fillRule:"fill-rule",floodColor:"flood-color",floodOpacity:"flood-opacity",fontFamily:"font-family",fontSize:"font-size",fontSizeAdjust:"font-size-adjust",fontStretch:"font-stretch",fontStyle:"font-style",fontVariant:"font-variant",fontWeight:"font-weight",glyphOrientationHorizontal:"glyph-orientation-horizontal",glyphOrientationVertical:"glyph-orientation-vertical",horizAdvX:"horiz-adv-x",horizOriginX:"horiz-origin-x",imageRendering:"image-rendering",letterSpacing:"letter-spacing",lightingColor:"lighting-color",markerEnd:"marker-end",markerMid:"marker-mid",markerStart:"marker-start",stopColor:"stop-color",stopOpacity:"stop-opacity",strikethroughPosition:"strikethrough-position",strikethroughThickness:"strikethrough-thickness",strokeDashArray:"stroke-dasharray",strokeDashOffset:"stroke-dashoffset",strokeLineCap:"stroke-linecap",strokeLineJoin:"stroke-linejoin",strokeMiterLimit:"stroke-miterlimit",strokeOpacity:"stroke-opacity",strokeWidth:"stroke-width",textAnchor:"text-anchor",textDecoration:"text-decoration",textRendering:"text-rendering",underlinePosition:"underline-position",underlineThickness:"underline-thickness",vertAdvY:"vert-adv-y",vertOriginY:"vert-origin-y",wordSpacing:"word-spacing",writingMode:"writing-mode"},_attachSVG:function(b,c){var d=b.namespaceURI==this.svgNS?b:null,b=d?null:b;if(a(b||d).hasClass(this.markerClassName))return;typeof c=="string"?c={loadURL:c}:typeof c=="function"&&(c={onLoad:c}),a(b||d).addClass(this.markerClassName);try{d||(d=document.createElementNS(this.svgNS,"svg"),d.setAttribute("version","1.1"),b.clientWidth>0&&d.setAttribute("width",b.clientWidth),b.clientHeight>0&&d.setAttribute("height",b.clientHeight),b.appendChild(d)),this._afterLoad(b,d,c||{})}catch(e){a.browser.msie?(b.id||(b.id="svg"+this._uuid++),this._settings[b.id]=c,b.innerHTML='<embed type="image/svg+xml" width="100%" height="100%" src="'+(c.initPath||"")+'blank.svg" '+'pluginspage="http://www.adobe.com/svg/viewer/install/main.html"/>'):b.innerHTML='<p class="svg_error">'+this.local.notSupportedText+"</p>"}},_registerSVG:function(){for(var b=0;b<document.embeds.length;b++){var c=document.embeds[b].parentNode;if(!a(c).hasClass(a.svg.markerClassName)||a.data(c,d))continue;var e=null;try{e=document.embeds[b].getSVGDocument()}catch(f){setTimeout(a.svg._registerSVG,250);return}e=e?e.documentElement:null,e&&a.svg._afterLoad(c,e)}},_afterLoad:function(b,c,e){var e=e||this._settings[b.id];this._settings[b?b.id:""]=null;var f=new this._wrapperClass(c,b);a.data(b||c,d,f);try{e.loadURL&&f.load(e.loadURL,e),e.settings&&f.configure(e.settings),e.onLoad&&!e.loadURL&&e.onLoad.apply(b||c,[f])}catch(g){alert(g)}},_getSVG:function(b){return b=typeof b=="string"?a(b)[0]:b.jquery?b[0]:b,a.data(b,d)},_destroySVG:function(b){var c=a(b);if(!c.hasClass(this.markerClassName))return;c.removeClass(this.markerClassName),b.namespaceURI!=this.svgNS&&c.empty(),a.removeData(b,d)},addExtension:function(a,b){this._extensions.push([a,b])},isSVGElem:function(b){return b.nodeType==1&&b.namespaceURI==a.svg.svgNS}}),a.extend(e.prototype,{_width:function(){return this._container?this._container.clientWidth:this._svg.width},_height:function(){return this._container?this._container.clientHeight:this._svg.height},root:function(){return this._svg},configure:function(b,c,d){b.nodeName||(d=c,c=b,b=this._svg);if(d)for(var e=b.attributes.length-1;e>=0;e--){var f=b.attributes.item(e);f.nodeName!="onload"&&f.nodeName!="version"&&f.nodeName.substring(0,5)!="xmlns"&&b.attributes.removeNamedItem(f.nodeName)}for(var g in c)b.setAttribute(a.svg._attrNames[g]||g,c[g]);return this},getElementById:function(a){return this._svg.ownerDocument.getElementById(a)},change:function(b,c){if(b)for(var d in c)c[d]==null?b.removeAttribute(a.svg._attrNames[d]||d):b.setAttribute(a.svg._attrNames[d]||d,c[d]);return this},_args:function(b,c,d){c.splice(0,0,"parent"),c.splice(c.length,0,"settings");var e={},f=0;b[0]!=null&&b[0].jquery&&(b[0]=b[0][0]),b[0]!=null&&(typeof b[0]!="object"||!b[0].nodeName)&&(e.parent=null,f=1);for(var g=0;g<b.length;g++)e[c[g+f]]=b[g];return d&&a.each(d,function(a,b){typeof e[b]=="object"&&(e.settings=e[b],e[b]=null)}),e},title:function(a,b,c){var d=this._args(arguments,["text"]),e=this._makeNode(d.parent,"title",d.settings||{});return e.appendChild(this._svg.ownerDocument.createTextNode(d.text)),e},describe:function(a,b,c){var d=this._args(arguments,["text"]),e=this._makeNode(d.parent,"desc",d.settings||{});return e.appendChild(this._svg.ownerDocument.createTextNode(d.text)),e},defs:function(b,c,d){var e=this._args(arguments,["id"],["id"]);return this._makeNode(e.parent,"defs",a.extend(e.id?{id:e.id}:{},e.settings||{}))},symbol:function(b,c,d,e,f,g,h){var i=this._args(arguments,["id","x1","y1","width","height"]);return this._makeNode(i.parent,"symbol",a.extend({id:i.id,viewBox:i.x1+" "+i.y1+" "+i.width+" "+i.height},i.settings||{}))},marker:function(b,c,d,e,f,g,h,i){var j=this._args(arguments,["id","refX","refY","mWidth","mHeight","orient"],["orient"]);return this._makeNode(j.parent,"marker",a.extend({id:j.id,refX:j.refX,refY:j.refY,markerWidth:j.mWidth,markerHeight:j.mHeight,orient:j.orient||"auto"},j.settings||{}))},style:function(b,c,d){var e=this._args(arguments,["styles"]),f=this._makeNode(e.parent,"style",a.extend({type:"text/css"},e.settings||{}));return f.appendChild(this._svg.ownerDocument.createTextNode(e.styles)),a.browser.opera&&a("head").append('<style type="text/css">'+e.styles+"</style>"),f},script:function(b,c,d,e){var f=this._args(arguments,["script","type"],["type"]),g=this._makeNode(f.parent,"script",a.extend({type:f.type||"text/javascript"},f.settings||{}));return g.appendChild(this._svg.ownerDocument.createTextNode(f.script)),a.browser.mozilla||a.globalEval(f.script),g},linearGradient:function(b,c,d,e,f,g,h,i){var j=this._args(arguments,["id","stops","x1","y1","x2","y2"],["x1"]),k=a.extend({id:j.id},j.x1!=null?{x1:j.x1,y1:j.y1,x2:j.x2,y2:j.y2}:{});return this._gradient(j.parent,"linearGradient",a.extend(k,j.settings||{}),j.stops)},radialGradient:function(b,c,d,e,f,g,h,i,j){var k=this._args(arguments,["id","stops","cx","cy","r","fx","fy"],["cx"]),l=a.extend({id:k.id},k.cx!=null?{cx:k.cx,cy:k.cy,r:k.r,fx:k.fx,fy:k.fy}:{});return this._gradient(k.parent,"radialGradient",a.extend(l,k.settings||{}),k.stops)},_gradient:function(b,c,d,e){var f=this._makeNode(b,c,d);for(var g=0;g<e.length;g++){var h=e[g];this._makeNode(f,"stop",a.extend({offset:h[0],stopColor:h[1]},h[2]!=null?{stopOpacity:h[2]}:{}))}return f},pattern:function(b,c,d,e,f,g,h,i,j,k,l){var m=this._args(arguments,["id","x","y","width","height","vx","vy","vwidth","vheight"],["vx"]),n=a.extend({id:m.id,x:m.x,y:m.y,width:m.width,height:m.height},m.vx!=null?{viewBox:m.vx+" "+m.vy+" "+m.vwidth+" "+m.vheight}:{});return this._makeNode(m.parent,"pattern",a.extend(n,m.settings||{}))},clipPath:function(b,c,d,e){var f=this._args(arguments,["id","units"]);return f.units=f.units||"userSpaceOnUse",this._makeNode(f.parent,"clipPath",a.extend({id:f.id,clipPathUnits:f.units},f.settings||{}))},mask:function(b,c,d,e,f,g,h){var i=this._args(arguments,["id","x","y","width","height"]);return this._makeNode(i.parent,"mask",a.extend({id:i.id,x:i.x,y:i.y,width:i.width,height:i.height},i.settings||{}))},createPath:function(){return new f},createText:function(){return new g},svg:function(b,c,d,e,f,g,h,i,j,k){var l=this._args(arguments,["x","y","width","height","vx","vy","vwidth","vheight"],["vx"]),m=a.extend({x:l.x,y:l.y,width:l.width,height:l.height},l.vx!=null?{viewBox:l.vx+" "+l.vy+" "+l.vwidth+" "+l.vheight}:{});return this._makeNode(l.parent,"svg",a.extend(m,l.settings||{}))},group:function(b,c,d){var e=this._args(arguments,["id"],["id"]);return this._makeNode(e.parent,"g",a.extend({id:e.id},e.settings||{}))},use:function(b,c,d,e,f,g,h){var i=this._args(arguments,["x","y","width","height","ref"]);typeof i.x=="string"&&(i.ref=i.x,i.settings=i.y,i.x=i.y=i.width=i.height=null);var j=this._makeNode(i.parent,"use",a.extend({x:i.x,y:i.y,width:i.width,height:i.height},i.settings||{}));return j.setAttributeNS(a.svg.xlinkNS,"href",i.ref),j},link:function(b,c,d){var e=this._args(arguments,["ref"]),f=this._makeNode(e.parent,"a",e.settings);return f.setAttributeNS(a.svg.xlinkNS,"href",e.ref),f},image:function(b,c,d,e,f,g,h){var i=this._args(arguments,["x","y","width","height","ref"]),j=this._makeNode(i.parent,"image",a.extend({x:i.x,y:i.y,width:i.width,height:i.height},i.settings||{}));return j.setAttributeNS(a.svg.xlinkNS,"href",i.ref),j},path:function(b,c,d){var e=this._args(arguments,["path"]);return this._makeNode(e.parent,"path",a.extend({d:e.path.path?e.path.path():e.path},e.settings||{}))},rect:function(b,c,d,e,f,g,h,i){var j=this._args(arguments,["x","y","width","height","rx","ry"],["rx"]);return this._makeNode(j.parent,"rect",a.extend({x:j.x,y:j.y,width:j.width,height:j.height},j.rx?{rx:j.rx,ry:j.ry}:{},j.settings||{}))},circle:function(b,c,d,e,f){var g=this._args(arguments,["cx","cy","r"]);return this._makeNode(g.parent,"circle",a.extend({cx:g.cx,cy:g.cy,r:g.r},g.settings||{}))},ellipse:function(b,c,d,e,f,g){var h=this._args(arguments,["cx","cy","rx","ry"]);return this._makeNode(h.parent,"ellipse",a.extend({cx:h.cx,cy:h.cy,rx:h.rx,ry:h.ry},h.settings||{}))},line:function(b,c,d,e,f,g){var h=this._args(arguments,["x1","y1","x2","y2"]);return this._makeNode(h.parent,"line",a.extend({x1:h.x1,y1:h.y1,x2:h.x2,y2:h.y2},h.settings||{}))},polyline:function(a,b,c){var d=this._args(arguments,["points"]);return this._poly(d.parent,"polyline",d.points,d.settings)},polygon:function(a,b,c){var d=this._args(arguments,["points"]);return this._poly(d.parent,"polygon",d.points,d.settings)},_poly:function(b,c,d,e){var f="";for(var g=0;g<d.length;g++)f+=d[g].join()+" ";return this._makeNode(b,c,a.extend({points:a.trim(f)},e||{}))},text:function(b,c,d,e,f){var g=this._args(arguments,["x","y","value"]);return typeof g.x=="string"&&arguments.length<4&&(g.value=g.x,g.settings=g.y,g.x=g.y=null),this._text(g.parent,"text",g.value,a.extend({x:g.x&&h(g.x)?g.x.join(" "):g.x,y:g.y&&h(g.y)?g.y.join(" "):g.y},g.settings||{}))},textpath:function(b,c,d,e){var f=this._args(arguments,["path","value"]),g=this._text(f.parent,"textPath",f.value,f.settings||{});return g.setAttributeNS(a.svg.xlinkNS,"href",f.path),g},_text:function(b,c,d,e){var f=this._makeNode(b,c,e);if(typeof d=="string")f.appendChild(f.ownerDocument.createTextNode(d));else for(var g=0;g<d._parts.length;g++){var h=d._parts[g];if(h[0]=="tspan"){var i=this._makeNode(f,h[0],h[2]);i.appendChild(f.ownerDocument.createTextNode(h[1])),f.appendChild(i)}else if(h[0]=="tref"){var i=this._makeNode(f,h[0],h[2]);i.setAttributeNS(a.svg.xlinkNS,"href",h[1]),f.appendChild(i)}else if(h[0]=="textpath"){var j=a.extend({},h[2]);j.href=null;var i=this._makeNode(f,h[0],j);i.setAttributeNS(a.svg.xlinkNS,"href",h[2].href),i.appendChild(f.ownerDocument.createTextNode(h[1])),f.appendChild(i)}else f.appendChild(f.ownerDocument.createTextNode(h[1]))}return f},other:function(a,b,c){var d=this._args(arguments,["name"]);return this._makeNode(d.parent,d.name,d.settings||{})},_makeNode:function(b,c,d){b=b||this._svg;var e=this._svg.ownerDocument.createElementNS(a.svg.svgNS,c);for(var c in d){var f=d[c];f!=null&&f!=null&&(typeof f!="string"||f!="")&&e.setAttribute(a.svg._attrNames[c]||c,f)}return b.appendChild(e),e},add:function(b,c){var d=this._args(arguments.length==1?[null,b]:arguments,["node"]),e=this;d.parent=d.parent||this._svg,d.node=d.node.jquery?d.node:a(d.node);try{if(a.svg._renesis)throw"Force traversal";d.parent.appendChild(d.node.cloneNode(!0))}catch(f){d.node.each(function(){var a=e._cloneAsSVG(this);a&&d.parent.appendChild(a)})}return this},clone:function(b,c){var d=this,e=this._args(arguments.length==1?[null,b]:arguments,["node"]);e.parent=e.parent||this._svg,e.node=e.node.jquery?e.node:a(e.node);var f=[];return e.node.each(function(){var a=d._cloneAsSVG(this);a&&(a.id="",e.parent.appendChild(a),f.push(a))}),f},_cloneAsSVG:function(b){var c=null;if(b.nodeType==1){c=this._svg.ownerDocument.createElementNS(a.svg.svgNS,this._checkName(b.nodeName));for(var d=0;d<b.attributes.length;d++){var e=b.attributes.item(d);e.nodeName!="xmlns"&&e.nodeValue&&(e.prefix=="xlink"?c.setAttributeNS(a.svg.xlinkNS,e.localName||e.baseName,e.nodeValue):c.setAttribute(this._checkName(e.nodeName),e.nodeValue))}for(var d=0;d<b.childNodes.length;d++){var f=this._cloneAsSVG(b.childNodes[d]);f&&c.appendChild(f)}}else if(b.nodeType==3)a.trim(b.nodeValue)&&(c=this._svg.ownerDocument.createTextNode(b.nodeValue));else if(b.nodeType==4&&a.trim(b.nodeValue))try{c=this._svg.ownerDocument.createCDATASection(b.nodeValue)}catch(g){c=this._svg.ownerDocument.createTextNode(b.nodeValue.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"))}return c},_checkName:function(a){return a=a.substring(0,1)>="A"&&a.substring(0,1)<="Z"?a.toLowerCase():a,a.substring(0,4)=="svg:"?a.substring(4):a},load:function(b,c){c=typeof c=="boolean"?{addTo:c}:typeof c=="function"?{onLoad:c}:typeof c=="string"?{parent:c}:typeof c=="object"&&c.nodeName?{parent:c}:typeof c=="object"&&c.jquery?{parent:c}:c||{},!c.parent&&!c.addTo&&this.clear(!1);var d=[this._svg.getAttribute("width"),this._svg.getAttribute("height")],e=this,f=function(b){b=a.svg.local.errorLoadingText+": "+b,c.onLoad?c.onLoad.apply(e._container||e._svg,[e,b]):e.text(null,10,20,b)},g=function(a){var b=new ActiveXObject("Microsoft.XMLDOM");return b.validateOnParse=!1,b.resolveExternals=!1,b.async=!1,b.loadXML(a),b.parseError.errorCode!=0?(f(b.parseError.reason),null):b},h=function(b){if(!b)return;if(b.documentElement.nodeName!="svg"){var g=b.getElementsByTagName("parsererror"),h=g.length?g[0].getElementsByTagName("div"):[];f(g.length?(h.length?h[0]:g[0]).firstChild.nodeValue:"???");return}var i=c.parent?a(c.parent)[0]:e._svg,j={};for(var o=0;o<b.documentElement.attributes.length;o++){var p=b.documentElement.attributes.item(o);p.nodeName!="version"&&p.nodeName.substring(0,5)!="xmlns"&&(j[p.nodeName]=p.nodeValue)}e.configure(i,j,!c.parent);var q=b.documentElement.childNodes;for(var o=0;o<q.length;o++)try{if(a.svg._renesis)throw"Force traversal";i.appendChild(e._svg.ownerDocument.importNode(q[o],!0)),q[o].nodeName=="script"&&a.globalEval(q[o].textContent)}catch(r){e.add(i,q[o])}c.changeSize||e.configure(i,{width:d[0],height:d[1]}),c.onLoad&&c.onLoad.apply(e._container||e._svg,[e])};return b.match("<svg")?h(a.browser.msie?g(b):(new DOMParser).parseFromString(b,"text/xml")):a.ajax({url:b,dataType:a.browser.msie?"text":"xml",success:function(b){h(a.browser.msie?g(b):b)},error:function(a,b,c){f(b+(c?" "+c.message:""))}}),this},remove:function(a){return a=a.jquery?a[0]:a,a.parentNode.removeChild(a),this},clear:function(a){a&&this.configure({},!0);while(this._svg.firstChild)this._svg.removeChild(this._svg.firstChild);return this},toSVG:function(a){return a=a||this._svg,typeof XMLSerializer=="undefined"?this._toSVG(a):(new XMLSerializer).serializeToString(a)},_toSVG:function(b){var c="";if(!b)return c;if(b.nodeType==3)c=b.nodeValue;else if(b.nodeType==4)c="<![CDATA["+b.nodeValue+"]]>";else{c="<"+b.nodeName;if(b.attributes)for(var d=0;d<b.attributes.length;d++){var e=b.attributes.item(d);a.trim(e.nodeValue)!=""&&!e.nodeValue.match(/^\[object/)&&!e.nodeValue.match(/^function/)&&(c+=" "+(e.namespaceURI==a.svg.xlinkNS?"xlink:":"")+e.nodeName+'="'+e.nodeValue+'"')}if(b.firstChild){c+=">";var f=b.firstChild;while(f)c+=this._toSVG(f),f=f.nextSibling;c+="</"+b.nodeName+">"}else c+="/>"}return c}}),a.extend(f.prototype,{reset:function(){return this._path="",this},move:function(a,b,c){return c=h(a)?b:c,this._coords(c?"m":"M",a,b)},line:function(a,b,c){return c=h(a)?b:c,this._coords(c?"l":"L",a,b)},horiz:function(a,b){return this._path+=(b?"h":"H")+(h(a)?a.join(" "):a),this},vert:function(a,b){return this._path+=(b?"v":"V")+(h(a)?a.join(" "):a),this},curveC:function(a,b,c,d,e,f,g){return g=h(a)?b:g,this._coords(g?"c":"C",a,b,c,d,e,f)},smoothC:function(a,b,c,d,e){return e=h(a)?b:e,this._coords(e?"s":"S",a,b,c,d)},curveQ:function(a,b,c,d,e){return e=h(a)?b:e,this._coords(e?"q":"Q",a,b,c,d)},smoothQ:function(a,b,c){return c=h(a)?b:c,this._coords(c?"t":"T",a,b)},_coords:function(a,b,c,d,e,f,g){if(h(b))for(var i=0;i<b.length;i++){var j=b[i];this._path+=(i==0?a:" ")+j[0]+","+j[1]+(j.length<4?"":" "+j[2]+","+j[3]+(j.length<6?"":" "+j[4]+","+j[5]))}else this._path+=a+b+","+c+(d==null?"":" "+d+","+e+(f==null?"":" "+f+","+g));return this},arc:function(a,b,c,d,e,f,g,i){i=h(a)?b:i,this._path+=i?"a":"A";if(h(a))for(var j=0;j<a.length;j++){var k=a[j];this._path+=(j==0?"":" ")+k[0]+","+k[1]+" "+k[2]+" "+(k[3]?"1":"0")+","+(k[4]?"1":"0")+" "+k[5]+","+k[6]}else this._path+=a+","+b+" "+c+" "+(d?"1":"0")+","+(e?"1":"0")+" "+f+","+g;return this},close:function(){return this._path+="z",this},path:function(){return this._path}}),f.prototype.moveTo=f.prototype.move,f.prototype.lineTo=f.prototype.line,f.prototype.horizTo=f.prototype.horiz,f.prototype.vertTo=f.prototype.vert,f.prototype.curveCTo=f.prototype.curveC,f.prototype.smoothCTo=f.prototype.smoothC,f.prototype.curveQTo=f.prototype.curveQ,f.prototype.smoothQTo=f.prototype.smoothQ,f.prototype.arcTo=f.prototype.arc,a.extend(g.prototype,{reset:function(){return this._parts=[],this},string:function(a){return this._parts[this._parts.length]=["text",a],this},span:function(a,b){return this._parts[this._parts.length]=["tspan",a,b],this},ref:function(a,b){return this._parts[this._parts.length]=["tref",a,b],this},path:function(b,c,d){return this._parts[this._parts.length]=["textpath",c,a.extend({href:b},d||{})],this}}),a.fn.svg=function(b){var c=Array.prototype.slice.call(arguments,1);return typeof b=="string"&&b=="get"?a.svg["_"+b+"SVG"].apply(a.svg,[this[0]].concat(c)):this.each(function(){typeof b=="string"?a.svg["_"+b+"SVG"].apply(a.svg,[this].concat(c)):a.svg._attachSVG(this,b||{})})},a.svg=new b}(jQuery),function(a,b,c,d){var e=c("html"),f=c(a),g=c(b),h=c.fancybox=function(){h.open.apply(this,arguments)},i=navigator.userAgent.match(/msie/i),j=null,k=b.createTouch!==d,l=function(a){return a&&a.hasOwnProperty&&a instanceof c},m=function(a){return a&&"string"===c.type(a)},n=function(a){return m(a)&&0<a.indexOf("%")},o=function(a,b){var c=parseInt(a,10)||0;return b&&n(a)&&(c*=h.getViewport()[b]/100),Math.ceil(c)},p=function(a,b){return o(a,b)+"px"};c.extend(h,{version:"2.1.5",defaults:{padding:15,margin:20,width:800,height:600,minWidth:100,minHeight:100,maxWidth:9999,maxHeight:9999,pixelRatio:1,autoSize:!0,autoHeight:!1,autoWidth:!1,autoResize:!0,autoCenter:!k,fitToView:!0,aspectRatio:!1,topRatio:.5,leftRatio:.5,scrolling:"auto",wrapCSS:"",arrows:!0,closeBtn:!0,closeClick:!1,nextClick:!1,mouseWheel:!0,autoPlay:!1,playSpeed:3e3,preload:3,modal:!1,loop:!0,ajax:{dataType:"html",headers:{"X-fancyBox":!0}},iframe:{scrolling:"auto",preload:!0},swf:{wmode:"transparent",allowfullscreen:"true",allowscriptaccess:"always"},keys:{next:{13:"left",34:"up",39:"left",40:"up"},prev:{8:"right",33:"down",37:"right",38:"down"},close:[27],play:[32],toggle:[70]},direction:{next:"left",prev:"right"},scrollOutside:!0,index:0,type:null,href:null,content:null,title:null,tpl:{wrap:'<div class="fancybox-wrap" tabIndex="-1"><div class="fancybox-skin"><div class="fancybox-outer"><div class="fancybox-inner"></div></div></div></div>',image:'<img class="fancybox-image" src="{href}" alt="" />',iframe:'<iframe id="fancybox-frame{rnd}" name="fancybox-frame{rnd}" class="fancybox-iframe" frameborder="0" vspace="0" hspace="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen'+(i?' allowtransparency="true"':"")+"></iframe>",error:'<p class="fancybox-error">The requested content cannot be loaded.<br/>Please try again later.</p>',closeBtn:'<a title="Close" class="fancybox-item fancybox-close" href="javascript:;"></a>',next:'<a title="Next" class="fancybox-nav fancybox-next" href="javascript:;"><span></span></a>',prev:'<a title="Previous" class="fancybox-nav fancybox-prev" href="javascript:;"><span></span></a>'},openEffect:"fade",openSpeed:250,openEasing:"swing",openOpacity:!0,openMethod:"zoomIn",closeEffect:"fade",closeSpeed:250,closeEasing:"swing",closeOpacity:!0,closeMethod:"zoomOut",nextEffect:"elastic",nextSpeed:250,nextEasing:"swing",nextMethod:"changeIn",prevEffect:"elastic",prevSpeed:250,prevEasing:"swing",prevMethod:"changeOut",helpers:{overlay:!0,title:!0},onCancel:c.noop,beforeLoad:c.noop,afterLoad:c.noop,beforeShow:c.noop,afterShow:c.noop,beforeChange:c.noop,beforeClose:c.noop,afterClose:c.noop},group:{},opts:{},previous:null,coming:null,current:null,isActive:!1,isOpen:!1,isOpened:!1,wrap:null,skin:null,outer:null,inner:null,player:{timer:null,isActive:!1},ajaxLoad:null,imgPreload:null,transitions:{},helpers:{},open:function(a,b){if(a&&(c.isPlainObject(b)||(b={}),!1!==h.close(!0)))return c.isArray(a)||(a=l(a)?c(a).get():[a]),c.each(a,function(e,f){var g={},i,j,k,n,o;"object"===c.type(f)&&(f.nodeType&&(f=c(f)),l(f)?(g={href:f.data("fancybox-href")||f.attr("href"),title:f.data("fancybox-title")||f.attr("title"),isDom:!0,element:f},c.metadata&&c.extend(!0,g,f.metadata())):g=f),i=b.href||g.href||(m(f)?f:null),j=b.title!==d?b.title:g.title||"",n=(k=b.content||g.content)?"html":b.type||g.type,!n&&g.isDom&&(n=f.data("fancybox-type"),n||(n=(n=f.prop("class").match(/fancybox\.(\w+)/))?n[1]:null)),m(i)&&(n||(h.isImage(i)?n="image":h.isSWF(i)?n="swf":"#"===i.charAt(0)?n="inline":m(f)&&(n="html",k=f)),"ajax"===n&&(o=i.split(/\s+/,2),i=o.shift(),o=o.shift())),k||("inline"===n?i?k=c(m(i)?i.replace(/.*(?=#[^\s]+$)/,""):i):g.isDom&&(k=f):"html"===n?k=i:!n&&!i&&g.isDom&&(n="inline",k=f)),c.extend(g,{href:i,type:n,content:k,title:j,selector:o}),a[e]=g}),h.opts=c.extend(!0,{},h.defaults,b),b.keys!==d&&(h.opts.keys=b.keys?c.extend({},h.defaults.keys,b.keys):!1),h.group=a,h._start(h.opts.index)},cancel:function(){var a=h.coming;a&&!1!==h.trigger("onCancel")&&(h.hideLoading(),h.ajaxLoad&&h.ajaxLoad.abort(),h.ajaxLoad=null,h.imgPreload&&(h.imgPreload.onload=h.imgPreload.onerror=null),a.wrap&&a.wrap.stop(!0,!0).trigger("onReset").remove(),h.coming=null,h.current||h._afterZoomOut(a))},close:function(a){h.cancel(),!1!==h.trigger("beforeClose")&&(h.unbindEvents(),h.isActive&&(!h.isOpen||!0===a?(c(".fancybox-wrap").stop(!0).trigger("onReset").remove(),h._afterZoomOut()):(h.isOpen=h.isOpened=!1,h.isClosing=!0,c(".fancybox-item, .fancybox-nav").remove(),h.wrap.stop(!0,!0).removeClass("fancybox-opened"),h.transitions[h.current.closeMethod]())))},play:function(a){var b=function(){clearTimeout(h.player.timer)},c=function(){b(),h.current&&h.player.isActive&&(h.player.timer=setTimeout(h.next,h.current.playSpeed))},d=function(){b(),g.unbind(".player"),h.player.isActive=!1,h.trigger("onPlayEnd")};!0===a||!h.player.isActive&&!1!==a?h.current&&(h.current.loop||h.current.index<h.group.length-1)&&(h.player.isActive=!0,g.bind({"onCancel.player beforeClose.player":d,"onUpdate.player"
-:c,"beforeLoad.player":b}),c(),h.trigger("onPlayStart")):d()},next:function(a){var b=h.current;b&&(m(a)||(a=b.direction.next),h.jumpto(b.index+1,a,"next"))},prev:function(a){var b=h.current;b&&(m(a)||(a=b.direction.prev),h.jumpto(b.index-1,a,"prev"))},jumpto:function(a,b,c){var e=h.current;e&&(a=o(a),h.direction=b||e.direction[a>=e.index?"next":"prev"],h.router=c||"jumpto",e.loop&&(0>a&&(a=e.group.length+a%e.group.length),a%=e.group.length),e.group[a]!==d&&(h.cancel(),h._start(a)))},reposition:function(a,b){var d=h.current,e=d?d.wrap:null,f;e&&(f=h._getPosition(b),a&&"scroll"===a.type?(delete f.position,e.stop(!0,!0).animate(f,200)):(e.css(f),d.pos=c.extend({},d.dim,f)))},update:function(a){var b=a&&a.type,c=!b||"orientationchange"===b;c&&(clearTimeout(j),j=null),h.isOpen&&!j&&(j=setTimeout(function(){var d=h.current;d&&!h.isClosing&&(h.wrap.removeClass("fancybox-tmp"),(c||"load"===b||"resize"===b&&d.autoResize)&&h._setDimension(),"scroll"===b&&d.canShrink||h.reposition(a),h.trigger("onUpdate"),j=null)},c&&!k?0:300))},toggle:function(a){h.isOpen&&(h.current.fitToView="boolean"===c.type(a)?a:!h.current.fitToView,k&&(h.wrap.removeAttr("style").addClass("fancybox-tmp"),h.trigger("onUpdate")),h.update())},hideLoading:function(){g.unbind(".loading"),c("#fancybox-loading").remove()},showLoading:function(){var a,b;h.hideLoading(),a=c('<div id="fancybox-loading"><div></div></div>').click(h.cancel).appendTo("body"),g.bind("keydown.loading",function(a){27===(a.which||a.keyCode)&&(a.preventDefault(),h.cancel())}),h.defaults.fixed||(b=h.getViewport(),a.css({position:"absolute",top:.5*b.h+b.y,left:.5*b.w+b.x}))},getViewport:function(){var b=h.current&&h.current.locked||!1,c={x:f.scrollLeft(),y:f.scrollTop()};return b?(c.w=b[0].clientWidth,c.h=b[0].clientHeight):(c.w=k&&a.innerWidth?a.innerWidth:f.width(),c.h=k&&a.innerHeight?a.innerHeight:f.height()),c},unbindEvents:function(){h.wrap&&l(h.wrap)&&h.wrap.unbind(".fb"),g.unbind(".fb"),f.unbind(".fb")},bindEvents:function(){var a=h.current,b;a&&(f.bind("orientationchange.fb"+(k?"":" resize.fb")+(a.autoCenter&&!a.locked?" scroll.fb":""),h.update),(b=a.keys)&&g.bind("keydown.fb",function(e){var f=e.which||e.keyCode,g=e.target||e.srcElement;if(27===f&&h.coming)return!1;!e.ctrlKey&&!e.altKey&&!e.shiftKey&&!e.metaKey&&(!g||!g.type&&!c(g).is("[contenteditable]"))&&c.each(b,function(b,g){if(1<a.group.length&&g[f]!==d)return h[b](g[f]),e.preventDefault(),!1;if(-1<c.inArray(f,g))return h[b](),e.preventDefault(),!1})}),c.fn.mousewheel&&a.mouseWheel&&h.wrap.bind("mousewheel.fb",function(b,d,e,f){for(var g=c(b.target||null),i=!1;g.length&&!i&&!g.is(".fancybox-skin")&&!g.is(".fancybox-wrap");)i=g[0]&&(!g[0].style.overflow||"hidden"!==g[0].style.overflow)&&(g[0].clientWidth&&g[0].scrollWidth>g[0].clientWidth||g[0].clientHeight&&g[0].scrollHeight>g[0].clientHeight),g=c(g).parent();0!==d&&!i&&1<h.group.length&&!a.canShrink&&(0<f||0<e?h.prev(0<f?"down":"left"):(0>f||0>e)&&h.next(0>f?"up":"right"),b.preventDefault())}))},trigger:function(a,b){var d,e=b||h.coming||h.current;if(e){c.isFunction(e[a])&&(d=e[a].apply(e,Array.prototype.slice.call(arguments,1)));if(!1===d)return!1;e.helpers&&c.each(e.helpers,function(b,d){d&&h.helpers[b]&&c.isFunction(h.helpers[b][a])&&h.helpers[b][a](c.extend(!0,{},h.helpers[b].defaults,d),e)}),g.trigger(a)}},isImage:function(a){return m(a)&&a.match(/(^data:image\/.*,)|(\.(jp(e|g|eg)|gif|png|bmp|webp|svg)((\?|#).*)?$)/i)},isSWF:function(a){return m(a)&&a.match(/\.(swf)((\?|#).*)?$/i)},_start:function(a){var b={},d,e;a=o(a),d=h.group[a]||null;if(!d)return!1;b=c.extend(!0,{},h.opts,d),d=b.margin,e=b.padding,"number"===c.type(d)&&(b.margin=[d,d,d,d]),"number"===c.type(e)&&(b.padding=[e,e,e,e]),b.modal&&c.extend(!0,b,{closeBtn:!1,closeClick:!1,nextClick:!1,arrows:!1,mouseWheel:!1,keys:null,helpers:{overlay:{closeClick:!1}}}),b.autoSize&&(b.autoWidth=b.autoHeight=!0),"auto"===b.width&&(b.autoWidth=!0),"auto"===b.height&&(b.autoHeight=!0),b.group=h.group,b.index=a,h.coming=b;if(!1===h.trigger("beforeLoad"))h.coming=null;else{e=b.type,d=b.href;if(!e)return h.coming=null,h.current&&h.router&&"jumpto"!==h.router?(h.current.index=a,h[h.router](h.direction)):!1;h.isActive=!0;if("image"===e||"swf"===e)b.autoHeight=b.autoWidth=!1,b.scrolling="visible";"image"===e&&(b.aspectRatio=!0),"iframe"===e&&k&&(b.scrolling="scroll"),b.wrap=c(b.tpl.wrap).addClass("fancybox-"+(k?"mobile":"desktop")+" fancybox-type-"+e+" fancybox-tmp "+b.wrapCSS).appendTo(b.parent||"body"),c.extend(b,{skin:c(".fancybox-skin",b.wrap),outer:c(".fancybox-outer",b.wrap),inner:c(".fancybox-inner",b.wrap)}),c.each(["Top","Right","Bottom","Left"],function(a,c){b.skin.css("padding"+c,p(b.padding[a]))}),h.trigger("onReady");if("inline"===e||"html"===e){if(!b.content||!b.content.length)return h._error("content")}else if(!d)return h._error("href");"image"===e?h._loadImage():"ajax"===e?h._loadAjax():"iframe"===e?h._loadIframe():h._afterLoad()}},_error:function(a){c.extend(h.coming,{type:"html",autoWidth:!0,autoHeight:!0,minWidth:0,minHeight:0,scrolling:"no",hasError:a,content:h.coming.tpl.error}),h._afterLoad()},_loadImage:function(){var a=h.imgPreload=new Image;a.onload=function(){this.onload=this.onerror=null,h.coming.width=this.width/h.opts.pixelRatio,h.coming.height=this.height/h.opts.pixelRatio,h._afterLoad()},a.onerror=function(){this.onload=this.onerror=null,h._error("image")},a.src=h.coming.href,!0!==a.complete&&h.showLoading()},_loadAjax:function(){var a=h.coming;h.showLoading(),h.ajaxLoad=c.ajax(c.extend({},a.ajax,{url:a.href,error:function(a,b){h.coming&&"abort"!==b?h._error("ajax",a):h.hideLoading()},success:function(b,c){"success"===c&&(a.content=b,h._afterLoad())}}))},_loadIframe:function(){var a=h.coming,b=c(a.tpl.iframe.replace(/\{rnd\}/g,(new Date).getTime())).attr("scrolling",k?"auto":a.iframe.scrolling).attr("src",a.href);c(a.wrap).bind("onReset",function(){try{c(this).find("iframe").hide().attr("src","//about:blank").end().empty()}catch(a){}}),a.iframe.preload&&(h.showLoading(),b.one("load",function(){c(this).data("ready",1),k||c(this).bind("load.fb",h.update),c(this).parents(".fancybox-wrap").width("100%").removeClass("fancybox-tmp").show(),h._afterLoad()})),a.content=b.appendTo(a.inner),a.iframe.preload||h._afterLoad()},_preloadImages:function(){var a=h.group,b=h.current,c=a.length,d=b.preload?Math.min(b.preload,c-1):0,e,f;for(f=1;f<=d;f+=1)e=a[(b.index+f)%c],"image"===e.type&&e.href&&((new Image).src=e.href)},_afterLoad:function(){var a=h.coming,b=h.current,d,e,f,g,i;h.hideLoading();if(a&&!1!==h.isActive)if(!1===h.trigger("afterLoad",a,b))a.wrap.stop(!0).trigger("onReset").remove(),h.coming=null;else{b&&(h.trigger("beforeChange",b),b.wrap.stop(!0).removeClass("fancybox-opened").find(".fancybox-item, .fancybox-nav").remove()),h.unbindEvents(),d=a.content,e=a.type,f=a.scrolling,c.extend(h,{wrap:a.wrap,skin:a.skin,outer:a.outer,inner:a.inner,current:a,previous:b}),g=a.href;switch(e){case"inline":case"ajax":case"html":a.selector?d=c("<div>").html(d).find(a.selector):l(d)&&(d.data("fancybox-placeholder")||d.data("fancybox-placeholder",c('<div class="fancybox-placeholder"></div>').insertAfter(d).hide()),d=d.show().detach(),a.wrap.bind("onReset",function(){c(this).find(d).length&&d.hide().replaceAll(d.data("fancybox-placeholder")).data("fancybox-placeholder",!1)}));break;case"image":d=a.tpl.image.replace("{href}",g);break;case"swf":d='<object id="fancybox-swf" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="100%" height="100%"><param name="movie" value="'+g+'"></param>',i="",c.each(a.swf,function(a,b){d+='<param name="'+a+'" value="'+b+'"></param>',i+=" "+a+'="'+b+'"'}),d+='<embed src="'+g+'" type="application/x-shockwave-flash" width="100%" height="100%"'+i+"></embed></object>"}(!l(d)||!d.parent().is(a.inner))&&a.inner.append(d),h.trigger("beforeShow"),a.inner.css("overflow","yes"===f?"scroll":"no"===f?"hidden":f),h._setDimension(),h.reposition(),h.isOpen=!1,h.coming=null,h.bindEvents(),h.isOpened?b.prevMethod&&h.transitions[b.prevMethod]():c(".fancybox-wrap").not(a.wrap).stop(!0).trigger("onReset").remove(),h.transitions[h.isOpened?a.nextMethod:a.openMethod](),h._preloadImages()}},_setDimension:function(){var a=h.getViewport(),b=0,d=!1,e=!1,d=h.wrap,f=h.skin,g=h.inner,i=h.current,e=i.width,j=i.height,k=i.minWidth,l=i.minHeight,m=i.maxWidth,q=i.maxHeight,r=i.scrolling,s=i.scrollOutside?i.scrollbarWidth:0,t=i.margin,u=o(t[1]+t[3]),v=o(t[0]+t[2]),x,y,z,A,B,C,D,F,G;d.add(f).add(g).width("auto").height("auto").removeClass("fancybox-tmp"),t=o(f.outerWidth(!0)-f.width()),x=o(f.outerHeight(!0)-f.height()),y=u+t,z=v+x,A=n(e)?(a.w-y)*o(e)/100:e,B=n(j)?(a.h-z)*o(j)/100:j;if("iframe"===i.type){if(G=i.content,i.autoHeight&&1===G.data("ready"))try{G[0].contentWindow.document.location&&(g.width(A).height(9999),C=G.contents().find("body"),s&&C.css("overflow-x","hidden"),B=C.outerHeight(!0))}catch(H){}}else if(i.autoWidth||i.autoHeight)g.addClass("fancybox-tmp"),i.autoWidth||g.width(A),i.autoHeight||g.height(B),i.autoWidth&&(A=g.width()),i.autoHeight&&(B=g.height()),g.removeClass("fancybox-tmp");e=o(A),j=o(B),F=A/B,k=o(n(k)?o(k,"w")-y:k),m=o(n(m)?o(m,"w")-y:m),l=o(n(l)?o(l,"h")-z:l),q=o(n(q)?o(q,"h")-z:q),C=m,D=q,i.fitToView&&(m=Math.min(a.w-y,m),q=Math.min(a.h-z,q)),y=a.w-u,v=a.h-v,i.aspectRatio?(e>m&&(e=m,j=o(e/F)),j>q&&(j=q,e=o(j*F)),e<k&&(e=k,j=o(e/F)),j<l&&(j=l,e=o(j*F))):(e=Math.max(k,Math.min(e,m)),i.autoHeight&&"iframe"!==i.type&&(g.width(e),j=g.height()),j=Math.max(l,Math.min(j,q)));if(i.fitToView)if(g.width(e).height(j),d.width(e+t),a=d.width(),u=d.height(),i.aspectRatio)for(;(a>y||u>v)&&e>k&&j>l&&!(19<b++);)j=Math.max(l,Math.min(q,j-10)),e=o(j*F),e<k&&(e=k,j=o(e/F)),e>m&&(e=m,j=o(e/F)),g.width(e).height(j),d.width(e+t),a=d.width(),u=d.height();else e=Math.max(k,Math.min(e,e-(a-y))),j=Math.max(l,Math.min(j,j-(u-v)));s&&"auto"===r&&j<B&&e+t+s<y&&(e+=s),g.width(e).height(j),d.width(e+t),a=d.width(),u=d.height(),d=(a>y||u>v)&&e>k&&j>l,e=i.aspectRatio?e<C&&j<D&&e<A&&j<B:(e<C||j<D)&&(e<A||j<B),c.extend(i,{dim:{width:p(a),height:p(u)},origWidth:A,origHeight:B,canShrink:d,canExpand:e,wPadding:t,hPadding:x,wrapSpace:u-f.outerHeight(!0),skinSpace:f.height()-j}),!G&&i.autoHeight&&j>l&&j<q&&!e&&g.height("auto")},_getPosition:function(a){var b=h.current,c=h.getViewport(),d=b.margin,e=h.wrap.width()+d[1]+d[3],f=h.wrap.height()+d[0]+d[2],d={position:"absolute",top:d[0],left:d[3]};return b.autoCenter&&b.fixed&&!a&&f<=c.h&&e<=c.w?d.position="fixed":b.locked||(d.top+=c.y,d.left+=c.x),d.top=p(Math.max(d.top,d.top+(c.h-f)*b.topRatio)),d.left=p(Math.max(d.left,d.left+(c.w-e)*b.leftRatio)),d},_afterZoomIn:function(){var a=h.current;a&&(h.isOpen=h.isOpened=!0,h.wrap.css("overflow","visible").addClass("fancybox-opened"),h.update(),(a.closeClick||a.nextClick&&1<h.group.length)&&h.inner.css("cursor","pointer").bind("click.fb",function(b){!c(b.target).is("a")&&!c(b.target).parent().is("a")&&(b.preventDefault(),h[a.closeClick?"close":"next"]())}),a.closeBtn&&c(a.tpl.closeBtn).appendTo(h.skin).bind("click.fb",function(a){a.preventDefault(),h.close()}),a.arrows&&1<h.group.length&&((a.loop||0<a.index)&&c(a.tpl.prev).appendTo(h.outer).bind("click.fb",h.prev),(a.loop||a.index<h.group.length-1)&&c(a.tpl.next).appendTo(h.outer).bind("click.fb",h.next)),h.trigger("afterShow"),!a.loop&&a.index===a.group.length-1?h.play(!1):h.opts.autoPlay&&!h.player.isActive&&(h.opts.autoPlay=!1,h.play()))},_afterZoomOut:function(a){a=a||h.current,c(".fancybox-wrap").trigger("onReset").remove(),c.extend(h,{group:{},opts:{},router:!1,current:null,isActive:!1,isOpened:!1,isOpen:!1,isClosing:!1,wrap:null,skin:null,outer:null,inner:null}),h.trigger("afterClose",a)}}),h.transitions={getOrigPosition:function(){var a=h.current,b=a.element,c=a.orig,d={},e=50,f=50,g=a.hPadding,i=a.wPadding,j=h.getViewport();!c&&a.isDom&&b.is(":visible")&&(c=b.find("img:first"),c.length||(c=b)),l(c)?(d=c.offset(),c.is("img")&&(e=c.outerWidth(),f=c.outerHeight())):(d.top=j.y+(j.h-f)*a.topRatio,d.left=j.x+(j.w-e)*a.leftRatio);if("fixed"===h.wrap.css("position")||a.locked)d.top-=j.y,d.left-=j.x;return d={top:p(d.top-g*a.topRatio),left:p(d.left-i*a.leftRatio),width:p(e+i),height:p(f+g)}},step:function(a,b){var c,d,e=b.prop;d=h.current;var f=d.wrapSpace,g=d.skinSpace;if("width"===e||"height"===e)c=b.end===b.start?1:(a-b.start)/(b.end-b.start),h.isClosing&&(c=1-c),d="width"===e?d.wPadding:d.hPadding,d=a-d,h.skin[e](o("width"===e?d:d-f*c)),h.inner[e](o("width"===e?d:d-f*c-g*c))},zoomIn:function(){var a=h.current,b=a.pos,d=a.openEffect,e="elastic"===d,f=c.extend({opacity:1},b);delete f.position,e?(b=this.getOrigPosition(),a.openOpacity&&(b.opacity=.1)):"fade"===d&&(b.opacity=.1),h.wrap.css(b).animate(f,{duration:"none"===d?0:a.openSpeed,easing:a.openEasing,step:e?this.step:null,complete:h._afterZoomIn})},zoomOut:function(){var a=h.current,b=a.closeEffect,c="elastic"===b,d={opacity:.1};c&&(d=this.getOrigPosition(),a.closeOpacity&&(d.opacity=.1)),h.wrap.animate(d,{duration:"none"===b?0:a.closeSpeed,easing:a.closeEasing,step:c?this.step:null,complete:h._afterZoomOut})},changeIn:function(){var a=h.current,b=a.nextEffect,c=a.pos,d={opacity:1},e=h.direction,f;c.opacity=.1,"elastic"===b&&(f="down"===e||"up"===e?"top":"left","down"===e||"right"===e?(c[f]=p(o(c[f])-200),d[f]="+=200px"):(c[f]=p(o(c[f])+200),d[f]="-=200px")),"none"===b?h._afterZoomIn():h.wrap.css(c).animate(d,{duration:a.nextSpeed,easing:a.nextEasing,complete:h._afterZoomIn})},changeOut:function(){var a=h.previous,b=a.prevEffect,d={opacity:.1},e=h.direction;"elastic"===b&&(d["down"===e||"up"===e?"top":"left"]=("up"===e||"left"===e?"-":"+")+"=200px"),a.wrap.animate(d,{duration:"none"===b?0:a.prevSpeed,easing:a.prevEasing,complete:function(){c(this).trigger("onReset").remove()}})}},h.helpers.overlay={defaults:{closeClick:!0,speedOut:200,showEarly:!0,css:{},locked:!k,fixed:!0},overlay:null,fixed:!1,el:c("html"),create:function(a){a=c.extend({},this.defaults,a),this.overlay&&this.close(),this.overlay=c('<div class="fancybox-overlay"></div>').appendTo(h.coming?h.coming.parent:a.parent),this.fixed=!1,a.fixed&&h.defaults.fixed&&(this.overlay.addClass("fancybox-overlay-fixed"),this.fixed=!0)},open:function(a){var b=this;a=c.extend({},this.defaults,a),this.overlay?this.overlay.unbind(".overlay").width("auto").height("auto"):this.create(a),this.fixed||(f.bind("resize.overlay",c.proxy(this.update,this)),this.update()),a.closeClick&&this.overlay.bind("click.overlay",function(a){if(c(a.target).hasClass("fancybox-overlay"))return h.isActive?h.close():b.close(),!1}),this.overlay.css(a.css).show()},close:function(){var a,b;f.unbind("resize.overlay"),this.el.hasClass("fancybox-lock")&&(c(".fancybox-margin").removeClass("fancybox-margin"),a=f.scrollTop(),b=f.scrollLeft(),this.el.removeClass("fancybox-lock"),f.scrollTop(a).scrollLeft(b)),c(".fancybox-overlay").remove().hide(),c.extend(this,{overlay:null,fixed:!1})},update:function(){var a="100%",c;this.overlay.width(a).height("100%"),i?(c=Math.max(b.documentElement.offsetWidth,b.body.offsetWidth),g.width()>c&&(a=g.width())):g.width()>f.width()&&(a=g.width()),this.overlay.width(a).height(g.height())},onReady:function(a,b){var d=this.overlay;c(".fancybox-overlay").stop(!0,!0),d||this.create(a),a.locked&&this.fixed&&b.fixed&&(d||(this.margin=g.height()>f.height()?c("html").css("margin-right").replace("px",""):!1),b.locked=this.overlay.append(b.wrap),b.fixed=!1),!0===a.showEarly&&this.beforeShow.apply(this,arguments)},beforeShow:function(a,b){var d,e;b.locked&&(!1!==this.margin&&(c("*").filter(function(){return"fixed"===c(this).css("position")&&!c(this).hasClass("fancybox-overlay")&&!c(this).hasClass("fancybox-wrap")}).addClass("fancybox-margin"),this.el.addClass("fancybox-margin")),d=f.scrollTop(),e=f.scrollLeft(),this.el.addClass("fancybox-lock"),f.scrollTop(d).scrollLeft(e)),this.open(a)},onUpdate:function(){this.fixed||this.update()},afterClose:function(a){this.overlay&&!h.coming&&this.overlay.fadeOut(a.speedOut,c.proxy(this.close,this))}},h.helpers.title={defaults:{type:"float",position:"bottom"},beforeShow:function(a){var b=h.current,d=b.title,e=a.type;c.isFunction(d)&&(d=d.call(b.element,b));if(m(d)&&""!==c.trim(d)){b=c('<div class="fancybox-title fancybox-title-'+e+'-wrap">'+d+"</div>");switch(e){case"inside":e=h.skin;break;case"outside":e=h.wrap;break;case"over":e=h.inner;break;default:e=h.skin,b.appendTo("body"),i&&b.width(b.width()),b.wrapInner('<span class="child"></span>'),h.current.margin[2]+=Math.abs(o(b.css("margin-bottom")))}b["top"===a.position?"prependTo":"appendTo"](e)}}},c.fn.fancybox=function(a){var b,d=c(this),e=this.selector||"",f=function(f){var g=c(this).blur(),i=b,j,k;!f.ctrlKey&&!f.altKey&&!f.shiftKey&&!f.metaKey&&!g.is(".fancybox-wrap")&&(j=a.groupAttr||"data-fancybox-group",k=g.attr(j),k||(j="rel",k=g.get(0)[j]),k&&""!==k&&"nofollow"!==k&&(g=e.length?c(e):d,g=g.filter("["+j+'="'+k+'"]'),i=g.index(this)),a.index=i,!1!==h.open(g,a)&&f.preventDefault())};return a=a||{},b=a.index||0,!e||!1===a.live?d.unbind("click.fb-start").bind("click.fb-start",f):g.undelegate(e,"click.fb-start").delegate(e+":not('.fancybox-item, .fancybox-nav')","click.fb-start",f),this.filter("[data-fancybox-start=1]").trigger("click"),this},g.ready(function(){var b,f;c.scrollbarWidth===d&&(c.scrollbarWidth=function(){var a=c('<div style="width:50px;height:50px;overflow:auto"><div/></div>').appendTo("body"),b=a.children(),b=b.innerWidth()-b.height(99).innerWidth();return a.remove(),b});if(c.support.fixedPosition===d){b=c.support,f=c('<div style="position:fixed;top:20px;"></div>').appendTo("body");var g=20===f[0].offsetTop||15===f[0].offsetTop;f.remove(),b.fixedPosition=g}c.extend(h.defaults,{scrollbarWidth:c.scrollbarWidth(),fixed:c.support.fixedPosition,parent:c("body")}),b=c(a).width(),e.addClass("fancybox-lock-test"),f=c(a).width(),e.removeClass("fancybox-lock-test"),c("<style type='text/css'>.fancybox-margin{margin-right:"+(f-b)+"px;}</style>").appendTo("head")})}(window,document,jQuery),Field.prototype.updated=function(){this.onUpdate&&this.onUpdate()},Field.prototype.getFieldHtml=function(){var a=this.label+":<br/>";if(this.type=="longtext")a+='<textarea name="'+this.name+'"></textarea>';else if(this.type=="choice"||this.choices){a+='<select name="'+this.name+'">';for(k in this.choices){var b=this.choices[k];a+='<option value="'+b+'">'+b+"</option>"}a+="</select>"}else{var c=this.type=="bool"?"checkbox":"text";a+='<input value="'+this.getPrintableValue()+'" type="'+c+'" name="'+this.name+'" />'+this.unit}return a+="<br/>",a},Field.prototype.getHtml=function(){var a="";return this.hideLabel||(a+="<b>"+this.label+"</b>: "),a+=this.getPrintableValueWithUnit()+"<br/>",a},Field.prototype.getValue=function(){return this.value},Field.prototype.getPrintableValue=function(a){var b=this.getValue();return b instanceof Array&&(a==undefined?b=b.join(","):b=b[a]),b},Field.prototype.getPrintableValueWithUnit=function(a){var b=this.getPrintableValue(a);return this.unit&&(b+=this.unit),b},Field.prototype.getLabel=function(){return this.label},Field.prototype.setValue=function(a){this.isArray&&!(a instanceof Array)&&(a=a.split(",")),this.type=="bool"&&(a=!!a),this.value=a},Field.prototype.getDimension=function(){return this.extensible?this.size+1:this.isArray?this.getValue().length:parseInt(this.getValue())},Field.prototype.is=function(a){return a in this.attrs},Field.prototype.parseCardinality=function(a,b){var c=[0,1];b&&(c=[0,"*"]),a!=undefined&&(typeof a!="string"?c=[a,a]:(tab=a.split("-"),tab.length==1?c=[0,tab[0]]:c=tab));for(idx in c)c[idx]!="*"&&(c[idx]=parseInt(c[idx]));return c},Fields.prototype.getField=function(a){return a=a.toLowerCase(),a in this.indexedFields?this.indexedFields[a]:null},Fields.prototype.show=function(){var a=this,b="<h3>"+this.block.meta.name+"#"+this.block.id+"</h3>";b+='<form class="form">';for(k in this.editables)b+=this.editables[k].getFieldHtml();b+='<input type="submit" style="display:none" width="0" height="0" />',b+="</form>",b+='<button class="save" href="javascript:void(0);">Save</button>',b+='<button class="close" href="javascript:void(0);">Close</button>',this.div.html(b),this.div.find(".close").click(function(){$.fancybox.close()});var c=this.div.find("form");this.div.find(".save").click(function(){a.save(c.serializeForm()),$.fancybox.close()}),this.div.find("form").submit(function(){return a.save($(this).serializeForm()),$.fancybox.close(),!1}),this.div.find("input").dblclick(function(){$(this).select()}),$.fancybox.open(this.div,{wrapCSS:"blocks_js_modal"}),this.display=!0},Fields.prototype.getHtml=function(){var a="";for(k in this.editables)a+=this.editables[k].getHtml();return a},Fields.prototype.hide=function(){this.div.hide(),this.display=!1},Fields.prototype.save=function(a){var b={};for(key in a){var c=key,d=!1;c.substr(c.length-2,2)=="[]"&&(c=c.substr(0,c.length-2),d=!0),a[key]==null&&d&&(a[key]=[]),this.getField(c).setValue(a[key])}this.block.render(),this.block.redraw()},Fields.prototype.toggle=function(){this.meta.parametersEditor!=undefined&&typeof this.meta.parametersEditor=="function"?this.meta.parametersEditor(this.block.values,function(a){this.block.updateValues(a),this.block.render(),this.block.redraw()}):this.display?this.hide():this.show()},Segment.prototype.distance=function(a,b){return Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2))},Segment.prototype.distanceP=function(a){var b=this.normal();b.x=a.x,b.y=a.y;var c=this.intersection(b);return[c[0],this.distance(b.alpha(c[1]),a)]},Segment.prototype.normal=function(){return new Segment(this.x,this.y,this.dy,-this.dx)},Segment.prototype.intersection=function(a){var b=this.dx,c=-a.dx,d=this.dy,e=-a.dy,f=a.x-this.x,g=a.y-this.y,h=b*e-c*d;return h==0?null:(r1=(e*f-c*g)/h,r2=(-d*f+b*g)/h,[r1,r2])},Segment.prototype.alpha=function(a){var b={};return b.x=this.x+this.dx*a,b.y=this.y+this.dy*a,b},Types=function(){this.compatibles={}},Types.normalize=function(a){a=a.toLowerCase();if(a=="check"||a=="bool"||a=="checkbox")a="bool";a=="integer"&&(a="int");if(a=="float"||a=="double")a="number";a=="text"&&(a="string");if(a=="select"||a=="choices"||a=="combobox")a="choice";return a=="textarea"&&(a="longtext"),a},Types.prototype.isCompatible=function(a,b){a=Types.normalize(a),b=Types.normalize(b);if(a==b)return!0;if(a in this.compatibles)for(k in this.compatibles[a])if(b==this.compatibles[a][k])return!0;return!1},Types.prototype.getCompatibles=function(a){a=Types.normalize(a);var b=[a];if(a in this.compatibles)for(k in this.compatibles[a])b.push(this.compatibles[a][k]);return b},Types.prototype.addCompatibilityOneWay=function(a,b){a=Types.normalize(a),b=Types.normalize(b),a in this.compatibles||(this.compatibles[a]=[]),this.compatibles[a].push(b)},Types.prototype.addCompatibility=function(a,b){a=Types.normalize(a),b=Types.normalize(b),this.addCompatibilityOneWay(a,b),this.addCompatibilityOneWay(b,a)},Connector=function(a,b,c){this.name=a,this.index=c,this.type=b},Connector.prototype.id=function(){var a=this.name+"_"+this.type;return this.index!=null&&(a+="_"+this.index),a},Connector.prototype.isInput=function(){return this.type=="input"},Connector.prototype.isOutput=function(){return this.type=="output"},Connector.prototype.same=function(a){return this.name==a.name&&this.index==a.index&&this.type==a.type},Connector.prototype.exportData=function(){var a=[this.name,this.type];return this.index!==null&&a.push(this.index),a},Edge.prototype.isLoopable=function(){return this.block1.isLoopable()||this.block2.isLoopable()},Edge.prototype.fromTo=function(){return[this.block1,this.block2]},Edge.prototype.setLabel=function(a){this.label=a},Edge.prototype.draw=function(a){this.position1=this.block1.linkPositionFor(this.connector1),this.position2=this.block2.linkPositionFor(this.connector2),this.segment=new Segment(this.position1.x,this.position1.y,this.position2.x-this.position1.x,this.position2.y-this.position1.y);var b=this.defaultSize*this.blocks.scale;if(this.selected)var c="rgba(0, 200, 0, 1)";else var c="rgba(255, 200, 0, 1)";a.line(this.position1.x,this.position1.y,this.position2.x,this.position2.y,{stroke:c,strokeWidth:b});var d=(this.position1.x+this.position2.x)/2,e=(this.position1.y+this.position2.y)/2,f=Math.sqrt(Math.pow(this.position1.x-this.position2.x,2)+Math.pow(this.position1.y-this.position2.y,2)),g=30;g=g*Math.PI/180;var h=Math.cos(g),i=Math.sin(g),j=Math.cos(-g),k=Math.sin(-g);if(this.blocks.getOption("orientation",!0)){var l=(this.position1.x-d)*this.blocks.scale*10/(f/2),m=(this.position1.y-e)*this.blocks.scale*10/(f/2),b=this.defaultSize*this.blocks.scale/3;a.line(d,e,d+(l*h-m*i),e+(m*h+l*i),{stroke:c,strokeWidth:b}),a.line(d,e,d+(l*j-m*k),e+(m*j+l*k),{stroke:c,strokeWidth:b})}if(this.label!=null){var n=Math.round(this.defaultFontSize*this.blocks.scale);a.text(d-2*n,e+n/3,this.label,{fontSize:n+"px",fill:"#3a3b01",stroke:"#fff",strokeWidth:2}),a.text(d-2*n,e+n/3,this.label,{fontSize:n+"px",fill:"#3a3b01"})}},Edge.prototype.collide=function(a,b){var c=this.segment.distanceP({x:a,y:b});return c[0]>=0&&c[0]<=1&&c[1]<this.defaultSize*blocks.scale*2?c[0]:!1},Edge.prototype.create=function(){if(this.block1==this.block2)throw"You can't link a block to itself";if(!this.blocks.getOption("canLinkInputs",!1)&&this.connector1.type==this.connector2.type)throw"You have to link an input with an output";if(!this.block1.canLink(this.connector1)||!this.block2.canLink(this.connector2))throw"Can't create such an edge because of the cardinalities";this.block1.addEdge(this.connector1,this),this.block2.addEdge(this.connector2,this),this.block1.render(),this.block2.render()},Edge.prototype.getTypes=function(){return[this.block1.getField(this.connector1.name).type,this.block2.getField(this.connector2.name).type]},Edge.prototype.erase=function(){this.block1.eraseEdge(this.connector1,this),this.block2.eraseEdge(this.connector2,this),this.block1.render(),this.block2.render()},Edge.prototype.same=function(a){return this.block1==a.block1&&this.block2==a.block2&&this.connector1.same(a.connector1)&&this.connector2.same(a.connector2)?!0:this.block1==a.block1&&this.block2==a.block2&&this.connector1.same(a.connector2)&&this.connector2.same(a.connector1)?!0:!1},Edge.prototype.exportData=function(){return{id:this.id,block1:this.block1.id,connector1:this.connector1.exportData(),block2:this.block2.id,connector2:this.connector2.exportData()}},BlocksMessages.prototype.show=function(a,b){var c=this;this.hideTimer!=null&&clearTimeout(this.hideTimer);var d="message";b["class"]!=undefined&&(d+=" "+b["class"]),html='<div class="'+d+'">'+a+"</div>",this.messages.html(html),this.messages.fadeIn(),this.messages.css("margin-left",Math.round((this.width-350)/2)+"px"),this.messages.css("margin-top","20px"),this.hideTimer=setTimeout(function(){c.hide()},5e3)},BlocksMessages.prototype.hide=function(){this.messages.fadeOut(),this.hideTimer=null},BlocksMenu.prototype.addAction=function(a,b,c){this.actions.push({label:a,action:b,icon:c})},BlocksMenu.prototype.hide=function(){this.menu.hide(),this.visible=!1},BlocksMenu.prototype.show=function(){this.menu.css("margin-left",5+this.blocks.mouseX+"px"),this.menu.css("margin-top",5+this.blocks.mouseY+"px"),this.menu.show(),this.visible=!0},Meta=function(a){var b=this;this.name=a.name,this.loopable="loopable"in a&&a.loopable,this.size="size"in a?a.size:"normal",this.fields=[];if("fields"in a)for(k in a.fields){var c=a.fields[k],d="attrs"in c?c.attrs.split(" "):[];c.attrs={};for(i in d)c.attrs[d[i]]=!0;this.fields.push(c)}for(k in a.parametersEditor){var e=keys[k];a[e]!=undefined?this[e]=a[e]:this[e]=[]}"module"in a?this.module=a.module:this.module=null,a.family==undefined?this.family="":this.family=a.family,a["class"]!=undefined?this["class"]=a["class"]:this["class"]="",this.description=null,a.description!=undefined&&(this.description=a.description)},History.prototype.save=function(){this.history.push(this.blocks.exportData()),this.history.length>this.historySize&&this.history.shift()},History.prototype.restoreLast=function(){if(this.history.length){var a=this.history.pop();this.blocks.importData(a)}else alert("Nothing to get")},Block=function(a,b,c){this.blocks=a,this.meta=b,this.defaultFont=10,this.description=null,this.meta.size=="normal"?this.width=150:this.meta.size=="small"?this.width=100:this.width=this.meta.size,this.historySaved=!1,this.id=c,this.hasFocus=!1,this.div=null,this.drag=null,this.lastScale=null,this.fields=new Fields(this),this.x=0,this.y=0,this.ios={},this.focusedConnector=null,this.edges={},this.connectors=[]},Block.prototype.isLoopable=function(){return this.meta.loopable},Block.prototype.setDescription=function(a){this.description=a,this.div.find(".description").html(a)},Block.prototype.updateValues=function(){this.blocks.history.save()},Block.prototype.setValues=function(a){for(field in a)this.fields.getField(field).setValue(a[field])},Block.prototype.getValues=function(a){var a={};for(k in this.fields.editables){var b=this.fields.editables[k];a[b.name]=b.getValue()}return a},Block.prototype.getValue=function(a){var b=this.fields.getField(a);return b?b.getValue():null},Block.prototype.parseDimension=function(a){if(typeof a=="number")return a;var b=this.fields.getField(a);if(!b)throw"Unable to find dimension field "+a;return b.getDimension()},Block.prototype.htmlentities=function(a){return a=a.replace(/</,"&lt;"),a=a.replace(/>/,"&gt;"),a},Block.prototype.setInfos=function(a){this.div.find(".infos").html(a)},Block.prototype.getHtml=function(){var a=this;this.connectors=[];var b=this.meta.name+'<span class="blockId">#'+this.id+"</span>";for(k in this.fields.fields){var c=this.fields.fields[k];c.asTitle&&(b=c.getPrintableValue())}html='<div class="parameters"></div>',html+='<div class="blockTitle"><span class="titleText">'+b+'</span><div class="blockicon delete"></div>',html+='<div class="blockicon info"></div>',this.description?html+='<div class="description">'+a.description+"</div>":this.meta.description?html+='<div class="description">'+this.meta.description+"</div>":html+='<div class="description">No description</div>',html+='<div class="blockicon settings"></div></div>',html+='<div class="infos"></div>';for(k in a.fields.editables){var c=a.fields.editables[k],d=c.getHtml();html&&!c.hide&&!c.asTitle&&!this.blocks.compactMode&&(html+='<div class="parameter">'+d+"</div>")}return handle=function(b,c){html+='<div class="'+b+"s "+(a.isLoopable()?"loopable":"")+'">';for(k in c){var d=c[k];d.extensible&&(d.size=a.maxEntry(d.name));var e=1;d.variadic&&(e=a.parseDimension(d.dimension));for(x=0;x<e;x++){var f=d.name.toLowerCase()+"_"+b,g=d.getLabel().replace("#",x+1),h="";d.dynamicLabel!=null?g=String(d.dynamicLabel(a,x)):d&&d.is("editable")&&(h=" ("+d.getPrintableValueWithUnit(d.variadic?x:undefined)+")"),d.variadic&&(f+="_"+x),html+='<div class="'+b+" type_"+d.type+" connector "+f+'" rel="'+f+'"><div class="circle"></div>'+a.htmlentities(g)+h+"</div>",a.connectors.push(f)}}html+="</div>"},handle("input",this.fields.inputs),handle("output",this.fields.outputs),html},Block.prototype.render=function(){this.lastScale=null,this.hasFocus=!1,this.div.html(this.getHtml()),this.initListeners(),this.redraw()},Block.prototype.maxEntry=function(a){var b=0;for(connectorId in this.edges)if(this.edges[connectorId].length){var c=IdToConnector(connectorId);c.name==a&&(b=Math.max(parseInt(c.index)+1,b))}return b},Block.prototype.create=function(a){html='<div id="block'+this.id+'" class="block '+this.meta["class"]+'"></div>',a.append(html),this.div=a.find("#block"+this.id),this.render()},Block.prototype.redraw=function(a){this.div.css("margin-left",this.blocks.center.x+this.x*this.blocks.scale+"px"),this.div.css("margin-top",this.blocks.center.y+this.y*this.blocks.scale+"px"),this.blocks.showIcons&&this.blocks.scale>.8?this.div.find(".blockicon").show():this.div.find(".blockicon").hide();if(this.lastScale!=this.blocks.scale){this.div.css("font-size",Math.round(this.blocks.scale*this.defaultFont)+"px"),this.div.css("width",Math.round(this.blocks.scale*this.width)+"px");var b=Math.round(12*this.blocks.scale);this.div.find(".circle").css("width",b+"px"),this.div.find(".circle").css("height",b+"px"),this.div.find(".circle").css("background-size",b+"px "+b+"px"),this.div.find(".inputs, .outputs").width(this.div.width()/2-10),this.cssParameters(),this.lastScale=this.blocks.scale}for(k in this.connectors){var c=this.connectors[k],d=this.div.find("."+c),e=d.find(".circle");e.removeClass("io_active"),e.removeClass("io_selected");if(c in this.edges&&this.edges[c].length){e.addClass("io_active");for(n in this.edges[c])this.edges[c][n].selected&&e.addClass("io_selected")}}this.fields.div=this.div.find(".parameters"),this.div.removeClass("block_selected"),a&&this.div.addClass("block_selected")},Block.prototype.cssParameters=function(){this.div.find("input"
-).css("font-size",Math.round(this.blocks.scale*this.defaultFont)+"px")},Block.prototype.initListeners=function(){var a=this;a.div.find(".blockTitle").mousedown(function(b){b.which==1&&(a.historySaved=!1,a.drag=[a.blocks.mouseX/a.blocks.scale-a.x,a.blocks.mouseY/a.blocks.scale-a.y])}),a.div.hover(function(){a.hasFocus=!0},function(){a.hasFocus=!1}),a.div.find(".connector").hover(function(){a.focusedConnector=$(this).attr("rel")},function(){a.focusedConnector=null}),$("html").mousemove(function(b){a.drag&&(a.historySaved||(a.blocks.history.save(),a.historySaved=!0),a.x=a.blocks.mouseX/a.blocks.scale-a.drag[0],a.y=a.blocks.mouseY/a.blocks.scale-a.drag[1],a.blocks.redraw())}),$("html").mouseup(function(){a.drag=null}),a.div.find(".connector").mousedown(function(b){b.which==1&&(a.blocks.beginLink(a,$(this).attr("rel")),b.preventDefault())}),a.div.find(".settings").click(function(){a.fields.toggle(),a.cssParameters()}),a.div.find(".delete").click(function(){a.blocks.removeBlock(a.blocks.getBlockId(a))}),a.div.find(".info").hover(function(){a.div.find(".description").show()},function(){a.div.find(".description").hide()})},Block.prototype.linkPositionFor=function(a){var b=a;a instanceof Object&&(b=a.id());try{div=this.div.find("."+b+" .circle");var c=div.offset().left-this.blocks.div.offset().left+div.width()/2,d=div.offset().top-this.blocks.div.offset().top+div.height()/2}catch(e){throw"Unable to find link position for "+b+" ("+e+")"}return{x:c,y:d}},Block.prototype.canLink=function(a){var b=[],c=a.id();c in this.edges&&(b=this.edges[c]);var d=this.fields.getField(a.name).card;return d[1]=="*"?!0:b.length<d[1]},Block.prototype.addEdge=function(a,b){var c=[],d=a.id();this.edges[d]!=undefined&&(c=this.edges[d]),c.push(b),this.edges[d]=c},Block.prototype.eraseEdge=function(a,b){var c=a.id();if(this.edges[c]!=undefined)for(k in this.edges[c])if(this.edges[c][k]==b){arrayRemove(this.edges[c],k);break}},Block.prototype.erase=function(){this.div.remove()},Block.prototype.allSuccessors=function(){var a={},b=[this],c=[this.id];a[this.id]=!0;while(b.length>0){var d=b.pop();for(key in d.edges)for(i in d.edges[key]){var e=d.edges[key][i];if(e.isLoopable())continue;fromTo=e.fromTo(),fromTo[0]==d&&(target=fromTo[1],target.id in a||(a[target.id]=!0,b.push(target),c.push(target.id)))}}return c},Block.prototype.exportData=function(){return{id:this.id,x:this.x,y:this.y,type:this.meta.name,module:this.meta.module,values:this.getValues()}},Block.prototype.getField=function(a){return this.fields.getField(a)},Blocks=function(a){typeof a!="undefined"?this.options=a:this.options={},this.types=new Types,this.center={},this.scale=1,this.redrawTimeout=null,this.history=null,this.moving=null,this.isReady=!1,this.compactMode=!1,this.menu=null,this.mouseX=0,this.mouseY=0,this.linking=null,this.selectedLink=null,this.selectedSide=null,this.selectedBlock=null,this.div=null,this.context=null,this.metas=[],this.blocks=[],this.edges=[],this.id=1,this.edgeId=1,this.clear=function(){this.edges=[],this.blocks=[],this.id=1,this.edgeId=1,this.div.find(".blocks").html(""),this.redraw()},this.getOption=function(a,b){return a in this.options?this.options[a]:b},this.showIcons=!0},Blocks.prototype.run=function(a){var b=this;$(document).ready(function(){b.div=$(a),b.div.size()||alert("blocks.js: Unable to find "+a),b.div.html('<div class="blocks_js_editor"><div class="messages"></div><div class="contextmenu"><div class="types"></div></div><svg xmlns="http://www.w3.org/2000/svg" version="1.1"></svg><div class="blocks"></div></div>'),b.div.find("svg").css("width","100%"),b.div.find("svg").css("height","100%"),b.context=b.div.find("svg"),b.center.x=b.div.width()/2,b.center.y=b.div.height()/2,b.menu=new BlocksMenu(b),b.messages=new BlocksMessages(b.div.find(".messages"),b.div.width()),b.div[0].addEventListener("mousemove",function(a){b.mouseX=a.pageX-b.div.offset().left,b.mouseY=a.pageY-b.div.offset().top,b.move(a)}),$("html").mouseup(function(a){a.which==1&&b.release()}),b.div.mousedown(function(a){b.canvasClicked()&&a.preventDefault();if(a.which==2||!b.selectedLink&&!b.selectedBlock&&a.which==1)b.moving=[b.mouseX,b.mouseY]}),b.div.mouseup(function(a){if(a.which==2||a.which==1)b.moving=null;a.which==1&&b.menu.hide()}),b.context.svg(),$(document).keydown(function(a){if($("input").is(":focus"))return;a.keyCode==46&&b.deleteEvent()}),b.div.bind("mousewheel",function(a,c,d,e){var f=b.mouseX-b.center.x,g=b.mouseY-b.center.y,h=Math.pow(1.1,e);b.center.x-=f*(h-1),b.center.y-=g*(h-1),b.scale*=h,b.redraw(),a.preventDefault()}),b.history=new History(b),b.isReady||b.postReady()})},Blocks.prototype.postReady=function(){this.isReady=!0;if(this.readyQueue!=undefined)for(k in this.readyQueue)this.readyQueue[k]()},Blocks.prototype.ready=function(a){if(this.isReady)a();else{var b=[];this.readyQueue!=undefined&&(b=this.readyQueue),b.push(a),this.readyQueue=b}},Blocks.prototype.getPosition=function(){var a={};return a.x=(this.mouseX-this.center.x)/this.scale,a.y=(this.mouseY-this.center.y)/this.scale,a},Blocks.prototype.addBlock=function(a,b,c){for(k in this.metas){var d=this.metas[k];if(d.name==a){var e=new Block(this,this.metas[k],this.id);e.x=b,e.y=c,e.create(this.div.find(".blocks")),this.history.save(),this.blocks.push(e),this.id++}}},Blocks.prototype.register=function(a){this.metas.push(new Meta(a))},Blocks.prototype.beginLink=function(a,b){this.linking=[a,b],this.highlightTargets()},Blocks.prototype.highlightTargets=function(){var a=this.linking[0],b=IdToConnector(this.linking[1]),c=a.getField(b.name).type;$(".connector").addClass("disabled");var d=this.types.getCompatibles(c);for(k in d){var e=d[k];$(".connector.type_"+e).removeClass("disabled")}},Blocks.prototype.move=function(){if(this.selectedSide){var a=Math.sqrt(Math.pow(this.mouseX-this.selectedSide[1],2)+Math.pow(this.mouseY-this.selectedSide[2],2));if(a>15){var b=this.edges[this.selectedLink];this.selectedSide[0]==2?this.linking=[b.block1,b.connector1.id()]:this.linking=[b.block2,b.connector2.id()],this.removeEdge(this.selectedLink),this.selectedSide=null,this.highlightTargets(),this.selectedLink!=null&&(this.edges[this.selectedLink].selected=!1),this.selectedLink=null,this.redraw()}}this.moving&&(this.center.x+=this.mouseX-this.moving[0],this.center.y+=this.mouseY-this.moving[1],this.moving=[this.mouseX,this.mouseY],this.redraw()),this.linking&&this.redraw()},Blocks.prototype.canvasClicked=function(){var a=!1;this.selectedBlock=null,this.selectedLink!=null&&(this.edges[this.selectedLink].selected=!1),this.selectedLink=null,this.selectedSide=null;for(k in this.blocks){var b=this.blocks[k];b.hasFocus&&(this.selectedBlock=k)}if(!this.selectedBlock)for(k in this.edges){var c=this.edges[k].collide(this.mouseX,this.mouseY);if(c!=0){c<.2?this.selectedSide=[1,this.mouseX,this.mouseY]:c>.8&&(this.selectedSide=[2,this.mouseX,this.mouseY]),this.selectedLink=k,this.edges[k].selected=!0,a=!0;break}}return this.redraw(),a},Blocks.prototype.removeEdge=function(a){this.history.save(),this.edges[a].erase(),arrayRemove(this.edges,a)},Blocks.prototype.getEdgeId=function(a){for(k in this.edges)if(a==this.edges[k])return k;return!1},Blocks.prototype.removeBlock=function(a){var b=this.blocks[a],c=[];for(k in this.edges){var d=this.edges[k];d.block1==b||d.block2==b?d.erase():c.push(d)}this.edges=c,b.erase(),arrayRemove(this.blocks,this.selectedBlock),this.redraw()},Blocks.prototype.getBlockId=function(a){for(k in this.blocks)if(this.blocks[k]==a)return k;return null},Blocks.prototype.getBlockById=function(a){for(k in this.blocks)if(this.blocks[k].id==a)return this.blocks[k];return null},Blocks.prototype.deleteEvent=function(){this.selectedBlock!=null&&(this.history.save(),this.removeBlock(this.selectedBlock),this.selectedBlock=null),this.selectedLink!=null&&(this.history.save(),this.removeEdge(this.selectedLink),this.selectedLink=null,this.redraw())},Blocks.prototype.doRedraw=function(){for(k in this.blocks)this.blocks[k].redraw(this.selectedBlock==k);var a=this.context.svg("get");a.clear();for(k in this.edges)this.edges[k].draw(a);if(this.linking)try{var b=this.linking[0].linkPositionFor(this.linking[1]);a.line(b.x,b.y,this.mouseX,this.mouseY,{stroke:"rgba(0,0,0,0.4)",strokeWidth:3*this.scale})}catch(c){this.linking=null}this.redrawTimeout=null},Blocks.prototype.redraw=function(){var a=this;this.redrawTimeout||(this.redrawTimeout=setTimeout(function(){a.doRedraw()},25))},Blocks.prototype.release=function(){this.linking&&(this.tryEndLink(),this.linking=null),$(".connector").removeClass("disabled"),this.redraw()},Blocks.prototype.tryEndLink=function(){for(k in this.blocks){var a=this.blocks[k];if(a.hasFocus&&a.focusedConnector){this.endLink(a,a.focusedConnector);break}}},Blocks.prototype.endLink=function(a,b){try{var c=this.edgeId++,d=this.linking[0],e=IdToConnector(this.linking[1]),f=a,g=IdToConnector(b);if(e.isOutput())var h=new Edge(c,d,e,f,g,this);else var h=new Edge(c,f,g,d,e,this);for(k in this.edges){var i=this.edges[k];if(i.same(h))throw"This edge already exists"}var j=h.fromTo();if(j[1].allSuccessors().indexOf(j[0].id)!=-1)throw"You can not create a loop";this.history.save(),h.create();var l=this.edges.push(h)-1,m=h.getTypes();if(!this.types.isCompatible(m[0],m[1]))throw this.removeEdge(l),"Types "+m[0]+" and "+m[1]+" are not compatible"}catch(n){this.messages.show("Unable to create this edge :\n"+n,{"class":"error"})}this.linking=null,this.selectedBlock=null,this.redraw()},Blocks.prototype.toggleCompact=function(){this.compactMode=!this.compactMode;for(k in this.blocks)this.blocks[k].render();this.redraw()},Blocks.prototype.exportData=function(){var a=[],b=[];for(k in this.blocks)a.push(this.blocks[k].exportData());for(k in this.edges)b.push(this.edges[k].exportData());return{edges:b,blocks:a}},Blocks.prototype.importData=function(a){this.clear(),this.doLoad(a,!1)},Blocks.prototype.load=function(a){this.doLoad(a,!0)},Blocks.prototype.doLoad=function(a,b){var c=this;this.ready(function(){var d=[];c.id=1,c.edgeId=1;for(k in a.blocks)try{var e=a.blocks[k],f=BlockImport(c,e);c.id=Math.max(c.id,f.id+1),f.create(c.div.find(".blocks")),c.blocks.push(f)}catch(g){d.push("Block #"+k+":"+g)}for(k in a.edges)try{var e=a.edges[k],h=EdgeImport(c,e);c.edgeId=Math.max(c.edgeId,h.id+1),h.create(),c.edges.push(h)}catch(g){d.push("Edge #"+k+" :"+g)}if(d.length){var i=d.length+" loading errors :<br/>";i+="<ul>";for(k in d)i+="<li>"+d[k]+"</li>";i+="</ul>",c.messages.show(i,{"class":"error"})}c.redraw(),b&&c.perfectScale()})},Blocks.prototype.perfectScale=function(){if(!this.div)return;var a=null,b=null,c=null,d=null;for(k in this.blocks){var e=this.blocks[k];a==null?(a=b=e.x,c=d=e.y):(a=Math.min(a,e.x-15),b=Math.max(b,e.x+e.width+18),c=Math.min(c,e.y-15),d=Math.max(d,e.y+115))}var f=this.div.width()/(b-a),g=this.div.height()/(d-c),h=Math.min(f,g);this.scale=h,this.center.x=this.div.width()/2-h*(a+b)/2,this.center.y=this.div.height()/2-h*(c+d)/2,this.redraw()},Blocks.prototype.setLabels=function(a){for(k in this.edges){var b=this.edges[k];b.id in a&&b.setLabel(a[k])}};
+ * Options can contains :
+ * - canLinkInputs (default false): can inputs be linked together?
+ * - orientatiion (default true): is the graph oriented?
+ */
+var Blocks = function(options)
+{
+    if (typeof options != 'undefined') {
+        this.options = options;
+    } else {
+        this.options = {};
+    }
+
+    // Types checker
+    this.types = new Types;
+
+    // View center & scale
+    this.center = {};
+    this.scale = 1.0;
+    this.redrawTimeout = null;
+
+    // History manager
+    this.history = null;
+
+    // Is the user dragging the view ?
+    this.moving = null;
+
+    // Is the system ready ?
+    this.isReady = false;
+
+    // Compact mode
+    this.compactMode = false;
+
+    // Context menu
+    this.menu = null;
+
+    // Mouse
+    this.mouseX = 0;
+    this.mouseY = 0;
+
+    // Linking ?
+    this.linking = null;
+
+    // Selected items
+    this.selectedLink = null;
+    this.selectedSide = null;
+    this.selectedBlock = null;
+
+    // BLocks division
+    this.div = null;
+
+    // Context for drawingc
+    this.context = null;
+
+    // Blocks types
+    this.metas = [];
+
+    // Instances
+    this.blocks = [];
+
+    // Edges
+    this.edges = [];
+
+    /**
+     * Next block id
+     */
+    this.id = 1;
+
+    /**
+     * Next edge id
+     */
+    this.edgeId = 1;
+
+    /**
+     * Clears blocks
+     */
+    this.clear = function()
+    {
+        this.edges = [];
+        this.blocks = [];
+        this.id = 1;
+        this.edgeId = 1;
+        this.div.find('.blocks').html('');
+        this.redraw();
+    }
+
+    /**
+     * Gets an option value
+     */
+    this.getOption = function(key, defaultValue)
+    {
+        if (key in this.options) {
+            return this.options[key];
+        } else {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Show/hide icons
+     */
+    this.showIcons = true;    
+};
+
+/**
+ * Runs the blocks editor
+ */
+Blocks.prototype.run = function(selector)
+{
+    var self = this;
+
+    $(document).ready(function() {
+        self.div = $(selector);
+
+        if (!self.div.size()) {
+            alert('blocks.js: Unable to find ' + selector);
+        }
+
+        // Inject the initial editor
+        self.div.html(
+              '<div class="blocks_js_editor">'
+            + '<div class="messages"></div>'
+            + '<div class="contextmenu"><div class="types"></div></div>'
+            + '<svg xmlns="http://www.w3.org/2000/svg" version="1.1"></svg>'
+            + '<div class="blocks"></div>'
+            + '</div>'
+        );
+
+        self.div.find('svg').css('width', '100%');
+        self.div.find('svg').css('height', '100%');
+
+        self.context = self.div.find('svg');
+
+        // Setting up default viewer center
+        self.center.x = self.div.width()/2;
+        self.center.y = self.div.height()/2;
+
+        // Run the menu
+        self.menu = new BlocksMenu(self);
+
+        // Create the message handler
+        self.messages = new BlocksMessages(self.div.find('.messages'), self.div.width());
+
+        // Listen for mouse position
+        self.div[0].addEventListener('mousemove', function(evt) {
+            self.mouseX = evt.pageX - self.div.offset().left;
+            self.mouseY = evt.pageY - self.div.offset().top;
+            self.move(evt);
+        });
+
+        $('html').mouseup(function(event) {
+            if (event.which == 1) {
+                self.release();
+            }
+        });
+
+        // Detect clicks on the canvas
+        self.div.mousedown(function(event) {
+            if (self.canvasClicked()) {
+                event.preventDefault();
+            } 
+            
+            if (event.which == 2 || (!self.selectedLink && !self.selectedBlock && event.which == 1)) {
+                self.moving = [self.mouseX, self.mouseY];
+            }
+        });
+        
+        self.div.mouseup(function(event) {
+            if (event.which == 2 || event.which == 1) {
+                self.moving = null;
+            }
+           
+            if (event.which == 1) {
+                self.menu.hide();
+            }
+        });
+        
+        // Initializing canvas
+        self.context.svg();
+
+        // Detecting key press
+        $(document).keydown(function(e){
+            if ($('input').is(':focus')) {
+                return;
+            }   
+
+            // "del" will delete a selected link
+            if (e.keyCode == 46) {
+                self.deleteEvent();
+            }
+        });
+
+        // Binding the mouse wheel
+        self.div.bind('mousewheel', function(event, delta, deltaX, deltaY) {
+            var dX = self.mouseX - self.center.x;
+            var dY = self.mouseY - self.center.y;
+            var deltaScale = Math.pow(1.1, deltaY);
+            self.center.x -= dX*(deltaScale-1);
+            self.center.y -= dY*(deltaScale-1);
+            self.scale *= deltaScale;
+            self.redraw();
+            event.preventDefault();
+        });
+
+        self.history = new History(self);
+
+        if (!self.isReady) {
+            self.postReady();
+        }
+    });
+};
+
+/**
+ * Tell the system is ready
+ */
+Blocks.prototype.postReady = function()
+{
+    this.isReady = true;
+    if (this.readyQueue != undefined) {
+        for (var k in this.readyQueue) {
+            this.readyQueue[k]();
+        }
+    }
+};
+
+/**
+ * Callback when ready
+ */
+Blocks.prototype.ready = function(callback) 
+{
+    if (this.isReady) {
+        callback();
+    } else {
+        var queue = [];
+        if (this.readyQueue != undefined) {
+            queue = this.readyQueue;
+        }
+        queue.push(callback);
+        this.readyQueue = queue;
+    }
+};
+
+/**
+ * Gets the mouse position
+ */
+Blocks.prototype.getPosition = function()
+{
+    var position = {};
+    position.x = (this.mouseX-this.center.x)/this.scale;
+    position.y = (this.mouseY-this.center.y)/this.scale;
+
+    return position;
+};
+
+/**
+ * Adds a block
+ */
+Blocks.prototype.addBlock = function(name, x, y)
+{
+    for (var k in this.metas) {
+        var type = this.metas[k];
+
+        if (type.name == name) {
+            var block = new Block(this, this.metas[k], this.id);
+            block.x = x;
+            block.y = y;
+            block.create(this.div.find('.blocks'));
+            this.history.save();
+            this.blocks.push(block);
+            this.id++;
+        }
+    }
+};
+
+/**
+ * Registers a new block type
+ */
+Blocks.prototype.register = function(meta)
+{
+    this.metas.push(new Meta(meta));
+};
+
+/**
+ * Begin to draw an edge
+ */
+Blocks.prototype.beginLink = function(block, connectorId)
+{
+    this.linking = [block, connectorId];
+    this.highlightTargets();
+};
+
+/**
+ * Highlight possible targets for a connector ID
+ */
+Blocks.prototype.highlightTargets = function()
+{
+    var block = this.linking[0];
+    var connector = IdToConnector(this.linking[1]);
+    var type = block.getField(connector.name).type;
+    $('.connector').addClass('disabled');
+
+    var compatibles = this.types.getCompatibles(type);
+    for (var k in compatibles) {
+        var compatible = compatibles[k];
+        $('.connector.type_'+compatible).removeClass('disabled');
+    }
+};
+
+/**
+ * The mouse has moved
+ */
+Blocks.prototype.move = function()
+{
+    if (this.selectedSide) {
+        var distance = Math.sqrt(Math.pow(this.mouseX-this.selectedSide[1],2)+Math.pow(this.mouseY-this.selectedSide[2],2));
+        if (distance > 15) {
+            var edge = this.edges[this.selectedLink];
+            if (this.selectedSide[0] == 2) {
+                this.linking = [edge.block1, edge.connector1.id()];
+            } else {
+                this.linking = [edge.block2, edge.connector2.id()];
+            }
+
+            this.removeEdge(this.selectedLink);
+            this.selectedSide = null;
+            this.highlightTargets();
+            if (this.selectedLink != null) {
+                this.edges[this.selectedLink].selected = false;
+            }
+            this.selectedLink = null;
+            this.redraw();
+        }
+    }
+
+    if (this.moving) {
+        this.center.x += (this.mouseX-this.moving[0]);
+        this.center.y += (this.mouseY-this.moving[1]);
+        this.moving = [this.mouseX, this.mouseY];
+        this.redraw();
+    }
+
+    if (this.linking) {
+        this.redraw();
+    }
+};
+
+/**
+ * Clicks the canvas
+ */
+Blocks.prototype.canvasClicked = function()
+{
+    var prevent = false;
+    this.selectedBlock = null;
+    if (this.selectedLink != null) {
+        this.edges[this.selectedLink].selected = false;
+    }
+    this.selectedLink = null;
+    this.selectedSide = null;
+
+    for (var k in this.blocks) {
+        var block = this.blocks[k];
+        if (block.hasFocus) {
+            this.selectedBlock = k;
+        }
+    }
+
+    if (!this.selectedBlock) {
+        for (var k in this.edges) {
+            var collide = this.edges[k].collide(this.mouseX, this.mouseY);
+            if (collide != false) {
+                if (collide < 0.2) {
+                    this.selectedSide = [1, this.mouseX, this.mouseY];
+                } else if (collide > 0.8) {
+                    this.selectedSide = [2, this.mouseX, this.mouseY];
+                }
+                this.selectedLink = k;
+                this.edges[k].selected = true;
+                prevent = true;
+                break;
+            }
+        }
+    }
+            
+    this.redraw();
+    return prevent;
+};
+
+/**
+ * Edge to remove
+ */
+Blocks.prototype.removeEdge = function(edge)
+{
+    this.history.save();
+    this.edges[edge].erase();
+    arrayRemove(this.edges, edge);
+};
+
+/**
+ * Returns an edge id
+ */
+Blocks.prototype.getEdgeId = function(edge)
+{
+    for (var k in this.edges) {
+        if (edge == this.edges[k]) {
+            return k;
+        }
+    }
+
+    return false;
+};
+    
+/**
+ * Remove a block
+ */
+Blocks.prototype.removeBlock = function(key)
+{
+    var block = this.blocks[key];
+
+    var newEdges = [];
+    for (var k in this.edges) {
+        var edge = this.edges[k];
+        if (edge.block1 == block || edge.block2 == block) {
+            edge.erase();
+        } else {
+            newEdges.push(edge);
+        }
+    }
+    this.edges = newEdges;
+
+    block.erase();
+    arrayRemove(this.blocks, this.selectedBlock);
+
+    this.redraw();
+};
+
+/**
+ * Get a block id
+ */
+Blocks.prototype.getBlockId = function(block)
+{
+    for (var k in this.blocks) {
+        if (this.blocks[k] == block) {
+            return k;
+        }
+    }
+
+    return null;
+};
+
+/**
+ * Retreive a block by ID
+ */
+Blocks.prototype.getBlockById = function(blockId)
+{
+    for (var k in this.blocks) {
+        if (this.blocks[k].id == blockId) {
+            return this.blocks[k];
+        }
+    }
+
+    return null;
+};
+
+/**
+ * Delete the current link
+ */
+Blocks.prototype.deleteEvent = function()
+{
+    // Remove a block and its edges
+    if (this.selectedBlock != null) {
+        this.history.save();
+        this.removeBlock(this.selectedBlock);
+        this.selectedBlock = null;
+    }
+
+    // Remove an edge
+    if (this.selectedLink != null) {
+        this.history.save();
+        this.removeEdge(this.selectedLink);
+        this.selectedLink = null;
+        this.redraw();
+    }
+};
+
+/**
+ * Do the redraw
+ */
+Blocks.prototype.doRedraw = function()
+{
+    // Set the position for blocks
+    for (var k in this.blocks) {
+        this.blocks[k].redraw(this.selectedBlock == k);
+    }
+
+    // Redraw edges
+    var svg = this.context.svg('get');
+    svg.clear();
+
+    for (var k in this.edges) {
+        this.edges[k].draw(svg);
+    }
+
+    if (this.linking) {
+        try {
+            var position = this.linking[0].linkPositionFor(this.linking[1]);
+
+            svg.line(position.x, position.y, this.mouseX, this.mouseY, {
+                stroke: 'rgba(0,0,0,0.4)',
+                strokeWidth: 3*this.scale
+            });
+        } catch (error) {
+            this.linking = null;
+        }
+    }
+    
+    this.redrawTimeout = null;
+};
+
+/**
+ *  Draw the edges
+ */
+Blocks.prototype.redraw = function()
+{
+    var self = this;
+
+    if (!this.redrawTimeout) {
+        this.redrawTimeout = setTimeout(function() { self.doRedraw(); }, 25);
+    }
+};
+
+/**
+ * Release the mouse
+ */
+Blocks.prototype.release = function()
+{
+    if (this.linking) {
+        this.tryEndLink();
+        this.linking=null;
+    }
+    $('.connector').removeClass('disabled');
+    this.redraw();
+};
+
+/**
+ * Tries to end a link
+ */
+Blocks.prototype.tryEndLink = function()
+{
+    for (var k in this.blocks) {
+        var block = this.blocks[k];
+        if (block.hasFocus && block.focusedConnector) {
+            this.endLink(block, block.focusedConnector);
+            break;
+        }
+    }
+};
+
+/**
+ * End drawing an edge
+ */
+Blocks.prototype.endLink = function(block, connectorId)
+{
+    try {
+        var id = this.edgeId++;
+
+        var blockA = this.linking[0];
+        var connectorA = IdToConnector(this.linking[1]);
+        var blockB = block;
+        var connectorB = IdToConnector(connectorId);
+
+        if (connectorA.isOutput()) {
+            var edge = new Edge(id, blockA, connectorA, blockB, connectorB, this);
+        } else {
+            var edge = new Edge(id, blockB, connectorB, blockA, connectorA, this);
+        }
+
+        for (var k in this.edges) {
+            var other = this.edges[k];
+            if (other.same(edge)) {
+                throw 'This edge already exists';
+            }
+        }
+
+        var fromTo = edge.fromTo();
+        if (fromTo[1].allSuccessors().indexOf(fromTo[0].id) != -1) {
+            throw 'You can not create a loop';
+        }
+
+        this.history.save();
+        edge.create();
+        var edgeIndex = this.edges.push(edge)-1;
+
+        var types = edge.getTypes();
+        if (!this.types.isCompatible(types[0], types[1])) {
+            this.removeEdge(edgeIndex);
+            throw 'Types '+types[0]+' and '+types[1]+' are not compatible';
+        }
+    } catch (error) {
+        this.messages.show('Unable to create this edge :' + "\n" + error, {'class': 'error'});
+    }
+    this.linking = null;
+    this.selectedBlock = null;
+    this.redraw();
+};
+
+/**
+ * Changing the compact mode
+ */
+Blocks.prototype.toggleCompact = function()
+{
+    this.compactMode = !this.compactMode;
+    for (var k in this.blocks) {
+        this.blocks[k].render();
+    }
+    this.redraw();
+};
+
+/**
+ * Export the scene
+ */
+Blocks.prototype.exportData = function()
+{
+    var blocks = [];
+    var edges = [];
+
+    for (var k in this.blocks) {
+        blocks.push(this.blocks[k].exportData());
+    }
+
+    for (var k in this.edges) {
+        edges.push(this.edges[k].exportData());
+    }
+
+    return {
+        edges: edges,
+        blocks: blocks
+    };
+};
+
+/**
+ * Import some data
+ */
+Blocks.prototype.importData = function(scene)
+{
+    this.clear();
+    this.doLoad(scene, false);
+}
+
+/**
+ * Lads a scene
+ */
+Blocks.prototype.load = function(scene)
+{
+    this.doLoad(scene, true);
+}
+
+/**
+ * Loads the scene
+ */
+Blocks.prototype.doLoad = function(scene, init)
+{
+    var self = this;
+
+    this.ready(function() {
+            var errors = [];
+            self.id = 1;
+            self.edgeId = 1;
+
+            for (var k in scene.blocks) {
+                try {
+                    var data = scene.blocks[k];
+                    var block = BlockImport(self, data);
+                    self.id = Math.max(self.id, block.id+1);
+                    block.create(self.div.find('.blocks'));
+                    self.blocks.push(block);
+                } catch (error) {
+                    errors.push('Block #'+k+ ':'+error);
+                }
+            }
+
+            for (var k in scene.edges) {
+                try {
+                    var data = scene.edges[k];
+                    var edge = EdgeImport(self, data);
+
+                    self.edgeId = Math.max(self.edgeId, edge.id+1);
+
+                    edge.create();
+                    self.edges.push(edge);
+                } catch (error) {
+                    errors.push('Edge #'+k+' :'+error);
+                }
+            }
+
+            if (errors.length) {
+                var text = errors.length + " loading errors :<br/>";
+                text += '<ul>';
+                for (var k in errors) {
+                    text += '<li>' + errors[k] + '</li>';
+                }
+                text += '</ul>';
+                self.messages.show(text, {'class': 'error'});
+            }
+
+            self.redraw();
+
+            if (init) {
+                self.perfectScale();	    
+            }
+    });
+};
+
+/**
+ * Go to the perfect scale
+ */
+Blocks.prototype.perfectScale = function()
+{
+    if (!this.div) {
+        return;
+    }
+
+    var xMin = null, xMax = null;
+    var yMin = null, yMax = null;
+
+    for (var k in this.blocks) {
+        var block = this.blocks[k];
+        if (xMin == null) {
+            xMin = xMax = block.x;
+            yMin = yMax = block.y;
+        } else {
+            xMin = Math.min(xMin, block.x-15);
+            xMax = Math.max(xMax, block.x+block.width+18);
+            yMin = Math.min(yMin, block.y-15);
+            yMax = Math.max(yMax, block.y+115);
+        }
+    }
+    var scaleA = this.div.width()/(xMax-xMin);
+    var scaleB = this.div.height()/(yMax-yMin);
+    var scale = Math.min(scaleA, scaleB);
+
+    this.scale = scale;
+    this.center.x = this.div.width()/2 - scale*(xMin+xMax)/2.0;
+    this.center.y = this.div.height()/2 - scale*(yMin+yMax)/2.0;
+
+    this.redraw();
+}
+
+/**
+ * Write labels on the edges, edges is an object of ids => label
+ */
+Blocks.prototype.setLabels = function(labels)
+{
+    for (var k in this.edges) {
+        var edge = this.edges[k];
+
+        if (edge.id in labels) {
+            edge.setLabel(labels[k]);
+        }
+    }
+}

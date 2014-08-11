@@ -373,7 +373,9 @@ f(this).css("position")&&!f(this).hasClass("fancybox-overlay")&&!f(this).hasClas
 b.current,e=d.title,c=a.type;f.isFunction(e)&&(e=e.call(d.element,d));if(q(e)&&""!==f.trim(e)){d=f('<div class="fancybox-title fancybox-title-'+c+'-wrap">'+e+"</div>");switch(c){case "inside":c=b.skin;break;case "outside":c=b.wrap;break;case "over":c=b.inner;break;default:c=b.skin,d.appendTo("body"),I&&d.width(d.width()),d.wrapInner('<span class="child"></span>'),b.current.margin[2]+=Math.abs(l(d.css("margin-bottom")))}d["top"===a.position?"prependTo":"appendTo"](c)}}};f.fn.fancybox=function(a){var d,
 e=f(this),c=this.selector||"",k=function(g){var h=f(this).blur(),j=d,k,l;!g.ctrlKey&&(!g.altKey&&!g.shiftKey&&!g.metaKey)&&!h.is(".fancybox-wrap")&&(k=a.groupAttr||"data-fancybox-group",l=h.attr(k),l||(k="rel",l=h.get(0)[k]),l&&(""!==l&&"nofollow"!==l)&&(h=c.length?f(c):e,h=h.filter("["+k+'="'+l+'"]'),j=h.index(this)),a.index=j,!1!==b.open(h,a)&&g.preventDefault())};a=a||{};d=a.index||0;!c||!1===a.live?e.unbind("click.fb-start").bind("click.fb-start",k):p.undelegate(c,"click.fb-start").delegate(c+
 ":not('.fancybox-item, .fancybox-nav')","click.fb-start",k);this.filter("[data-fancybox-start=1]").trigger("click");return this};p.ready(function(){var a,d;f.scrollbarWidth===v&&(f.scrollbarWidth=function(){var a=f('<div style="width:50px;height:50px;overflow:auto"><div/></div>').appendTo("body"),b=a.children(),b=b.innerWidth()-b.height(99).innerWidth();a.remove();return b});if(f.support.fixedPosition===v){a=f.support;d=f('<div style="position:fixed;top:20px;"></div>').appendTo("body");var e=20===
-d[0].offsetTop||15===d[0].offsetTop;d.remove();a.fixedPosition=e}f.extend(b.defaults,{scrollbarWidth:f.scrollbarWidth(),fixed:f.support.fixedPosition,parent:f("body")});a=f(r).width();J.addClass("fancybox-lock-test");d=f(r).width();J.removeClass("fancybox-lock-test");f("<style type='text/css'>.fancybox-margin{margin-right:"+(d-a)+"px;}</style>").appendTo("head")})})(window,document,jQuery);/**
+d[0].offsetTop||15===d[0].offsetTop;d.remove();a.fixedPosition=e}f.extend(b.defaults,{scrollbarWidth:f.scrollbarWidth(),fixed:f.support.fixedPosition,parent:f("body")});a=f(r).width();J.addClass("fancybox-lock-test");d=f(r).width();J.removeClass("fancybox-lock-test");f("<style type='text/css'>.fancybox-margin{margin-right:"+(d-a)+"px;}</style>").appendTo("head")})})(window,document,jQuery);"use strict";
+
+/**
  * Remove an item from an array
  */
 function arrayRemove(array, index)
@@ -384,10 +386,12 @@ function arrayRemove(array, index)
     array[index] = last;
     array.pop();
 };
+"use strict";
+
 /**
  * A metaField field
  */
-function Field(metaField)
+var Field = function(metaField)
 {
     var self = this;
     this.onUpdate = null;
@@ -455,7 +459,9 @@ function Field(metaField)
     this.isArray = (this.type.substr(-2) == '[]');
 
     if (this.isArray) {
-        this.dimension = this.name;
+        if (this.dimension == null) {
+            this.dimension = this.name;
+        }
         this.type = this.type.substr(0, this.type.length-2);
     }
 
@@ -483,21 +489,69 @@ Field.prototype.getFieldHtml = function()
 {
     var field = this.label+':<br/>';
 
+    if (this.isArray) {
+        field += '<div class="fieldsArray">';
+        field += '<div class="pattern">';
+        field += this.getSingleFieldHtml('');
+        field += '</div>';
+        field += '<div class="fields">';
+        var value = this.getValue();
+        for (var k in value) {
+            field += '<div class="field">';
+            field += this.getSingleFieldHtml(value[k]);
+            field += '</div>';
+        }
+        field += '</div>';
+        field += '</div>';
+    } else {
+        field += this.getSingleFieldHtml();
+    }
+
+    field += '<br/>';
+
+    return field;
+};
+
+/**
+ * Return the (field) name, which is the name suffixed with []
+ * if it's an array
+ */
+Field.prototype.getFieldName = function()
+{
+    var name = this.name;
+
+    if (this.isArray) {
+        name += '[]';
+    }
+
+    return name;
+};
+
+/**
+ * Gets the HTML code for a single field
+ */
+Field.prototype.getSingleFieldHtml = function(value)
+{
+    var field = '';
+
+    if (value == undefined) {
+        value = this.getPrintableValue();
+    }
+
     if (this.type == 'longtext') {
-        field += '<textarea name="'+this.name+'"></textarea>';
+        field += '<textarea name="'+this.getFieldName()+'"></textarea>';
     } else if (this.type == 'choice' || this.choices) {
-        field += '<select name="'+this.name+'">';
-        for (k in this.choices) {
+        field += '<select name="'+this.getFieldName()+'">';
+        for (var k in this.choices) {
             var choice = this.choices[k];
-            field += '<option value="'+choice+'">'+choice+'</option>';
+            var selected = (choice == value) ? 'selected' : '';
+            field += '<option '+selected+' value="'+choice+'">'+choice+'</option>';
         }
         field += '</select>';
     } else {
         var type = this.type == 'bool' ? 'checkbox' : 'text';
-        field += '<input value="'+this.getPrintableValue()+'" type="'+type+'" name="'+this.name+'" />'+this.unit;
+        field += '<input value="'+value+'" type="'+type+'" name="'+this.getFieldName()+'" />'+this.unit;
     }
-
-    field += '<br/>';
 
     return field;
 };
@@ -523,6 +577,7 @@ Field.prototype.getHtml = function()
  */
 Field.prototype.getValue = function()
 {
+        console.log(this);
     return this.value;
 };
 
@@ -535,7 +590,7 @@ Field.prototype.getPrintableValue = function(index)
 
     if (value instanceof Array) {
         if (index == undefined) {
-            value = value.join(',');
+            value = value.join(', ');
         } else {
             value = value[index];
         }
@@ -572,7 +627,7 @@ Field.prototype.getLabel = function()
 Field.prototype.setValue = function(value)
 {
     if (this.isArray && !(value instanceof Array)) {
-        value = value.split(',');
+        value = value.split(', ');
     }
 
     if (this.type == 'bool') {
@@ -583,18 +638,42 @@ Field.prototype.setValue = function(value)
 };
 
 /**
- * Gets the variadic dimension
+ * Gets as variadic dimension
  */
-Field.prototype.getDimension = function()
+Field.prototype.asDimension = function()
 {
     if (this.extensible) {
         return this.size+1;
     } else if (this.isArray) {
-        return this.getValue().length;
+        var value = this.getValue();
+
+        if (value instanceof Array) {
+            return this.getValue().length;
+        } else {
+            throw "Unable to get the dimension of field "+this.name;
+        }
     } else {
         return parseInt(this.getValue());
     }
 };
+
+/**
+ * Gets the variadic dimension
+ */
+Field.prototype.getDimension = function(fields)
+{
+    if (typeof(this.dimension) == 'number') {
+        return this.dimension;
+    }
+
+    var field = fields.getField(this.dimension);
+    if (!field) {
+        throw 'Unable to find dimension field '+this.dimension;
+    }
+
+    return field.asDimension();
+};
+
 
 /**
  * Checks if the fields has an attribute
@@ -619,7 +698,7 @@ Field.prototype.parseCardinality = function(ioCard, isOutput)
         if (typeof(ioCard) != 'string') {
             card = [ioCard, ioCard];
         } else {
-            tab = ioCard.split('-');
+            var tab = ioCard.split('-');
             if (tab.length == 1) {
                 card = [0, tab[0]];
             } else {
@@ -628,7 +707,7 @@ Field.prototype.parseCardinality = function(ioCard, isOutput)
         }
     }
 
-    for (idx in card) {
+    for (var idx in card) {
         if (card[idx] != '*') {
             card[idx] = parseInt(card[idx]);
         }
@@ -636,10 +715,12 @@ Field.prototype.parseCardinality = function(ioCard, isOutput)
 
     return card;
 };
+"use strict";
+
 /**
  * Parameters managers
  */
-function Fields(block)
+var Fields = function(block)
 {
     var self = this;
 
@@ -655,7 +736,7 @@ function Fields(block)
 
     // Fields
     this.fields = [];
-    for (k in this.meta.fields) {
+    for (var k in this.meta.fields) {
         var field = new Field(this.meta.fields[k]);
         field.onUpdate = function() {
             self.block.cssParameters();
@@ -670,7 +751,7 @@ function Fields(block)
     this.indexedFields = {};
 
     // Indexing
-    for (k in this.fields) {
+    for (var k in this.fields) {
         var field = this.fields[k];
         this.indexedFields[field.name] = field;
 
@@ -707,7 +788,7 @@ Fields.prototype.show = function()
     var html = '<h3>'+this.block.meta.name+'#'+this.block.id+'</h3>';
 
     html += '<form class="form">';
-    for (k in this.editables) {
+    for (var k in this.editables) {
         html += this.editables[k].getFieldHtml();
     }
     html += '<input type="submit" style="display:none" width="0" height="0" />';
@@ -725,11 +806,13 @@ Fields.prototype.show = function()
     var form = this.div.find('form');
     
     this.div.find('.save').click(function() {
+        form.find('.pattern').remove();
         self.save(form.serializeForm());
         $.fancybox.close();
     });
 
     this.div.find('form').submit(function() {
+        form.find('.pattern').remove();
         self.save($(this).serializeForm());
         $.fancybox.close();
         return false;
@@ -739,8 +822,35 @@ Fields.prototype.show = function()
         $(this).select();
     });
 
+    this.handleArrays();
+
     $.fancybox.open(this.div, {wrapCSS: 'blocks_js_modal'});
     this.display = true;
+};
+
+/**
+ * Handle Add & Remove buttons on fields array
+ */
+Fields.prototype.handleArrays = function()
+{
+    this.div.find('.fieldsArray').each(function() {
+        var pattern = $(this).find('.pattern').html();
+        var fields = $(this).find('.fields');
+
+        var buttons = '<div class="buttons">';
+        buttons += '<a class="add" href="#">Add</a> ';
+        buttons += '<a class="remove" href="#">Remove</a>';
+        buttons += '</div>';
+        $(this).append(buttons);
+
+        $(this).find('.add').click(function() {
+            fields.append('<div class="field">'+pattern+'</div>');
+        });
+
+        $(this).find('.remove').click(function() {
+            fields.find('.field').last().remove();
+        });
+    });
 };
 
 /**
@@ -750,7 +860,7 @@ Fields.prototype.getHtml = function()
 {
     var html = '';
 
-    for (k in this.editables) {
+    for (var k in this.editables) {
         html += this.editables[k].getHtml();
     }
 
@@ -773,7 +883,7 @@ Fields.prototype.save = function(serialize)
 {
     var values = {};
 
-    for (key in serialize) {
+    for (var key in serialize) {
         var newKey = key;
         var isArray = false;
         if (newKey.substr(newKey.length-2, 2) == '[]') {
@@ -810,7 +920,9 @@ Fields.prototype.toggle = function()
         }
     }
 };
-function Segment(x, y, dx, dy)
+"use strict";
+
+var Segment = function(x, y, dx, dy)
 {
     this.x = x;
     this.y = y;
@@ -864,8 +976,8 @@ Segment.prototype.intersection = function(other)
         return null;
     }
 
-    r1 = (d*b0 - b*b1)/det;
-    r2 = (-c*b0 + a*b1)/det;
+    var r1 = (d*b0 - b*b1)/det;
+    var r2 = (-c*b0 + a*b1)/det;
 
     return [r1, r2];
 };
@@ -881,10 +993,12 @@ Segment.prototype.alpha = function(a)
 
     return point;
 };
+"use strict";
+
 /**
  * Manage the types compatibility
  */
-Types = function()
+var Types = function()
 {
     this.compatibles = {};
 };
@@ -936,7 +1050,7 @@ Types.prototype.isCompatible = function(typeA, typeB)
     }
 
     if (typeA in this.compatibles) {
-        for (k in this.compatibles[typeA]) {
+        for (var k in this.compatibles[typeA]) {
             if (typeB == this.compatibles[typeA][k]) {
                 return true;
             }
@@ -955,7 +1069,7 @@ Types.prototype.getCompatibles = function(type)
     var compatibles = [type];
 
     if (type in this.compatibles) {
-        for (k in this.compatibles[type]) {
+        for (var k in this.compatibles[type]) {
             compatibles.push(this.compatibles[type][k]);
         }
     }
@@ -989,14 +1103,16 @@ Types.prototype.addCompatibility = function(typeA, typeB)
     this.addCompatibilityOneWay(typeA, typeB);
     this.addCompatibilityOneWay(typeB, typeA);
 };
+"use strict";
+
 /**
  * A connector
  */
-Connector = function(name, type, index)
+var Connector = function(name, type, index)
 {
     this.name = name;
-    this.index = index;
     this.type = type;
+    this.index = (index == null) ? null : parseInt(index);
 };
 
 /**
@@ -1084,10 +1200,12 @@ function IdToConnector(connectorId)
 
     return new Connector(name, type, index);
 }
+"use strict";
+
 /**
  * An edge linking two blocks
  */
-function Edge(id, block1, connector1, block2, connector2, blocks)
+var Edge = function(id, block1, connector1, block2, connector2, blocks)
 {
     this.blocks = blocks;
     this.label = null;
@@ -1104,6 +1222,10 @@ function Edge(id, block1, connector1, block2, connector2, blocks)
     this.position1 = null;
     this.position2 = null;
     this.segment = null;
+
+    if (!block1.hasConnector(connector1) || !block2.hasConnector(connector2)) {
+        throw "Can't create edge because a connector don't exist";
+    }
 };
 
 /**
@@ -1308,10 +1430,12 @@ function EdgeImport(blocks, data)
     return new Edge(data.id, block1, ConnectorImport(data.connector1), 
                              block2, ConnectorImport(data.connector2), blocks);
 };
+"use strict";
+
 /**
  * Draw messages on the screen
  */
-function BlocksMessages(messages, width)
+var BlocksMessages = function(messages, width)
 {
     var self = this;
 
@@ -1346,7 +1470,7 @@ BlocksMessages.prototype.show = function(text, options)
         classes += ' '+options['class'];
     }
 
-    html = '<div class="'+classes+'">'+text+'</div>';
+    var html = '<div class="'+classes+'">'+text+'</div>';
 
     this.messages.html(html);
     this.messages.fadeIn();
@@ -1364,10 +1488,12 @@ BlocksMessages.prototype.hide = function()
     this.messages.fadeOut();
     this.hideTimer = null;
 };
+"use strict";
+
 /**
  * Handles the menu for creating blocks
  */
-function BlocksMenu(blocks)
+var BlocksMenu = function(blocks)
 {
     var self = this;
 
@@ -1412,7 +1538,7 @@ function BlocksMenu(blocks)
 
             // Sorting types by family
             var families = {};
-            for (k in blocks.metas) {
+            for (var k in blocks.metas) {
                 var meta = blocks.metas[k];
 
                 if (meta.family in families) {
@@ -1422,9 +1548,9 @@ function BlocksMenu(blocks)
                 }
             }
 
-            html = '';
+            var html = '';
 
-	    for (action in self.actions) {
+	    for (var action in self.actions) {
                 var icon = 'none';
                 if ('icon' in self.actions[action]) {
                     icon = self.actions[action].icon;
@@ -1432,14 +1558,14 @@ function BlocksMenu(blocks)
 		html += '<div rel="'+action+'" class="menuentry menu_action_'+action+'"><div class="menu_icon menu_icon_'+icon+'"></div>'+self.actions[action].label+'</div>';
 	    }
 
-            for (family in families) {
+            for (var family in families) {
                 if (family) {
                     var className = family.replace(/[^a-zA-Z]/g,'');
                     html += '<div class="family">';
                     html += '<div class="familyName family_'+family+'"><div class="menu_icon menu_icon_family_'+className+'"></div>'+family+' <span>&raquo;</span></div>';
                     html += '<div class="childs">';
                 }
-                for (k in families[family]) {
+                for (var k in families[family]) {
                     var type = families[family][k];
                     html += '<div class="type type_'+type.name+'" rel="'+type.name+'">'+type.name+'</div>';
                 }
@@ -1465,7 +1591,7 @@ function BlocksMenu(blocks)
                 });
             });
 
-	    for (k in self.actions) {
+	    for (var k in self.actions) {
 		self.menu.find('.menu_action_'+k).click(function() {
 		    var action = self.actions[$(this).attr('rel')];
 		    action.action(blocks);
@@ -1510,10 +1636,12 @@ BlocksMenu.prototype.show = function()
     this.visible = true;
 };
 
+"use strict";
+
 /**
  * Manage one block meta
  */
-Meta = function(meta)
+var Meta = function(meta)
 {
     var self = this;
 
@@ -1524,11 +1652,11 @@ Meta = function(meta)
 
     // Importing fields meta data
     if ('fields' in meta) {
-        for (k in meta.fields) {
+        for (var k in meta.fields) {
             var field = meta.fields[k];
             var attributes = ('attrs' in field ? field.attrs.split(' ') : []);
             field.attrs = {};
-            for (i in attributes) {
+            for (var i in attributes) {
                 field.attrs[attributes[i]] = true;
             }
             this.fields.push(field);
@@ -1536,7 +1664,7 @@ Meta = function(meta)
     }
 
     // Checking for parameters editor
-    for (k in meta.parametersEditor) {
+    for (var k in meta.parametersEditor) {
         var key = keys[k];
         if (meta[key] != undefined) {
             this[key] = meta[key];
@@ -1573,10 +1701,12 @@ Meta = function(meta)
     }
 }
 
+"use strict";
+
 /**
  * Handles the history
  */
-function History(blocks)
+var History = function(blocks)
 {
     var self = this;
     this.historySize = 30;
@@ -1628,10 +1758,12 @@ History.prototype.restoreLast = function()
         alert('Nothing to get');
     }
 };
+"use strict";
+
 /**
  * Creates an instance of a block
  */
-Block = function(blocks, meta, id)
+var Block = function(blocks, meta, id)
 {
     this.blocks = blocks;
     this.meta = meta;
@@ -1717,7 +1849,7 @@ Block.prototype.updateValues = function()
  */
 Block.prototype.setValues = function(values)
 {
-    for (field in values) {
+    for (var field in values) {
         this.fields.getField(field).setValue(values[field]);
     }
 };
@@ -1728,7 +1860,7 @@ Block.prototype.setValues = function(values)
 Block.prototype.getValues = function(values)
 {
     var values = {};
-    for (k in this.fields.editables) {
+    for (var k in this.fields.editables) {
         var field = this.fields.editables[k];
         values[field.name] = field.getValue();
     }
@@ -1748,23 +1880,6 @@ Block.prototype.getValue = function(name)
     } else {
         return null;
     }
-};
-
-/**
- * Parses a length
- */
-Block.prototype.parseDimension = function(dimension)
-{
-    if (typeof(dimension) == 'number') {
-        return dimension;
-    }
-
-    var field = this.fields.getField(dimension);
-    if (!field) {
-        throw 'Unable to find dimension field '+dimension;
-    }
-
-    return field.getDimension();
 };
 
 /**
@@ -1795,14 +1910,14 @@ Block.prototype.getHtml = function()
 
     // Getting the title
     var title = this.meta.name + '<span class="blockId">#' + this.id + '</span>';
-    for (k in this.fields.fields) {
+    for (var k in this.fields.fields) {
         var field = this.fields.fields[k];
         if (field.asTitle) {
             title = field.getPrintableValue();
         }
     }
 
-    html = '<div class="parameters"></div>';
+    var html = '<div class="parameters"></div>';
     html += '<div class="blockTitle"><span class="titleText">'+title+'</span><div class="blockicon delete"></div>';
     html += '<div class="blockicon info"></div>';
 
@@ -1818,7 +1933,7 @@ Block.prototype.getHtml = function()
     html += '<div class="blockicon settings"></div></div>';
     html += '<div class="infos"></div>';
     
-    for (k in self.fields.editables) {
+    for (var k in self.fields.editables) {
         var field = self.fields.editables[k];
         var fieldHtml = field.getHtml();
         if (html && (!field.hide) && (!field.asTitle) && (!this.blocks.compactMode)) {
@@ -1827,10 +1942,10 @@ Block.prototype.getHtml = function()
     }
 
     // Handling inputs & outputs
-    handle = function(key, fields) {
+    var handle = function(key, fields) {
         html += '<div class="' + key + 's '+(self.isLoopable() ? 'loopable' : '')+'">';
 
-        for (k in fields) {
+        for (var k in fields) {
             var field = fields[k];
 
             if (field.extensible) {
@@ -1839,10 +1954,10 @@ Block.prototype.getHtml = function()
 
             var size = 1;
             if (field.variadic) {
-                size = self.parseDimension(field.dimension);
+                size = field.getDimension(self.fields);
             }
 
-            for (x=0; x<size; x++) {
+            for (var x=0; x<size; x++) {
                 var connectorId = field.name.toLowerCase() + '_' + key;
                 var label = field.getLabel().replace('#', x+1);
 
@@ -1892,7 +2007,7 @@ Block.prototype.maxEntry = function(name)
 {
     var max = 0;
 
-    for (connectorId in this.edges) {
+    for (var connectorId in this.edges) {
         if (this.edges[connectorId].length) {
             var connector = IdToConnector(connectorId);
             if (connector.name == name) {
@@ -1909,7 +2024,7 @@ Block.prototype.maxEntry = function(name)
  */
 Block.prototype.create = function(div)
 {
-    html = '<div id="block' + this.id + '" class="block ' + this.meta['class'] + '"></div>'
+    var html = '<div id="block' + this.id + '" class="block ' + this.meta['class'] + '"></div>'
 
     div.append(html);
     this.div = div.find('#block' + this.id);
@@ -1950,7 +2065,7 @@ Block.prototype.redraw = function(selected)
     }
 
     // Changing the circle rendering
-    for (k in this.connectors) {
+    for (var k in this.connectors) {
         var connectorId = this.connectors[k];
         var connectorDiv = this.div.find('.' + connectorId);
         var connectorVisual = connectorDiv.find('.circle');
@@ -1960,7 +2075,7 @@ Block.prototype.redraw = function(selected)
         if (connectorId in this.edges && this.edges[connectorId].length) {
             connectorVisual.addClass('io_active');
 
-            for (n in this.edges[connectorId]) {
+            for (var n in this.edges[connectorId]) {
                 if (this.edges[connectorId][n].selected) {
                     connectorVisual.addClass('io_selected');
                 }
@@ -2071,7 +2186,7 @@ Block.prototype.linkPositionFor = function(connector)
     }
 
     try {
-        div = this.div.find('.' + connectorId + ' .circle')
+        var div = this.div.find('.' + connectorId + ' .circle')
 
         var x = (div.offset().left-this.blocks.div.offset().left)+div.width()/2;
         var y = (div.offset().top-this.blocks.div.offset().top)+div.height()/2;
@@ -2127,7 +2242,7 @@ Block.prototype.eraseEdge = function(connector, edge)
     var connectorId = connector.id();
 
     if (this.edges[connectorId] != undefined) {
-        for (k in this.edges[connectorId]) {
+        for (var k in this.edges[connectorId]) {
             if (this.edges[connectorId][k] == edge) {
                 arrayRemove(this.edges[connectorId], k);
                 break;
@@ -2158,16 +2273,16 @@ Block.prototype.allSuccessors = function()
     while (exploreList.length > 0) {
         var currentBlock = exploreList.pop();
 
-        for (key in currentBlock.edges) {
-            for (i in currentBlock.edges[key]) {
+        for (var key in currentBlock.edges) {
+            for (var i in currentBlock.edges[key]) {
                 var edge = currentBlock.edges[key][i];
                 if (edge.isLoopable()) {
                     continue;
                 }
-                fromTo = edge.fromTo();
+                var fromTo = edge.fromTo();
 
                 if (fromTo[0] == currentBlock) {
-                    target = fromTo[1];
+                    var target = fromTo[1];
                     
                     if (!(target.id in explored)) {
                         explored[target.id] = true;
@@ -2206,11 +2321,30 @@ Block.prototype.getField = function(name)
 };
 
 /**
+ * Does the block has the given connector ?
+ */
+Block.prototype.hasConnector = function(connector)
+{
+    var field = this.getField(connector.name);
+
+    if (!field) {
+        return false;
+    }
+
+    if (field.variadic) {
+        return (connector.index != null) && 
+            (field.getDimension(this.fields) >= connector.index);
+    } else {
+        return (connector.index == null);
+    }
+};
+
+/**
  * Imports a block from its data
  */
 function BlockImport(blocks, data)
 {
-    for (t in blocks.metas) {
+    for (var t in blocks.metas) {
 	var meta = blocks.metas[t];
         var module = ('module' in data) ? data.module : null;
 	if (meta.name == data.type && meta.module == module) {
@@ -2224,6 +2358,8 @@ function BlockImport(blocks, data)
 
     throw 'Unable to create a block of type ' + data.type;
 }
+"use strict";
+
 /**
  * Manage the blocks
  *
@@ -2231,7 +2367,7 @@ function BlockImport(blocks, data)
  * - canLinkInputs (default false): can inputs be linked together?
  * - orientatiion (default true): is the graph oriented?
  */
-Blocks = function(options)
+var Blocks = function(options)
 {
     if (typeof options != 'undefined') {
         this.options = options;
@@ -2445,7 +2581,7 @@ Blocks.prototype.postReady = function()
 {
     this.isReady = true;
     if (this.readyQueue != undefined) {
-        for (k in this.readyQueue) {
+        for (var k in this.readyQueue) {
             this.readyQueue[k]();
         }
     }
@@ -2485,7 +2621,7 @@ Blocks.prototype.getPosition = function()
  */
 Blocks.prototype.addBlock = function(name, x, y)
 {
-    for (k in this.metas) {
+    for (var k in this.metas) {
         var type = this.metas[k];
 
         if (type.name == name) {
@@ -2528,7 +2664,7 @@ Blocks.prototype.highlightTargets = function()
     $('.connector').addClass('disabled');
 
     var compatibles = this.types.getCompatibles(type);
-    for (k in compatibles) {
+    for (var k in compatibles) {
         var compatible = compatibles[k];
         $('.connector.type_'+compatible).removeClass('disabled');
     }
@@ -2585,7 +2721,7 @@ Blocks.prototype.canvasClicked = function()
     this.selectedLink = null;
     this.selectedSide = null;
 
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         var block = this.blocks[k];
         if (block.hasFocus) {
             this.selectedBlock = k;
@@ -2593,7 +2729,7 @@ Blocks.prototype.canvasClicked = function()
     }
 
     if (!this.selectedBlock) {
-        for (k in this.edges) {
+        for (var k in this.edges) {
             var collide = this.edges[k].collide(this.mouseX, this.mouseY);
             if (collide != false) {
                 if (collide < 0.2) {
@@ -2628,7 +2764,7 @@ Blocks.prototype.removeEdge = function(edge)
  */
 Blocks.prototype.getEdgeId = function(edge)
 {
-    for (k in this.edges) {
+    for (var k in this.edges) {
         if (edge == this.edges[k]) {
             return k;
         }
@@ -2645,7 +2781,7 @@ Blocks.prototype.removeBlock = function(key)
     var block = this.blocks[key];
 
     var newEdges = [];
-    for (k in this.edges) {
+    for (var k in this.edges) {
         var edge = this.edges[k];
         if (edge.block1 == block || edge.block2 == block) {
             edge.erase();
@@ -2666,7 +2802,7 @@ Blocks.prototype.removeBlock = function(key)
  */
 Blocks.prototype.getBlockId = function(block)
 {
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         if (this.blocks[k] == block) {
             return k;
         }
@@ -2680,7 +2816,7 @@ Blocks.prototype.getBlockId = function(block)
  */
 Blocks.prototype.getBlockById = function(blockId)
 {
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         if (this.blocks[k].id == blockId) {
             return this.blocks[k];
         }
@@ -2716,7 +2852,7 @@ Blocks.prototype.deleteEvent = function()
 Blocks.prototype.doRedraw = function()
 {
     // Set the position for blocks
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         this.blocks[k].redraw(this.selectedBlock == k);
     }
 
@@ -2724,7 +2860,7 @@ Blocks.prototype.doRedraw = function()
     var svg = this.context.svg('get');
     svg.clear();
 
-    for (k in this.edges) {
+    for (var k in this.edges) {
         this.edges[k].draw(svg);
     }
 
@@ -2774,7 +2910,7 @@ Blocks.prototype.release = function()
  */
 Blocks.prototype.tryEndLink = function()
 {
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         var block = this.blocks[k];
         if (block.hasFocus && block.focusedConnector) {
             this.endLink(block, block.focusedConnector);
@@ -2802,7 +2938,7 @@ Blocks.prototype.endLink = function(block, connectorId)
             var edge = new Edge(id, blockB, connectorB, blockA, connectorA, this);
         }
 
-        for (k in this.edges) {
+        for (var k in this.edges) {
             var other = this.edges[k];
             if (other.same(edge)) {
                 throw 'This edge already exists';
@@ -2837,7 +2973,7 @@ Blocks.prototype.endLink = function(block, connectorId)
 Blocks.prototype.toggleCompact = function()
 {
     this.compactMode = !this.compactMode;
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         this.blocks[k].render();
     }
     this.redraw();
@@ -2851,11 +2987,11 @@ Blocks.prototype.exportData = function()
     var blocks = [];
     var edges = [];
 
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         blocks.push(this.blocks[k].exportData());
     }
 
-    for (k in this.edges) {
+    for (var k in this.edges) {
         edges.push(this.edges[k].exportData());
     }
 
@@ -2894,7 +3030,7 @@ Blocks.prototype.doLoad = function(scene, init)
             self.id = 1;
             self.edgeId = 1;
 
-            for (k in scene.blocks) {
+            for (var k in scene.blocks) {
                 try {
                     var data = scene.blocks[k];
                     var block = BlockImport(self, data);
@@ -2906,7 +3042,7 @@ Blocks.prototype.doLoad = function(scene, init)
                 }
             }
 
-            for (k in scene.edges) {
+            for (var k in scene.edges) {
                 try {
                     var data = scene.edges[k];
                     var edge = EdgeImport(self, data);
@@ -2923,7 +3059,7 @@ Blocks.prototype.doLoad = function(scene, init)
             if (errors.length) {
                 var text = errors.length + " loading errors :<br/>";
                 text += '<ul>';
-                for (k in errors) {
+                for (var k in errors) {
                     text += '<li>' + errors[k] + '</li>';
                 }
                 text += '</ul>';
@@ -2950,7 +3086,7 @@ Blocks.prototype.perfectScale = function()
     var xMin = null, xMax = null;
     var yMin = null, yMax = null;
 
-    for (k in this.blocks) {
+    for (var k in this.blocks) {
         var block = this.blocks[k];
         if (xMin == null) {
             xMin = xMax = block.x;
@@ -2978,7 +3114,7 @@ Blocks.prototype.perfectScale = function()
  */
 Blocks.prototype.setLabels = function(labels)
 {
-    for (k in this.edges) {
+    for (var k in this.edges) {
         var edge = this.edges[k];
 
         if (edge.id in labels) {

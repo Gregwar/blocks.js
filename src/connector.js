@@ -6,8 +6,8 @@
 var Connector = function(name, type, index)
 {
     this.name = name;
-    this.index = index;
     this.type = type;
+    this.index = (index == null) ? null : parseInt(index);
 };
 
 /**

@@ -16,8 +16,26 @@
         <link rel="stylesheet" type="text/css" href="build/blocks.css" />
 
         <!-- Demo script -->
-        <script type="text/javascript" src="demo/demo.js"></script>
         <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <script type="text/javascript">
+            var blocks = new Blocks();
+
+            blocks.register({
+                name: "Test",
+                fields: [
+                    {
+                        name: "Input",
+                        attrs: "input"
+                    },
+                    {
+                        name: "Output",
+                        attrs: "output"
+                    }
+                ]
+            });
+
+            blocks.run("#blocks");
+        </script>
     </head>
     <body>
         <h1>blocks.js</h1>
