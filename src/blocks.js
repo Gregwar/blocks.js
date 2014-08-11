@@ -666,9 +666,20 @@ Blocks.prototype.doLoad = function(scene, init)
     var self = this;
 
     this.ready(function() {
+        try {
             var errors = [];
             self.id = 1;
             self.edgeId = 1;
+
+            if (typeof(scene)!='object' || (scene instanceof Array)) {
+                throw 'Scene is not an object';
+            }
+            if (!('blocks' in scene) || !(scene.blocks instanceof Array)) {
+                throw 'Scene has no blocks section';
+            }
+            if (!('edges' in scene) || !(scene.edges instanceof Array)) {
+                throw 'Scene has no blocks section';
+            }
 
             for (var k in scene.blocks) {
                 try {
@@ -711,6 +722,9 @@ Blocks.prototype.doLoad = function(scene, init)
             if (init) {
                 self.perfectScale();	    
             }
+        } catch (error) {
+            self.messages.show('Unable to create this edge :' + "\n" + error, {'class': 'error'});
+        }
     });
 };
 
