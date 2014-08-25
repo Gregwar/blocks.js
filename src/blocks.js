@@ -20,7 +20,7 @@ var Blocks = function(options)
 
     // View center & scale
     this.center = {};
-    this.scale = 1.0;
+    this.scale = 1.3;
     this.redrawTimeout = null;
 
     // History manager
@@ -303,7 +303,13 @@ Blocks.prototype.highlightTargets = function()
     var type = block.getField(connector.name).type;
     $('.connector').addClass('disabled');
 
-    var compatibles = this.types.getCompatibles(type);
+    var compatibles;
+    if (connector.type == 'output') {
+        compatibles = this.types.getCompatibles(type);
+    } else {
+        compatibles = this.types.getBackCompatibles(type);
+    }
+
     for (var k in compatibles) {
         var compatible = compatibles[k];
         $('.connector.type_'+compatible).removeClass('disabled');

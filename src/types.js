@@ -83,6 +83,26 @@ Types.prototype.getCompatibles = function(type)
 };
 
 /**
+ * Get all the types compatibles with
+ */
+Types.prototype.getBackCompatibles = function(type)
+{
+    type = Types.normalize(type);
+    var compatibles = [type];
+
+    for (var some_type in this.compatibles) {
+        for (var index in this.compatibles[some_type]) {
+            if (this.compatibles[some_type][index] == type) {
+                compatibles.push(some_type);
+                break;
+            }
+        }
+    }
+
+    return compatibles;
+};
+
+/**
  * Add compatibility (one way)
  */
 Types.prototype.addCompatibilityOneWay = function(typeA, typeB)
