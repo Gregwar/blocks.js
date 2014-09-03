@@ -74,7 +74,7 @@ var Field = function(metaField)
         if (this.dimension == null) {
             this.dimension = this.name;
         }
-        this.type = this.type.substr(0, this.type.length-2);
+        this.type = Types.normalize(this.type.substr(0, this.type.length-2));
     }
 
     // Is variadic?
