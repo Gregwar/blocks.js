@@ -24,6 +24,7 @@ var Fields = function(block)
         field.onUpdate = function() {
             self.block.cssParameters();
         };
+        this.block.blocks.types.register(field.type);
         this.fields.push(field);
     }
 

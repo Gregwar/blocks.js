@@ -5,6 +5,7 @@
  */
 var Types = function()
 {
+    this.types = {};
     this.compatibles = {};
 };
 
@@ -39,6 +40,10 @@ Types.normalize = function(type)
         type = 'longtext';
     }
 
+    if (type == '*') {
+        type = 'any';
+    }
+
     return type;
 }
 
@@ -50,7 +55,7 @@ Types.prototype.isCompatible = function(typeA, typeB)
     typeA = Types.normalize(typeA);
     typeB = Types.normalize(typeB);
 
-    if (typeA == typeB) {
+    if (typeA == typeB || typeA == 'any' || typeB == 'any') {
         return true;
     }
 
@@ -71,7 +76,12 @@ Types.prototype.isCompatible = function(typeA, typeB)
 Types.prototype.getCompatibles = function(type)
 {
     type = Types.normalize(type);
-    var compatibles = [type];
+    
+    if (type == 'any') {
+        return this.allTypes();
+    }
+
+    var compatibles = ['any', type];
 
     if (type in this.compatibles) {
         for (var k in this.compatibles[type]) {
@@ -88,7 +98,12 @@ Types.prototype.getCompatibles = function(type)
 Types.prototype.getBackCompatibles = function(type)
 {
     type = Types.normalize(type);
-    var compatibles = [type];
+
+    if (type == 'any') {
+        return this.allTypes();
+    }
+
+    var compatibles = ['any', type];
 
     for (var some_type in this.compatibles) {
         for (var index in this.compatibles[some_type]) {
@@ -100,6 +115,14 @@ Types.prototype.getBackCompatibles = function(type)
     }
 
     return compatibles;
+};
+
+/**
+ * Get all the registered types
+ */
+Types.prototype.allTypes = function()
+{
+    return Object.keys(this.types);
 };
 
 /**
@@ -128,3 +151,11 @@ Types.prototype.addCompatibility = function(typeA, typeB)
     this.addCompatibilityOneWay(typeA, typeB);
     this.addCompatibilityOneWay(typeB, typeA);
 };
+
+/**
+ * Register a type to the list
+ */
+Types.prototype.register = function(type)
+{
+    this.types[type] = true;
+};  
