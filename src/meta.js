@@ -11,6 +11,7 @@ var Meta = function(meta)
     this.loopable = ('loopable' in meta && meta['loopable']);
     this.size = ('size' in meta ? meta.size : 'normal');
     this.fields = [];
+    this.generate = meta.generate;
 
     // Importing fields meta data
     if ('fields' in meta) {
