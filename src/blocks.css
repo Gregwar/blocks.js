@@ -79,6 +79,9 @@
     margin-right:-1px;
     background-repeat:repeat-x;
     padding:3px;
+    float:left;
+    width:100%;
+    text-align:left;
 }
 
 .blocks_js_editor .contextmenu .menu_icon
