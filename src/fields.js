@@ -167,6 +167,13 @@ Fields.prototype.save = function(serialize)
 {
     var values = {};
 
+    var boolFields = {};
+    for (var entry in this.indexedFields) {
+        if (this.indexedFields[entry].type == 'bool') {
+            boolFields[entry] = this.indexedFields[entry];
+        }
+    }
+
     for (var key in serialize) {
         var newKey = key;
         var isArray = false;
@@ -178,7 +185,14 @@ Fields.prototype.save = function(serialize)
             serialize[key] = [];
         }
 
+        if (newKey in boolFields) {
+            delete boolFields[newKey];
+        }
         this.getField(newKey).setValue(serialize[key]);
+    }
+
+    for (var key in boolFields) {
+        this.getField(key).setValue(false);
     }
 
     this.block.render();

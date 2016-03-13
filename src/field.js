@@ -162,7 +162,11 @@ Field.prototype.getSingleFieldHtml = function(value)
         field += '</select>';
     } else {
         var type = this.type == 'bool' ? 'checkbox' : 'text';
-        field += '<input value="'+value+'" type="'+type+'" name="'+this.getFieldName()+'" />'+this.unit;
+        var checked = '';
+        if (this.type == 'bool') {
+            checked = value ? 'checked="checked"' : '';
+        }
+        field += '<input '+checked+' value="'+value+'" type="'+type+'" name="'+this.getFieldName()+'" />'+this.unit;
     }
 
     return field;
