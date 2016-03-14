@@ -334,7 +334,7 @@ Blocks.prototype.move = function()
             this.removeEdge(this.selectedLink);
             this.selectedSide = null;
             this.highlightTargets();
-            if (this.selectedLink != null) {
+            if (this.selectedLink != null && (this.selectedLink in this.edges)) {
                 this.edges[this.selectedLink].selected = false;
             }
             this.selectedLink = null;
