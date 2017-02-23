@@ -113,7 +113,7 @@ A field can be an input, output and/or an editable parameter of the block.
 It is an object containing:
 
 * `name`: the name of the field, should not contain special chars
-* `prettyName`: the pretty name of the field, which will be printed in
+* `label`: the label of the field, which will be printed in
   the blocks title, can contain special characters
 * `attrs`: a string containg field attributes, can contain `input`, `output`
   and/or `editable`. For instance: `"editable input"`
