@@ -117,7 +117,7 @@ It is an object containing:
   the blocks title, can contain special characters
 * `attrs`: a string containg field attributes, can contain `input`, `output`
   and/or `editable`. For instance: `"editable input"`
-* ̀`type`: the field type. See [typing](#typing).
+* `type`: the field type. See [typing](#typing).
 * `defaultValue`: the default value of the field, that will be used if it's
   editable
 * `hide`: do not display the editable field in the block information
@@ -206,7 +206,8 @@ blocks.register({
             attrs: "editable"
         },
         {
-            name: "User #",
+	    name: "users",
+            label: "User #",
             dimension: "n",
             attrs: "output"
         }
