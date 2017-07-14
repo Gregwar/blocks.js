@@ -218,6 +218,12 @@ blocks.register({
 Here, the number of outputed users will be editable, using the `n` editable
 field. Note that the `#` will be replaced by the number of the output.
 
+## Example
+
+Here is an example that uses blocks.js:
+
+* [ArduiFlow, arduino programming with blocks.js](https://github.com/Gregwar/ArduiFlow)
+
 ## Contributing & hacking
 
 The development takes places in the `src/` directory. There is a `Makefile`
