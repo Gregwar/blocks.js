@@ -121,7 +121,7 @@ Edge.prototype.collide = function(x, y)
     var dp = this.segment.distanceP({x: x, y: y});
 
     if (dp[0] >= 0 && dp[0] <= 1) {
-        if (dp[1] < (this.defaultSize*blocks.scale)*2) {
+        if (dp[1] < (this.defaultSize*this.blocks.scale)*2) {
             return dp[0];
         }
     }
