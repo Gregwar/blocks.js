@@ -739,7 +739,7 @@ Blocks.prototype.doLoad = function(scene, init)
  */
 Blocks.prototype.perfectScale = function()
 {
-    if (!this.div) {
+    if (!this.div || this.blocks.length === 0) {
         return;
     }
 
