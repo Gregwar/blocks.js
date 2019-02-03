@@ -127,8 +127,9 @@ Block.prototype.getValue = function(name)
  */
 Block.prototype.htmlentities = function(str)
 {
-    str = str.replace(/</, '&lt;');
-    str = str.replace(/>/, '&gt;');
+    str = str.replace(/</g, '&lt;');
+    str = str.replace(/>/g, '&gt;');
+    str = str.replace(/"/g, '&quot;');
     return str;
 }
 
